@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fontes oficiais do Stitch: Veritas Libris */
+  --font-serif: "Merriweather", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Paleta Sacra e Editorial extraída do tema Stitch */
+  --color-primary: #022448;
+  --color-primary-container: #1e3a5f;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #adc8f5;
+
+  --color-secondary: #7c580e;
+  --color-secondary-container: #fecd7a;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #271900;
+  --color-on-secondary-fixed-variant: #5f4100;
+
+  --color-tertiary: #192436;
+  --color-on-tertiary: #ffffff;
+
+  --color-surface: #fff8f5;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #fcf2eb;
+  --color-surface-container: #f6ece6;
+  --color-surface-container-high: #f0e6e0;
+  --color-surface-container-highest: #eae1da;
+  --color-on-surface: #1f1b17;
+  --color-on-surface-variant: #43474e;
+  --color-outline: #74777f;
+  --color-outline-variant: #c4c6cf;
+
+  /* Cores de Alerta Doutrinário / Severidade */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  --color-warning: #b48a3e;
+  --color-warning-container: #ffdeaa;
+  
+  --color-success: #19692c;
+  --color-success-container: #d2f8d2;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, .font-editorial {
+  font-family: var(--font-serif);
+}
