@@ -36,6 +36,18 @@ const EnvSchema = z.object({
       value === undefined || value.trim() === "" ? undefined : value.trim(),
     ),
 
+  CORS_ORIGIN: z
+    .string()
+    .optional()
+    .transform((value) =>
+      value === undefined || value.trim() === ""
+        ? undefined
+        : value
+            .split(",")
+            .map((origin) => origin.trim())
+            .filter(Boolean),
+    ),
+
   IMPORT_REQUIRES_AUTH: z
     .enum(["true", "false"])
     .default("true")
