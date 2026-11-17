@@ -1,0 +1,20 @@
+{
+  "name": "veritas-libris",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plataforma de Curadoria e Discernimento Literário Católico",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build:shared": "npm run build --workspace=@app/shared",
+    "typecheck:shared": "npm run typecheck --workspace=@app/shared"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
