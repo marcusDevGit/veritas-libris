@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookMarked, Search, ScanBarcode, Plus, Bell, LogIn, LogOut } from 'lucide-react';
+import { BookMarked, Search, ScanBarcode, Plus, LogIn, LogOut } from 'lucide-react';
 import { TopBanner } from './TopBanner.js';
+import { NotificationsPopover } from './NotificationsPopover.js';
 import { useAuth } from '../../contexts/AuthContext.js';
 
 export interface NavbarProps {
@@ -111,14 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           <div className="flex items-center gap-3 sm:gap-4 sm:border-l sm:border-outline/20 sm:pl-6">
-            <button
-              type="button"
-              aria-label="Notificações"
-              className="relative p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all hidden sm:inline-flex"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error" />
-            </button>
+            <NotificationsPopover />
 
             {onOpenImportModal && (
               <button
@@ -149,8 +143,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {userInitials}
                     </div>
                   )}
-                  <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary" />
+                  <span
+                    className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5"
+                    title="Conectado"
+                  >
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 ring-2 ring-surface" />
                   </span>
                 </div>
                 <div className="hidden 2xl:flex flex-col text-left">
