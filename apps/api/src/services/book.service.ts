@@ -10,6 +10,7 @@ import { env } from "../config/env.js";
 import { NotFoundError } from "../errors/app-error.js";
 import { BookModel, type BookAttrs } from "../models/Book.model.js";
 import { findGoogleBookByIsbn } from "./google-books.service.js";
+import { enrichWithFallbackProviders } from "./external-books-providers.service.js";
 
 /** Forma de um documento `lean()` do Book (objeto simples, sem métodos do Mongoose). */
 type BookLean = BookAttrs & {
@@ -34,6 +35,9 @@ function toBookDto(doc: BookLean): BookDto {
     coverUrl: doc.coverUrl,
     synopsis: doc.synopsis,
     publishedYear: doc.publishedYear,
+    publisher: doc.publisher,
+    pageCount: doc.pageCount,
+    language: doc.language,
     hasImprimatur: doc.hasImprimatur,
     editorialLock: doc.editorialLock ?? false,
     editorialLockedAt: doc.editorialLockedAt,
@@ -166,11 +170,12 @@ export async function importBookByIsbn(isbn13: string): Promise<ImportResult> {
   const existing = await BookModel.findOne({ isbn13 }).lean<BookLean>();
   if (existing) return { created: false, book: toBookDto(existing) };
 
-  const external = await findGoogleBookByIsbn(isbn13, {
+  const googleExternal = await findGoogleBookByIsbn(isbn13, {
     apiKey: env.GOOGLE_BOOKS_API_KEY,
   });
+  const external = await enrichWithFallbackProviders(isbn13, googleExternal);
   if (!external) {
-    throw new NotFoundError("Nenhum livro encontrado na Google Books para este ISBN");
+    throw new NotFoundError("Nenhum livro encontrado nas bases externas para este ISBN");
   }
 
   const insertOnly = { ...external, ...curationDefaults() };
