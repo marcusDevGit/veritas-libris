@@ -33,13 +33,17 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(
+  endpoint: string,
+  options: RequestInit = {},
+  requiresAuth = false,
+): Promise<T> {
   const headers = new Headers(options.headers);
   if (!headers.has('Content-Type') && options.body && typeof options.body === 'string') {
     headers.set('Content-Type', 'application/json');
   }
 
-  if (getAuthToken && !headers.has('Authorization')) {
+  if (requiresAuth && getAuthToken && !headers.has('Authorization')) {
     const token = await getAuthToken();
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
@@ -89,7 +93,7 @@ export const api = {
     return request<ImportBookResponse>('/books/import', {
       method: 'POST',
       body: JSON.stringify({ isbn13 }),
-    });
+    }, true);
   },
 
   getReviewsByBook: async (bookId: string, query: Partial<ReviewListQuery> = {}): Promise<PaginatedReviews> => {
@@ -105,12 +109,12 @@ export const api = {
     return request<Review & { _id: string }>(`/books/${bookId}/reviews`, {
       method: 'POST',
       body: JSON.stringify(body),
-    });
+    }, true);
   },
 
   voteReviewHelpful: async (reviewId: string): Promise<HelpfulVoteResponse> => {
     return request<HelpfulVoteResponse>(`/reviews/${reviewId}/helpful`, {
       method: 'POST',
-    });
+    }, true);
   },
 };
