@@ -73,14 +73,14 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
   );
 
   return (
-    <section className="sticky top-[107px] z-40 bg-surface/95 backdrop-blur-md py-4 px-6 lg:px-8 border-b border-outline/10 shadow-xs">
+    <section className="md:sticky md:top-[107px] z-40 bg-surface/95 backdrop-blur-md py-3 sm:py-4 px-4 sm:px-6 lg:px-8 border-b border-outline/10 shadow-xs">
       <div className="max-w-[1380px] mx-auto flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 text-xs font-semibold">
+        <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 text-xs font-semibold w-full sm:w-auto">
             <button
               type="button"
               onClick={() => onSelectAdequacy(undefined)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg whitespace-nowrap shrink-0 transition-all ${
                 !selectedAdequacy
                   ? 'bg-primary text-on-primary font-bold shadow-xs'
                   : 'bg-surface-container hover:bg-surface-container-high text-on-surface'
