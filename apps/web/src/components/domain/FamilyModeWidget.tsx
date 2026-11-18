@@ -24,7 +24,7 @@ export const FamilyModeWidget: React.FC<FamilyModeWidgetProps> = ({
 }) => {
   return (
     <div className="w-full flex flex-col">
-      <section className="w-full bg-surface-container-low py-8 px-6 lg:px-8 border-b border-outline/10">
+      <section className="w-full bg-surface-container-low py-6 sm:py-8 px-4 sm:px-6 lg:px-8 border-b border-outline/10">
         <div className="max-w-[1380px] mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="flex flex-col gap-2 max-w-3xl">
             <div className="flex items-center gap-2">
