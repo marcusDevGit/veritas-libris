@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookMarked, Bookmark, Search, ScanBarcode, Plus, LogIn, LogOut, ShieldCheck, Feather } from 'lucide-react';
+import { BookMarked, Search, ScanBarcode, Plus, LogIn } from 'lucide-react';
 import { TopBanner } from './TopBanner.js';
 import { NotificationsPopover } from './NotificationsPopover.js';
+import { ProfileMenu } from './ProfileMenu.js';
 import { useAuth } from '../../contexts/AuthContext.js';
 
 export interface NavbarProps {
@@ -12,16 +13,6 @@ export interface NavbarProps {
   onOpenScanner?: () => void;
 }
 
-/**
- * Navbar — Barra de Navegação Superior Integrada
- *
- * Reproduz com máxima fidelidade o layout do Stitch:
- * - TopBanner litúrgico
- * - Identidade visual "Veritas Libris • Índice de Leitura"
- * - Campo de busca integrado com atalho ⌘K e acionador de scanner de código de barras
- * - Links editoriais e botão de ação rápida "Avaliar / Importar Livro"
- * - Indicador de perfil curatorial
- */
 export const Navbar: React.FC<NavbarProps> = ({
   searchTerm = '',
   onSearchChange,
@@ -29,64 +20,68 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenScanner,
 }) => {
   const location = useLocation();
-  const { user, profile, role, isCurator, isAdmin, isLoading, signInWithGoogle, signOut } = useAuth();
+  const { user, isCurator, isAdmin, isLoading, signInWithGoogle } = useAuth();
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const desktopSearchRef = useRef<HTMLInputElement | null>(null);
 
-  const roleLabel =
-    role === 'ADMIN'
-      ? profile?.isFounder
-        ? 'Superadmin'
-        : 'Administrador'
-      : role === 'CURATOR'
-        ? 'Curador'
-        : 'Autenticado';
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        desktopSearchRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, []);
 
-  const userInitials = user?.displayName
-    ? user.displayName
-        .split(' ')
-        .slice(0, 2)
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-    : 'VL';
+  const isSearchExpanded = isSearchFocused || searchTerm.trim().length > 0;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
       <TopBanner />
 
-      <div className="h-16 sm:h-20 max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-6">
-        <div className="flex items-center gap-2 sm:gap-4 shrink-0 min-w-0">
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
+      <div className="h-16 sm:h-20 max-w-[1380px] mx-auto px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="flex items-center shrink-0 min-w-0">
+          <Link to="/" className="flex items-center gap-2 sm:gap-2.5 group">
             <div className="p-1.5 sm:p-2 bg-primary text-on-primary rounded-xl group-hover:bg-primary-container transition-colors shadow-xs shrink-0">
               <BookMarked className="w-4 h-4 sm:w-5 sm:h-5 text-secondary-container" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-editorial text-base sm:text-2xl font-bold tracking-tight text-primary leading-none group-hover:text-primary-container transition-colors truncate">
+              <span className="font-editorial text-base sm:text-xl lg:text-2xl font-bold tracking-tight text-primary leading-none group-hover:text-primary-container transition-colors truncate">
                 Veritas Libris
               </span>
-              <span className="text-[9px] sm:text-xs tracking-widest text-secondary font-bold uppercase mt-0.5 sm:mt-1 truncate">
+              <span className="text-[9px] sm:text-[11px] tracking-widest text-secondary font-bold uppercase mt-0.5 truncate">
                 Índice de Leitura
               </span>
             </div>
           </Link>
         </div>
 
-        <div className="flex-1 max-w-xl mx-2 hidden sm:block">
+        <div
+          className={`hidden sm:block flex-1 min-w-[180px] transition-all duration-200 ${
+            isSearchExpanded ? 'max-w-2xl' : 'max-w-md lg:max-w-lg'
+          }`}
+        >
           <div className="relative flex items-center w-full">
             <Search className="w-4 h-4 text-on-surface-variant absolute left-3.5 pointer-events-none" />
             <input
+              ref={desktopSearchRef}
               type="text"
               value={searchTerm}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
               onChange={(e) => onSearchChange?.(e.target.value)}
               placeholder="Buscar título, autor, tema ou ISBN..."
-              className="w-full h-[42px] pl-10 pr-20 rounded-lg bg-surface-container-lowest border border-outline/25 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all shadow-2xs"
+              className="w-full h-[42px] pl-10 pr-20 rounded-lg bg-surface-container-lowest border border-outline/25 text-xs sm:text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all shadow-2xs"
             />
             <div className="absolute right-2 flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={onOpenScanner}
                 title="Ler código de barras / ISBN"
-                className="p-1 text-on-surface-variant hover:text-primary transition-colors flex items-center rounded"
+                className="p-1 text-on-surface-variant hover:text-primary transition-colors flex items-center rounded cursor-pointer"
               >
                 <ScanBarcode className="w-4 h-4" />
               </button>
@@ -97,67 +92,79 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 sm:gap-6 shrink-0">
-          <nav className="hidden xl:flex items-center gap-6 text-xs font-semibold text-on-surface-variant">
-            <Link
-              to="/"
-              className={`transition-colors py-1 ${
-                location.pathname === '/' ? 'text-primary font-bold border-b-2 border-primary' : 'hover:text-primary'
-              }`}
-            >
-              Catálogo
-            </Link>
-            <Link
-              to="/minha-lista"
-              className={`transition-colors py-1 ${
-                location.pathname === '/minha-lista'
-                  ? 'text-primary font-bold border-b-2 border-primary'
-                  : 'hover:text-primary'
-              }`}
-            >
-              Minha Lista
-            </Link>
-            <a
-              href="#criterios"
-              className="hover:text-primary transition-colors py-1"
-            >
-              Critérios do Índice
-            </a>
-            <a
-              href="#sobre"
-              className="hover:text-primary transition-colors py-1"
-            >
-              Sobre a Curadoria
-            </a>
-            {isCurator && (
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {!isSearchExpanded && (
+            <nav className="hidden xl:flex items-center gap-4 text-xs font-semibold text-on-surface-variant whitespace-nowrap mr-1">
               <Link
-                to="/curadoria"
-                className={`inline-flex items-center gap-1 transition-colors py-1 ${
-                  location.pathname === '/curadoria'
+                to="/"
+                className={`transition-colors py-1 ${
+                  location.pathname === '/'
                     ? 'text-primary font-bold border-b-2 border-primary'
-                    : 'text-secondary hover:text-primary'
+                    : 'hover:text-primary'
                 }`}
               >
-                <Feather className="w-3.5 h-3.5" />
-                Curadoria
+                Catálogo
               </Link>
-            )}
-            {isAdmin && (
+              {user && (
+                <Link
+                  to="/minha-lista"
+                  className={`transition-colors py-1 ${
+                    location.pathname === '/minha-lista'
+                      ? 'text-primary font-bold border-b-2 border-primary'
+                      : 'hover:text-primary'
+                  }`}
+                >
+                  Minha Lista
+                </Link>
+              )}
               <Link
-                to="/admin"
-                className={`inline-flex items-center gap-1 transition-colors py-1 ${
-                  location.pathname === '/admin'
+                to="/criterios"
+                className={`transition-colors py-1 ${
+                  location.pathname === '/criterios'
                     ? 'text-primary font-bold border-b-2 border-primary'
-                    : 'text-secondary hover:text-primary'
+                    : 'hover:text-primary'
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Administração
+                Critérios
               </Link>
-            )}
-          </nav>
+              <Link
+                to="/sobre"
+                className={`transition-colors py-1 ${
+                  location.pathname === '/sobre'
+                    ? 'text-primary font-bold border-b-2 border-primary'
+                    : 'hover:text-primary'
+                }`}
+              >
+                Sobre
+              </Link>
+              {isCurator && (
+                <Link
+                  to="/curadoria"
+                  className={`transition-colors py-1 ${
+                    location.pathname === '/curadoria'
+                      ? 'text-primary font-bold border-b-2 border-primary'
+                      : 'text-secondary hover:text-primary'
+                  }`}
+                >
+                  Curadoria
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className={`transition-colors py-1 ${
+                    location.pathname === '/admin'
+                      ? 'text-primary font-bold border-b-2 border-primary'
+                      : 'text-secondary hover:text-primary'
+                  }`}
+                >
+                  Admin
+                </Link>
+              )}
+            </nav>
+          )}
 
-          <div className="flex items-center gap-2 sm:gap-4 sm:border-l sm:border-outline/20 sm:pl-6">
+          <div className="flex items-center gap-2 sm:gap-3 xl:border-l xl:border-outline/20 xl:pl-4">
             <button
               type="button"
               aria-label="Abrir busca"
@@ -169,93 +176,27 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <NotificationsPopover />
 
-            {user && (
-              <Link
-                to="/minha-lista"
-                title="Minha Lista de Leitura"
-                className="xl:hidden p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all"
-              >
-                <Bookmark className="w-4 h-4" />
-              </Link>
-            )}
-
-            {isCurator && (
-              <Link
-                to="/curadoria"
-                title="Painel de Curadoria Oficial"
-                className="xl:hidden p-2 text-secondary hover:text-primary hover:bg-surface-container rounded-full transition-all"
-              >
-                <Feather className="w-4 h-4" />
-              </Link>
-            )}
-            {isAdmin && (
-              <Link
-                to="/admin"
-                title="Área do Administrador"
-                className="xl:hidden p-2 text-secondary hover:text-primary hover:bg-surface-container rounded-full transition-all"
-              >
-                <ShieldCheck className="w-4 h-4" />
-              </Link>
-            )}
-
             {onOpenImportModal && (
               <button
                 type="button"
                 onClick={onOpenImportModal}
-                className="inline-flex items-center gap-1.5 h-9 sm:h-10 px-3 sm:px-4 rounded-lg bg-primary-container text-on-primary hover:bg-primary text-xs sm:text-sm font-semibold transition-colors shadow-xs"
+                className="inline-flex items-center gap-1.5 h-9 px-2.5 sm:px-3.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary text-xs font-semibold transition-colors shadow-xs whitespace-nowrap cursor-pointer"
               >
-                <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">Avaliar / Importar Obra</span>
-                <span className="sm:hidden">Importar</span>
+                <Plus className="w-4 h-4 shrink-0" />
+                <span className="hidden md:inline">Avaliar / Importar</span>
+                <span className="md:hidden">Importar</span>
               </button>
             )}
 
             {isLoading ? (
-              <div className="w-8 h-8 rounded-full bg-surface-container-high animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-surface-container-high animate-pulse shrink-0" />
             ) : user ? (
-              <div className="flex items-center gap-2.5 pl-1">
-                <div className="relative">
-                  {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt={user.displayName || 'Usuário'}
-                      className="w-8 h-8 rounded-full object-cover ring-1 ring-outline/30"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-xs font-bold text-primary ring-1 ring-outline/30">
-                      {userInitials}
-                    </div>
-                  )}
-                  <span
-                    className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5"
-                    title="Conectado"
-                  >
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 ring-2 ring-surface" />
-                  </span>
-                </div>
-                <div className="hidden 2xl:flex flex-col text-left">
-                  <span className="text-xs font-semibold text-on-surface leading-none max-w-[110px] truncate">
-                    {user.displayName || 'Leitor'}
-                  </span>
-                  <span className="text-[10px] text-secondary font-bold uppercase mt-1 leading-none">
-                    {roleLabel}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={signOut}
-                  title="Sair da conta"
-                  className="p-1.5 text-outline hover:text-error hover:bg-surface-container rounded-lg transition-colors cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
+              <ProfileMenu />
             ) : (
               <button
                 type="button"
                 onClick={signInWithGoogle}
-                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors border border-outline/20 cursor-pointer"
+                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors border border-outline/20 whitespace-nowrap cursor-pointer shrink-0"
               >
                 <LogIn className="w-3.5 h-3.5 text-secondary" />
                 <span>Entrar</span>
