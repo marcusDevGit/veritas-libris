@@ -34,6 +34,8 @@ export const CurationPage: React.FC = () => {
         limit: 30,
       }),
     enabled: Boolean(user && isCurator),
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   useEffect(() => {

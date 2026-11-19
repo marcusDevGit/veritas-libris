@@ -60,6 +60,8 @@ export const CatalogPage: React.FC = () => {
         page,
         limit: 12,
       }),
+    staleTime: 15_000,
+    refetchOnMount: 'always',
   });
 
   const displayedBooks = useMemo(() => {
