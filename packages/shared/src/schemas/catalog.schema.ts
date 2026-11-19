@@ -23,6 +23,23 @@ const TagsQuerySchema = z
   )
   .pipe(z.array(z.string().max(40)).max(10, 'No máximo 10 tags por consulta'));
 
+const BooleanQueryParamSchema = z
+  .union([
+    z.boolean(),
+    z.enum(['true', 'false']).transform((value) => value === 'true'),
+  ]);
+
+export const BookSortOptionSchema = z.enum([
+  'most-reviewed',
+  'recent',
+  'strict-moral',
+  'alphabetical',
+]);
+export type BookSortOption = z.infer<typeof BookSortOptionSchema>;
+
+export const BookStampFilterSchema = z.enum(['imprimatur', 'classico-cristao']);
+export type BookStampFilter = z.infer<typeof BookStampFilterSchema>;
+
 export const BookListQuerySchema = z.object({
   /** Busca textual (título, subtítulo, autores). Vai para o índice `text` do Mongo; nunca para regex. */
   q: z.string().trim().min(1).max(100).optional(),
@@ -30,10 +47,23 @@ export const BookListQuerySchema = z.object({
   age: AgeRatingSchema.optional(),
   /** Lista separada por vírgula: `tags=romance,classico`. O livro precisa ter TODAS. */
   tags: TagsQuerySchema.optional(),
+  familyMode: BooleanQueryParamSchema.optional(),
+  hasImprimatur: BooleanQueryParamSchema.optional(),
+  stamp: BookStampFilterSchema.optional(),
+  sort: BookSortOptionSchema.default('most-reviewed'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 export type BookListQuery = z.infer<typeof BookListQuerySchema>;
+
+export const CatalogStatsSchema = z.object({
+  totalAll: z.number().int().nonnegative(),
+  reviewed: z.number().int().nonnegative(),
+  recommended: z.number().int().nonnegative(),
+  withReservations: z.number().int().nonnegative(),
+  notRecommended: z.number().int().nonnegative(),
+});
+export type CatalogStats = z.infer<typeof CatalogStatsSchema>;
 
 export const PaginatedBooksSchema = z.object({
   items: z.array(BookDtoSchema),
@@ -41,6 +71,7 @@ export const PaginatedBooksSchema = z.object({
   limit: z.number().int(),
   total: z.number().int().nonnegative(),
   totalPages: z.number().int().nonnegative(),
+  stats: CatalogStatsSchema,
 });
 export type PaginatedBooks = z.infer<typeof PaginatedBooksSchema>;
 
