@@ -1,16 +1,35 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext.js';
 import { Navbar } from './components/layout/Navbar.js';
 import { Footer } from './components/layout/Footer.js';
-import { ImportBookModal } from './components/domain/ImportBookModal.js';
-import { IsbnScannerModal } from './components/domain/IsbnScannerModal.js';
 import { CatalogPage } from './pages/CatalogPage.js';
-import { BookDetailPage } from './pages/BookDetailPage.js';
-import { AdminPage } from './pages/AdminPage.js';
-import { CurationPage } from './pages/CurationPage.js';
-import { ReadingListPage } from './pages/ReadingListPage.js';
+
+const BookDetailPage = lazy(() =>
+  import('./pages/BookDetailPage.js').then((m) => ({ default: m.BookDetailPage })),
+);
+const ReadingListPage = lazy(() =>
+  import('./pages/ReadingListPage.js').then((m) => ({ default: m.ReadingListPage })),
+);
+const CurationPage = lazy(() =>
+  import('./pages/CurationPage.js').then((m) => ({ default: m.CurationPage })),
+);
+const AdminPage = lazy(() =>
+  import('./pages/AdminPage.js').then((m) => ({ default: m.AdminPage })),
+);
+const ImportBookModal = lazy(() =>
+  import('./components/domain/ImportBookModal.js').then((m) => ({ default: m.ImportBookModal })),
+);
+const IsbnScannerModal = lazy(() =>
+  import('./components/domain/IsbnScannerModal.js').then((m) => ({ default: m.IsbnScannerModal })),
+);
+
+const PageLoader: React.FC = () => (
+  <div className="pt-[108px] pb-16 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="h-56 rounded-2xl bg-surface-container animate-pulse" />
+  </div>
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,49 +51,59 @@ export const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-surface text-on-surface">
-          <Navbar
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            onOpenImportModal={() => {
-              setScannedIsbn('');
-              setIsImportModalOpen(true);
-            }}
-            onOpenScanner={() => setIsScannerModalOpen(true)}
-          />
+          <div className="min-h-screen flex flex-col bg-surface text-on-surface">
+            <Navbar
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              onOpenImportModal={() => {
+                setScannedIsbn('');
+                setIsImportModalOpen(true);
+              }}
+              onOpenScanner={() => setIsScannerModalOpen(true)}
+            />
 
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<CatalogPage />} />
-              <Route path="/livros/:id" element={<BookDetailPage />} />
-              <Route path="/minha-lista" element={<ReadingListPage />} />
-              <Route path="/curadoria" element={<CurationPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-            </Routes>
-          </main>
+            <main className="flex-1">
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<CatalogPage />} />
+                  <Route path="/livros/:id" element={<BookDetailPage />} />
+                  <Route path="/minha-lista" element={<ReadingListPage />} />
+                  <Route path="/curadoria" element={<CurationPage />} />
+                  <Route path="/admin" element={<AdminPage />} />
+                </Routes>
+              </Suspense>
+            </main>
 
-          <Footer />
+            <Footer />
 
-          <ImportBookModal
-            isOpen={isImportModalOpen}
-            initialQuery={scannedIsbn}
-            onClose={() => {
-              setIsImportModalOpen(false);
-              setScannedIsbn('');
-            }}
-          />
+            {isImportModalOpen && (
+              <Suspense fallback={null}>
+                <ImportBookModal
+                  isOpen={isImportModalOpen}
+                  initialQuery={scannedIsbn}
+                  onClose={() => {
+                    setIsImportModalOpen(false);
+                    setScannedIsbn('');
+                  }}
+                />
+              </Suspense>
+            )}
 
-          <IsbnScannerModal
-            isOpen={isScannerModalOpen}
-            onClose={() => setIsScannerModalOpen(false)}
-            onDetected={(isbn13) => {
-              setIsScannerModalOpen(false);
-              setScannedIsbn(isbn13);
-              setIsImportModalOpen(true);
-            }}
-          />
-        </div>
-      </BrowserRouter>
+            {isScannerModalOpen && (
+              <Suspense fallback={null}>
+                <IsbnScannerModal
+                  isOpen={isScannerModalOpen}
+                  onClose={() => setIsScannerModalOpen(false)}
+                  onDetected={(isbn13) => {
+                    setIsScannerModalOpen(false);
+                    setScannedIsbn(isbn13);
+                    setIsImportModalOpen(true);
+                  }}
+                />
+              </Suspense>
+            )}
+          </div>
+        </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
   );
