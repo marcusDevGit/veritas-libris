@@ -1,21 +1,31 @@
 import React from 'react';
-import { Award, BookmarkCheck, GraduationCap, History, Lock, Shield, ShieldCheck, Users } from 'lucide-react';
+import {
+  Bookmark,
+  Gavel,
+  GraduationCap,
+  History,
+  Lock,
+  MessageSquare,
+  Shield,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
 
 const CHURCH_DOCS = [
   {
     ref: '§§ 2493–2499',
     title: 'Catecismo da Igreja Católica',
-    desc: 'Orientações sobre os meios de comunicação social e a responsabilidade moral de formar consciências retas.',
+    desc: 'Instrui sobre o uso dos meios de comunicação social e a grave obrigação moral de formar consciências retas, capazes de resistir à propagação da calúnia, do erotismo e do erro doutrinário disfarçado.',
   },
   {
     ref: 'Conc. Vaticano II',
     title: "Decreto 'Inter Mirifica'",
-    desc: 'Exorta pais e educadores a guiarem os jovens na escolha prudente de leituras que promovam a virtude.',
+    desc: 'Exorta os fiéis, principalmente pais e educadores, a guiarem os jovens na escolha prudente de leituras e obras que promovam a virtude cívica e sobrenatural, sem condescendência com o vício.',
   },
   {
     ref: 'Cânn. 822 a 832',
     title: 'Código de Direito Canônico',
-    desc: 'Disciplina sobre publicações que tocam na fé e nos costumes e colaboração de peritos na tutela doutrinária.',
+    desc: 'Regula os escritos que tocam na fé e nos costumes, legitimando a vigilância pastoral da hierarquia e a colaboração de peritos laicos na preservação da integridade da doutrina católica.',
   },
 ];
 
@@ -34,7 +44,7 @@ export const AboutOperationsAndFoundations: React.FC = () => {
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-on-surface-variant max-w-md">
-              Conjugando pareceres de curadores nomeados com contribuições estruturadas da comunidade leitora.
+              O Veritas Libris conjuga a autoridade teológica de peritos com a escuta empática de pais educadores, estruturando o veredito em camadas transparentes de escrutínio.
             </p>
           </div>
 
@@ -46,22 +56,22 @@ export const AboutOperationsAndFoundations: React.FC = () => {
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   <span className="px-2.5 py-1 rounded bg-secondary-container/70 text-on-secondary-container text-[11px] font-bold">
-                    Peso 3.0 • Curador
+                    Peso 3.0 • Eclesiástico
                   </span>
                 </div>
                 <h3 className="font-editorial text-lg font-bold text-primary mb-2">
                   Curadores Nomeados
                 </h3>
                 <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed mb-4">
-                  Pareceristas designados pela administração com autoridade editorial e prerrogativa de aplicar trava oficial.
+                  Composto por sacerdotes seculares, religiosos, teólogos dogmáticos, professores de letras clássicas e canonistas dedicados. Possuem autoridade de homologação e a prerrogativa técnica do <em>Editorial Lock</em>.
                 </p>
                 <div className="bg-surface-container-low rounded-lg p-3 border border-outline/10 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
                     <Lock className="w-3.5 h-3.5 text-secondary" />
-                    <span>Trava Editorial (editorialLock)</span>
+                    <span>Faculdade Canônica de Trava Editorial</span>
                   </div>
-                  <p className="text-[11px] text-on-surface-variant">
-                    Previne distorções externas mantendo o veredito homologado seguro no acervo.
+                  <p className="text-[11px] text-on-surface-variant leading-snug">
+                    Impede revisões unilaterais ou distorções ideológicas externas, congelando o parecer canônico definitivo no acervo.
                   </p>
                 </div>
               </div>
@@ -85,16 +95,20 @@ export const AboutOperationsAndFoundations: React.FC = () => {
                   Comunidade &amp; Educadores
                 </h3>
                 <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed mb-4">
-                  Pais, catequistas e leitores experientes que sinalizam passagens sensíveis por capítulo ou temática.
+                  Mães e pais praticantes de homeschooling, catequistas paroquiais e bibliófilos experientes. Alimentam o banco de dados catalogando marcadores pontuais de ressalvas por capítulo.
                 </p>
                 <ul className="space-y-2 text-xs text-on-surface-variant">
                   <li className="flex items-center gap-2">
-                    <BookmarkCheck className="w-4 h-4 text-secondary shrink-0" />
-                    <span>Sinalização de páginas com ressalvas</span>
+                    <Bookmark className="w-4 h-4 text-secondary shrink-0" />
+                    <span>Sinalização de páginas com passagens sensíveis</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Award className="w-4 h-4 text-secondary shrink-0" />
-                    <span>Indicação de obras alternativas edificantes</span>
+                    <ShieldCheck className="w-4 h-4 text-secondary shrink-0" />
+                    <span>Adequação etária empírica vivenciada em família</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-secondary shrink-0" />
+                    <span>Discussão de resenhas literárias orientadas</span>
                   </li>
                 </ul>
               </div>
@@ -118,16 +132,19 @@ export const AboutOperationsAndFoundations: React.FC = () => {
                   Transparência &amp; Critérios
                 </h3>
                 <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed mb-4">
-                  O índice distingue claramente entre consenso calculado dos leitores e parecer fixado pela curadoria.
+                  Nenhum veredito é emitido de modo anônimo ou arbitrário. O índice separa com absoluta nitidez a pontuação dada pelo público leitor do parecer magisterial outorgado pelo Conselho.
                 </p>
-                <div className="bg-surface-container rounded-lg p-3 space-y-1.5 text-xs">
-                  <div className="flex justify-between">
+                <div className="bg-surface-container rounded-lg p-3 space-y-2 text-xs">
+                  <div className="flex justify-between items-center">
                     <span className="text-on-surface-variant">Consenso Comunitário:</span>
-                    <span className="font-bold text-primary">Calculado</span>
+                    <span className="font-bold text-primary">Nota 4.2 / 5.0</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-on-surface-variant">Parecer Curatorial:</span>
-                    <span className="font-bold text-secondary">Auditado</span>
+                  <div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+                    <div className="bg-secondary h-full rounded-full w-[84%]" />
+                  </div>
+                  <div className="flex justify-between items-center pt-0.5">
+                    <span className="text-on-surface-variant">Parecer Oficial Homologado:</span>
+                    <span className="font-bold text-primary">Com Ressalvas</span>
                   </div>
                 </div>
               </div>
@@ -148,6 +165,9 @@ export const AboutOperationsAndFoundations: React.FC = () => {
           <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-primary">
             Fundamentos Eclesiais do nosso Serviço
           </h2>
+          <p className="text-xs sm:text-sm text-on-surface-variant mt-1 max-w-3xl">
+            A atuação do Veritas Libris apoia-se firmemente nas orientações da Igreja Católica acerca dos instrumentos de comunicação e na responsabilidade dos fiéis batizados.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -164,14 +184,19 @@ export const AboutOperationsAndFoundations: React.FC = () => {
           <div className="w-11 h-11 rounded-lg bg-surface-container-lowest text-secondary flex items-center justify-center shrink-0 shadow-2xs">
             <Shield className="w-6 h-6" />
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <h3 className="font-editorial text-base font-bold text-primary">
               Declaração Canônica e Institucional sobre o <em>Imprimatur</em>
             </h3>
-            <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
-              O <strong>Veritas Libris</strong> é uma iniciativa independente de caráter{' '}
-              <strong>consultivo, formativo e prudencial</strong>. Em nenhuma hipótese nossos vereditos substituem a censura oficial eclesiástica (<em>Nihil Obstat</em>) ou a licença de impressão (<em>Imprimatur</em>), reservadas ao Bispo Diocesano (Cân. 823).
+            <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed text-justify">
+              O <strong>Veritas Libris</strong> é uma iniciativa editorial independente de leigos católicos em comunhão de fé e caridade com a Sé de Pedro e os legítimos pastores diocesanos. Nossas classificações morais e pareceres críticos possuem caráter <strong>exclusivamente consultivo, formativo e prudencial</strong>. Em nenhuma hipótese o veredito aqui emitido substitui a censura oficial eclesiástica (<em>Nihil Obstat</em>) ou a licença de impressão (<em>Imprimatur</em>), prerrogativas reservadas pelo Código de Direito Canônico (Cân. 823) ao Bispo Diocesano e aos Ordinários locais.
             </p>
+            <div className="flex items-center gap-2 text-secondary pt-1">
+              <Gavel className="w-4 h-4" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">
+                Submissão Filial ao Magistério Autêntico da Igreja
+              </span>
+            </div>
           </div>
         </div>
       </section>

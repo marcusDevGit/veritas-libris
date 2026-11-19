@@ -30,7 +30,7 @@ export const CriteriaConsensusSection: React.FC = () => {
             Ponderação de Votos
           </h3>
           <p className="text-xs text-on-surface-variant leading-relaxed">
-            Curadores oficiais possuem peso 3 em cada avaliação. Votos de leitores cadastrados possuem peso 1 na composição do consenso.
+            Curadores eclesiásticos e pareceristas diplomados possuem peso 3 em cada métrica. Votos de leitores cadastrados possuem peso 1 modulado por idoneidade e histórico de resenhas aprovadas.
           </p>
         </div>
 
@@ -42,7 +42,7 @@ export const CriteriaConsensusSection: React.FC = () => {
             Threshold de Prudência
           </h3>
           <p className="text-xs text-on-surface-variant leading-relaxed">
-            Se 40% ou mais dos votos ponderados indicarem &ldquo;Não Recomendado&rdquo;, a obra assume esse alerta automaticamente por prudência.
+            Se 40% ou mais dos pareceres emitirem alerta de &ldquo;Desaconselhado&rdquo;, a obra é automaticamente impedida de receber o selo &ldquo;Recomendado&rdquo;, exigindo audiência do Colégio de Curadores.
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export const CriteriaConsensusSection: React.FC = () => {
             Trava Editorial (<code className="font-mono text-[11px]">editorialLock</code>)
           </h3>
           <p className="text-xs text-on-surface-variant leading-relaxed">
-            O colegiado pode fixar <code className="font-mono text-[11px]">editorialLock = true</code>, impedindo distorções por avaliações coordenadas.
+            Em obras centrais da fé ou heresias notórias, o Conselho impõe a chave soberana <code className="font-mono text-[11px]">editorialLock = true</code>, impedindo distorções provocadas por avaliações coordenadas.
           </p>
         </div>
 
@@ -66,7 +66,7 @@ export const CriteriaConsensusSection: React.FC = () => {
             Selo <em>Imprimatur</em> Auditado
           </h3>
           <p className="text-xs text-on-surface-variant leading-relaxed">
-            Registro explícito de licenças eclesiásticas (<em>Nihil Obstat</em> e <em>Imprimatur</em>) apenas para edições formalmente aprovadas.
+            Catalogação minuciosa de licenças eclesiásticas oficiais: <em>Nihil Obstat</em> (censor teólogo) e <em>Imprimatur</em> (Ordinário do Lugar), com menção da diocese e ano da concessão canônica.
           </p>
         </div>
       </div>
@@ -81,7 +81,7 @@ export const CriteriaConsensusSection: React.FC = () => {
               Fórmula de Discernimento Ponderado
             </span>
             <span className="text-[11px] text-on-surface-variant">
-              Peso Curador (3x) + Peso Comunidade (1x) + Trava de Prudência (≥ 40%) + Editorial Lock
+              Índice Final = (0.4 × Doutrina) + (0.25 × Modéstia) + (0.15 × Gravidade) + (0.2 × Estética)
             </span>
           </div>
         </div>

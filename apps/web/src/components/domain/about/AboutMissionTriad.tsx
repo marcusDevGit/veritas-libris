@@ -7,21 +7,21 @@ const TRIAD = [
     tag: 'Pilar I',
     title: 'Fidelitas',
     subtitle: 'Fidelidade ao Magistério & Sã Doutrina',
-    desc: 'Alinhamento ao Depósito da Fé, à Sagrada Escritura e à Tradição apostólica na avaliação de pressupostos teológicos.',
+    desc: 'Alinhamento irrestrito ao Depósito da Fé (Depositum Fidei), à Sagrada Escritura e à Tradição apostólica. Nenhuma obra é elogiada se atacar dissimuladamente os dogmas ou a revelação cristã como verdade objetiva.',
   },
   {
     icon: <Eye className="w-5 h-5 text-secondary" />,
     tag: 'Pilar II',
     title: 'Prudentia',
     subtitle: 'Discernimento Formativo e Equilíbrio',
-    desc: 'Distingue a representação dramática do pecado humano da apologia ao vício, zelando pela maturidade de cada faixa etária.',
+    desc: 'Distingue a crueza descritiva necessária à narrativa moral da glorificação licenciosa da impureza. Rejeita o escândalo desnecessário sem negar o peso trágico da condição humana decaída.',
   },
   {
     icon: <Sparkles className="w-5 h-5 text-primary" />,
     tag: 'Pilar III',
     title: 'Sapientia',
     subtitle: 'Estética Elevada e Excelência Formal',
-    desc: 'Reconhecimento da boa literatura como veículo de beleza e cultura: qualidade artística, rigor e profundidade humana.',
+    desc: 'Reconhecimento da boa literatura como veículo de redenção cultural. A mediocridade sentimental não basta como virtude moral: a arte autêntica requer perícia técnica, riqueza de linguagem e coerência estética.',
   },
 ];
 
@@ -41,18 +41,18 @@ export const AboutMissionTriad: React.FC = () => {
             Discernimento que ilumina, sem medo e sem obscurantismo
           </h2>
 
-          <div className="text-sm sm:text-base text-on-surface-variant space-y-4 leading-relaxed">
+          <div className="text-sm sm:text-base text-on-surface-variant space-y-4 leading-relaxed text-justify">
             <p>
               <span className="float-left text-5xl leading-[0.85] font-editorial font-bold text-primary pr-3 pt-1">
                 O
               </span>
-              Veritas Libris nasceu da necessidade sentida por famílias, colégios cristãos e leitores diante do volume crescente de publicações contemporâneas. Nem sempre a sinopse comercial revela os pressupostos filosóficos ou a adequação moral de uma obra.
+              Veritas Libris nasceu da urgência sentida por pais de família, colégios de orientação cristã e confessores diante da torrente editorial contemporânea. Em um século saturado de produções livreiras marcadas ora pelo cinismo moral, ora pela confusão metafísica, torna-se imprescindível contar com uma bússola segura e lúcida para o julgamento das letras.
             </p>
             <p>
-              Nosso método afasta tanto o pietismo simplista — que confunde o drama humano da redenção com apologia do erro — quanto a indiferença moral diante de conteúdos nocivos à fé e aos costumes.
+              Nosso método afasta deliberadamente tanto o pietismo simplista — que confunde a legítima representação artística do drama do pecado com apologia à culpa — quanto a ingenuidade liberal, que julga o leitor imune às investidas da imaginação corrompida. Ler com espírito católico exige distinguir com rigor: o heroísmo da graça, as feridas da carne e a corrosão intencional da fé.
             </p>
             <p>
-              Oferecemos um serviço pedagógico, consultivo e transparente, entregando à consciência formada do leitor ferramentas concretas para escolher boas obras com liberdade e critério.
+              Não praticamos a interdição cega nem pretendemos reeditar punições canônicas do passado: oferecemos um serviço pedagógico, consultivo e teológico. Avaliamos a substância doutrinária, a maturidade moral indispensável e a excelência literária da obra, entregando à consciência formada do leitor as ferramentas para haurir o trigo e afastar o joio.
             </p>
           </div>
 
