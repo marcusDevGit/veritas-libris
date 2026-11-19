@@ -4,6 +4,8 @@ import type {
   BookDto,
   BookListQuery,
   CreateReviewBody,
+  CurationQueueQuery,
+  CurationQueueResponse,
   ExternalBookResult,
   HelpfulVoteResponse,
   ImportBookResponse,
@@ -13,6 +15,7 @@ import type {
   PaginatedUsers,
   Review,
   ReviewListQuery,
+  UpdateBookEditorialBody,
   UserDto,
   UserRole,
 } from '@app/shared';
@@ -162,5 +165,23 @@ export const api = {
 
   listAdminAuditLogs: async (): Promise<{ items: AuditLogDto[] }> => {
     return request<{ items: AuditLogDto[] }>('/admin/audit-logs', {}, true);
+  },
+
+  listCurationBooks: async (query: Partial<CurationQueueQuery> = {}): Promise<CurationQueueResponse> => {
+    const params = new URLSearchParams();
+    if (query.q) params.set('q', query.q);
+    if (query.filter) params.set('filter', query.filter);
+    if (query.page) params.set('page', String(query.page));
+    if (query.limit) params.set('limit', String(query.limit));
+
+    const queryString = params.toString();
+    return request<CurationQueueResponse>(`/curation/books${queryString ? `?${queryString}` : ''}`, {}, true);
+  },
+
+  updateBookEditorial: async (bookId: string, body: UpdateBookEditorialBody): Promise<BookDto> => {
+    return request<BookDto>(`/books/${bookId}/editorial`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }, true);
   },
 };
