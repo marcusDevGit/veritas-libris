@@ -1,14 +1,20 @@
 import type {
+  AdminUsersQuery,
+  AuditLogDto,
   BookDto,
   BookListQuery,
   CreateReviewBody,
   ExternalBookResult,
   HelpfulVoteResponse,
   ImportBookResponse,
+  InviteUserBody,
   PaginatedBooks,
   PaginatedReviews,
+  PaginatedUsers,
   Review,
   ReviewListQuery,
+  UserDto,
+  UserRole,
 } from '@app/shared';
 
 const API_BASE = import.meta.env.VITE_API_URL
@@ -122,5 +128,39 @@ export const api = {
     return request<HelpfulVoteResponse>(`/reviews/${reviewId}/helpful`, {
       method: 'POST',
     }, true);
+  },
+
+  getCurrentUser: async (): Promise<UserDto> => {
+    return request<UserDto>('/auth/me', {}, true);
+  },
+
+  listAdminUsers: async (query: Partial<AdminUsersQuery> = {}): Promise<PaginatedUsers> => {
+    const params = new URLSearchParams();
+    if (query.q) params.set('q', query.q);
+    if (query.role) params.set('role', query.role);
+    if (query.sort) params.set('sort', query.sort);
+    if (query.page) params.set('page', String(query.page));
+    if (query.limit) params.set('limit', String(query.limit));
+
+    const queryString = params.toString();
+    return request<PaginatedUsers>(`/admin/users${queryString ? `?${queryString}` : ''}`, {}, true);
+  },
+
+  inviteAdminUser: async (body: InviteUserBody): Promise<UserDto> => {
+    return request<UserDto>('/admin/users/invite', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }, true);
+  },
+
+  updateUserRole: async (uid: string, role: UserRole): Promise<UserDto> => {
+    return request<UserDto>(`/admin/users/${encodeURIComponent(uid)}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    }, true);
+  },
+
+  listAdminAuditLogs: async (): Promise<{ items: AuditLogDto[] }> => {
+    return request<{ items: AuditLogDto[] }>('/admin/audit-logs', {}, true);
   },
 };
