@@ -18,6 +18,15 @@ const CurationPage = lazy(() =>
 const AdminPage = lazy(() =>
   import('./pages/AdminPage.js').then((m) => ({ default: m.AdminPage })),
 );
+const CriteriaPage = lazy(() =>
+  import('./pages/CriteriaPage.js').then((m) => ({ default: m.CriteriaPage })),
+);
+const AboutCurationPage = lazy(() =>
+  import('./pages/AboutCurationPage.js').then((m) => ({ default: m.AboutCurationPage })),
+);
+const SuggestionsPage = lazy(() =>
+  import('./pages/SuggestionsPage.js').then((m) => ({ default: m.SuggestionsPage })),
+);
 const ImportBookModal = lazy(() =>
   import('./components/domain/ImportBookModal.js').then((m) => ({ default: m.ImportBookModal })),
 );
@@ -68,6 +77,9 @@ export const App: React.FC = () => {
                   <Route path="/" element={<CatalogPage />} />
                   <Route path="/livros/:id" element={<BookDetailPage />} />
                   <Route path="/minha-lista" element={<ReadingListPage />} />
+                  <Route path="/criterios" element={<CriteriaPage />} />
+                  <Route path="/sobre" element={<AboutCurationPage />} />
+                  <Route path="/sugestoes" element={<SuggestionsPage />} />
                   <Route path="/curadoria" element={<CurationPage />} />
                   <Route path="/admin" element={<AdminPage />} />
                 </Routes>

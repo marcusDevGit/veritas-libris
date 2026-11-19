@@ -5,4 +5,5 @@ export * from './schemas/review.schema.js';
 export * from './schemas/catalog.schema.js';
 export * from './schemas/curation.schema.js';
 export * from './schemas/reading-list.schema.js';
+export * from './schemas/suggestion.schema.js';
 export * from './schemas/user.schema.js';
