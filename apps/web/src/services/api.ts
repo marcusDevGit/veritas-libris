@@ -11,6 +11,7 @@ import type {
   HelpfulVoteResponse,
   ImportBookResponse,
   InviteUserBody,
+  NotificationListResponse,
   PaginatedBooks,
   PaginatedReviews,
   PaginatedUsers,
@@ -219,5 +220,17 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(body),
     });
+  },
+
+  listNotifications: async (): Promise<NotificationListResponse> => {
+    return request<NotificationListResponse>('/notifications', {}, true);
+  },
+
+  markAllNotificationsRead: async (): Promise<{ updated: number }> => {
+    return request<{ updated: number }>('/notifications/read-all', { method: 'PATCH' }, true);
+  },
+
+  markNotificationRead: async (id: string): Promise<{ read: boolean }> => {
+    return request<{ read: boolean }>(`/notifications/${id}/read`, { method: 'PATCH' }, true);
   },
 };

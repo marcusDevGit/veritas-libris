@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, CheckCheck, ShieldCheck, BookOpen } from 'lucide-react';
+import type { NotificationDto } from '@app/shared';
+import { useAuth } from '../../contexts/AuthContext.js';
+import { api } from '../../services/api.js';
 
-interface NotificationItem {
+interface GuestNotificationItem {
   id: string;
   title: string;
   description: string;
@@ -9,12 +14,12 @@ interface NotificationItem {
   read: boolean;
 }
 
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+const INITIAL_GUEST_NOTIFICATIONS: GuestNotificationItem[] = [
   {
     id: 'welcome-curatorship',
     title: 'Bem-vindo ao Veritas Libris',
     description:
-      'Consulte pareceres morais ou importe uma obra pelo botão superior para iniciar um novo discernimento.',
+      'Consulte pareceres morais ou salve obras em Minha Lista para receber avisos quando houver novidades.',
     time: 'Agora',
     read: false,
   },
@@ -28,12 +33,53 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
+function formatRelativeTime(isoDate: string): string {
+  const diffMs = Date.now() - new Date(isoDate).getTime();
+  const diffMin = Math.floor(diffMs / 60_000);
+  if (diffMin < 1) return 'Agora';
+  if (diffMin < 60) return `${diffMin}m`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours}h`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d`;
+  return new Date(isoDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
 export const NotificationsPopover: React.FC = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [guestNotifications, setGuestNotifications] = useState<GuestNotificationItem[]>(
+    INITIAL_GUEST_NOTIFICATIONS,
+  );
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const notificationsQueryKey = ['notifications', user?.uid ?? 'guest'] as const;
+
+  const { data, isLoading } = useQuery({
+    queryKey: notificationsQueryKey,
+    queryFn: api.listNotifications,
+    enabled: Boolean(user),
+    refetchInterval: 60_000,
+  });
+
+  const markAllMutation = useMutation({
+    mutationFn: api.markAllNotificationsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
+    },
+  });
+
+  const markOneMutation = useMutation({
+    mutationFn: api.markNotificationRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
+    },
+  });
+
+  const unreadCount = user
+    ? (data?.unreadCount ?? 0)
+    : guestNotifications.filter((n) => !n.read).length;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -45,8 +91,19 @@ export const NotificationsPopover: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const handleMarkAllAsRead = () => {
+    if (user) {
+      markAllMutation.mutate();
+      return;
+    }
+    setGuestNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  const handleItemClick = (item: NotificationDto) => {
+    if (!item.read) {
+      markOneMutation.mutate(item.id);
+    }
+    setIsOpen(false);
   };
 
   return (
@@ -62,7 +119,7 @@ export const NotificationsPopover: React.FC = () => {
         {unreadCount > 0 && (
           <span
             className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"
-            title={`${unreadCount} notificação não lida`}
+            title={`${unreadCount} notificação(ões) não lida(s)`}
           />
         )}
       </button>
@@ -77,8 +134,9 @@ export const NotificationsPopover: React.FC = () => {
             {unreadCount > 0 && (
               <button
                 type="button"
-                onClick={markAllAsRead}
-                className="text-[11px] font-semibold text-secondary hover:text-primary flex items-center gap-1 cursor-pointer"
+                onClick={handleMarkAllAsRead}
+                disabled={markAllMutation.isPending}
+                className="text-[11px] font-semibold text-secondary hover:text-primary flex items-center gap-1 cursor-pointer disabled:opacity-50"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
                 <span>Marcar como lidas</span>
@@ -87,27 +145,79 @@ export const NotificationsPopover: React.FC = () => {
           </div>
 
           <div className="divide-y divide-outline/10 max-h-80 overflow-y-auto">
-            {notifications.map((item) => (
-              <div
-                key={item.id}
-                className={`p-4 flex items-start gap-3 transition-colors ${
-                  item.read ? 'bg-surface-container-lowest' : 'bg-secondary-container/15'
-                }`}
-              >
-                <div className="p-2 rounded-lg bg-surface-container text-primary shrink-0 mt-0.5">
-                  <BookOpen className="w-3.5 h-3.5" />
+            {user ? (
+              isLoading ? (
+                <div className="p-6 text-center text-xs text-on-surface-variant">
+                  Carregando notificações...
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-bold text-primary truncate">{item.title}</p>
-                    <span className="text-[10px] text-outline shrink-0">{item.time}</span>
+              ) : (data?.items.length ?? 0) === 0 ? (
+                <div className="p-6 text-center text-xs text-on-surface-variant leading-relaxed">
+                  Nenhum aviso para os livros da sua lista ainda. Salve obras em{' '}
+                  <Link
+                    to="/minha-lista"
+                    onClick={() => setIsOpen(false)}
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    Minha Lista
+                  </Link>{' '}
+                  para acompanhar novos pareceres e atualizações editoriais.
+                </div>
+              ) : (
+                data!.items.map((item) => {
+                  const Icon = item.type === 'EDITORIAL_UPDATE' ? ShieldCheck : BookOpen;
+                  return (
+                    <Link
+                      key={item.id}
+                      to={`/livros/${item.bookId}`}
+                      onClick={() => handleItemClick(item)}
+                      className={`p-4 flex items-start gap-3 transition-colors hover:bg-surface-container-low ${
+                        item.read ? 'bg-surface-container-lowest' : 'bg-secondary-container/15'
+                      }`}
+                    >
+                      <div className="p-2 rounded-lg bg-surface-container text-primary shrink-0 mt-0.5">
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs font-bold text-primary truncate">{item.title}</p>
+                          <span className="text-[10px] text-outline shrink-0">
+                            {formatRelativeTime(item.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-[11px] font-semibold text-secondary truncate mt-0.5">
+                          {item.bookTitle}
+                        </p>
+                        <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
+                          {item.description}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })
+              )
+            ) : (
+              guestNotifications.map((item) => (
+                <div
+                  key={item.id}
+                  className={`p-4 flex items-start gap-3 transition-colors ${
+                    item.read ? 'bg-surface-container-lowest' : 'bg-secondary-container/15'
+                  }`}
+                >
+                  <div className="p-2 rounded-lg bg-surface-container text-primary shrink-0 mt-0.5">
+                    <BookOpen className="w-3.5 h-3.5" />
                   </div>
-                  <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
-                    {item.description}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-bold text-primary truncate">{item.title}</p>
+                      <span className="text-[10px] text-outline shrink-0">{item.time}</span>
+                    </div>
+                    <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       )}
