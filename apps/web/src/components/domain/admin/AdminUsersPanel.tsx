@@ -107,8 +107,8 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({
   onSortChange,
   onUpdateRole,
 }) => {
-  const isProtectedLastAdmin = (item: UserDto) =>
-    item.role === 'ADMIN' && stats.admins <= 1;
+  const isProtectedAccount = (item: UserDto, isSelf: boolean) =>
+    item.role === 'ADMIN' && (item.isFounder || isSelf || stats.admins <= 1);
 
   const filterChips: Array<{ value: RoleFilter; label: string; count: number }> = [
     { value: 'ALL', label: 'Todos', count: stats.total },
@@ -189,8 +189,8 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({
               <tbody className="text-sm text-on-surface divide-y divide-outline/10">
                 {users.map((item) => {
                   const meta = ROLE_META[item.role];
-                  const locked = isProtectedLastAdmin(item);
                   const isSelf = item.uid === currentUserUid;
+                  const locked = isProtectedAccount(item, isSelf);
                   const activity = getActivityStatus(item, isSelf);
                   const roleTitle =
                     item.isFounder && item.role === 'ADMIN' ? 'Superadministrador' : meta.label;
@@ -276,11 +276,11 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({
                       <td className="py-4 px-6 text-right">
                         {locked ? (
                           <span
-                            title="Não é permitido remover o último administrador ativo do sistema."
+                            title="Conta fundadora ou sua própria credencial de administrador está protegida contra rebaixamento."
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface-variant text-xs font-semibold opacity-80 cursor-not-allowed"
                           >
                             <Lock className="w-3.5 h-3.5" />
-                            Protegido — Último Admin
+                            {item.isFounder ? 'Protegido — Conta Fundadora' : isSelf ? 'Protegido — Sua Conta' : 'Protegido — Último Admin'}
                           </span>
                         ) : (
                           <select
@@ -306,8 +306,8 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({
           <div className="md:hidden divide-y divide-outline/10">
             {users.map((item) => {
               const meta = ROLE_META[item.role];
-              const locked = isProtectedLastAdmin(item);
               const isSelf = item.uid === currentUserUid;
+              const locked = isProtectedAccount(item, isSelf);
               const activity = getActivityStatus(item, isSelf);
               const roleTitle =
                 item.isFounder && item.role === 'ADMIN' ? 'Superadministrador' : meta.label;
@@ -365,7 +365,7 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({
                   {locked ? (
                     <div className="inline-flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-lg bg-surface-container-high text-on-surface-variant text-xs font-semibold">
                       <Lock className="w-3.5 h-3.5" />
-                      Protegido — Último Admin
+                      {item.isFounder ? 'Protegido — Conta Fundadora' : isSelf ? 'Protegido — Sua Conta' : 'Protegido — Último Admin'}
                     </div>
                   ) : (
                     <select

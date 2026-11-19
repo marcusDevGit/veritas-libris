@@ -185,6 +185,22 @@ export async function updateUserRole(options: {
     throw new NotFoundError('Usuário não encontrado na base do Veritas Libris');
   }
 
+  if (options.targetUid === options.actor.uid && options.nextRole !== 'ADMIN') {
+    throw new AppError(
+      400,
+      'Você não pode remover seu próprio cargo de administrador.',
+      'SELF_DEMOTION_FORBIDDEN',
+    );
+  }
+
+  if (target.isFounder && options.nextRole !== 'ADMIN') {
+    throw new AppError(
+      400,
+      'Contas fundadoras (ADMIN_EMAILS) são protegidas e não podem ser rebaixadas pela interface.',
+      'FOUNDER_PROTECTED',
+    );
+  }
+
   const activeAdminCount = await UserModel.countDocuments({ role: 'ADMIN' });
   if (!canDemoteAdmin(target.role, options.nextRole, activeAdminCount)) {
     throw new AppError(

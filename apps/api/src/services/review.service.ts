@@ -10,6 +10,7 @@ import { NotFoundError } from '../errors/app-error.js';
 import { BookModel } from '../models/Book.model.js';
 import { ReviewModel, type ReviewAttrs } from '../models/Review.model.js';
 import { calculateConsensus } from './consensus.service.js';
+import { notifyReadingListWatchers } from './notification.service.js';
 
 export interface UpsertReviewInput {
   bookId: string;
@@ -99,6 +100,18 @@ export async function upsertReview({
   }
 
   await book.save();
+
+  try {
+    await notifyReadingListWatchers({
+      bookId: book._id,
+      bookTitle: book.title,
+      type: 'NEW_REVIEW',
+      actorUid: userId,
+      actorName: userName,
+    });
+  } catch {
+    // Notificação é melhor esforço para não falhar a publicação do parecer
+  }
 
   return toReviewDto(reviewDoc);
 }

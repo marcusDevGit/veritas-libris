@@ -4,12 +4,14 @@ import type {
   BookDto,
   BookListQuery,
   CreateReviewBody,
+  CreateSuggestionBody,
   CurationQueueQuery,
   CurationQueueResponse,
   ExternalBookResult,
   HelpfulVoteResponse,
   ImportBookResponse,
   InviteUserBody,
+  NotificationListResponse,
   PaginatedBooks,
   PaginatedReviews,
   PaginatedUsers,
@@ -17,6 +19,7 @@ import type {
   ReadingListStatusResponse,
   Review,
   ReviewListQuery,
+  SuggestionDto,
   UpdateBookEditorialBody,
   UserDto,
   UserRole,
@@ -210,5 +213,24 @@ export const api = {
     return request<ReadingListStatusResponse>(`/reading-list/${bookId}`, {
       method: 'DELETE',
     }, true);
+  },
+
+  createSuggestion: async (body: CreateSuggestionBody): Promise<SuggestionDto> => {
+    return request<SuggestionDto>('/suggestions', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
+
+  listNotifications: async (): Promise<NotificationListResponse> => {
+    return request<NotificationListResponse>('/notifications', {}, true);
+  },
+
+  markAllNotificationsRead: async (): Promise<{ updated: number }> => {
+    return request<{ updated: number }>('/notifications/read-all', { method: 'PATCH' }, true);
+  },
+
+  markNotificationRead: async (id: string): Promise<{ read: boolean }> => {
+    return request<{ read: boolean }>(`/notifications/${id}/read`, { method: 'PATCH' }, true);
   },
 };

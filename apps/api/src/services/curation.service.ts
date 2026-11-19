@@ -13,6 +13,7 @@ import { ReviewModel } from '../models/Review.model.js';
 import { calculateConsensus } from './consensus.service.js';
 import { toBookDto, type BookLean } from './book.service.js';
 import { sanitizeAlternativeIds } from './curation.utils.js';
+import { notifyReadingListWatchers } from './notification.service.js';
 
 function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -152,6 +153,21 @@ export async function updateBookEditorial(
         }`
       : 'Desativou Trava Editorial e restaurou consenso comunitário',
   });
+
+  try {
+    await notifyReadingListWatchers({
+      bookId: updated._id,
+      bookTitle: updated.title,
+      type: 'EDITORIAL_UPDATE',
+      actorUid: actor.uid,
+      actorName: actor.name,
+      summaryDetail: body.editorialLock
+        ? `${updated.adequacyStatus} • ${updated.recommendedAge}`
+        : 'Trava Editorial atualizada',
+    });
+  } catch {
+    // Melhor esforço
+  }
 
   return toBookDto(updated);
 }
