@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api.js';
+import { useAuth } from '../contexts/AuthContext.js';
 import { BookDetailBreadcrumb } from '../components/domain/book-detail/BookDetailBreadcrumb.js';
 import { BookBibliographicSidebar } from '../components/domain/book-detail/BookBibliographicSidebar.js';
 import { BookVerdictHeroCard } from '../components/domain/book-detail/BookVerdictHeroCard.js';
@@ -22,6 +23,7 @@ import { ArrowLeft } from 'lucide-react';
  */
 export const BookDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { user, signInWithGoogle } = useAuth();
   const queryClient = useQueryClient();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
@@ -54,6 +56,29 @@ export const BookDetailPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['book', id] });
     },
   });
+
+  const readingListStatusQuery = useQuery({
+    queryKey: ['reading-list-status', id],
+    queryFn: () => api.getReadingListStatus(id!),
+    enabled: Boolean(id && user),
+  });
+
+  const toggleReadingListMutation = useMutation({
+    mutationFn: async (currentlySaved: boolean) =>
+      currentlySaved ? api.removeFromReadingList(id!) : api.addToReadingList(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reading-list-status', id] });
+      queryClient.invalidateQueries({ queryKey: ['reading-list'] });
+    },
+  });
+
+  const handleToggleReadingList = () => {
+    if (!user) {
+      void signInWithGoogle();
+      return;
+    }
+    toggleReadingListMutation.mutate(Boolean(readingListStatusQuery.data?.saved));
+  };
 
   if (isBookLoading) {
     return (
@@ -104,6 +129,9 @@ export const BookDetailPage: React.FC = () => {
             onOpenReviewModal={() => setIsReviewModalOpen(true)}
             onRefreshMetadata={() => refreshMetadataMutation.mutate()}
             isRefreshingMetadata={refreshMetadataMutation.isPending}
+            isSavedInReadingList={Boolean(readingListStatusQuery.data?.saved)}
+            isTogglingReadingList={toggleReadingListMutation.isPending}
+            onToggleReadingList={handleToggleReadingList}
           />
 
           <section className="lg:col-span-8 flex flex-col gap-8">

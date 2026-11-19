@@ -8,6 +8,7 @@ import { adminRoutes } from './routes/admin.routes.js';
 import { authRoutes } from './routes/auth.routes.js';
 import { bookRoutes } from './routes/books.routes.js';
 import { healthRoutes } from './routes/health.routes.js';
+import { readingListRoutes } from './routes/reading-list.routes.js';
 import { reviewRoutes } from './routes/reviews.routes.js';
 
 /**
@@ -42,6 +43,7 @@ export function buildApp(): FastifyInstance {
   void app.register(authRoutes, { prefix: '/api/v1' });
   void app.register(adminRoutes, { prefix: '/api/v1' });
   void app.register(bookRoutes, { prefix: '/api/v1' });
+  void app.register(readingListRoutes, { prefix: '/api/v1' });
   void app.register(reviewRoutes, { prefix: '/api/v1' });
 
   return app;

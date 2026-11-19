@@ -13,6 +13,8 @@ import type {
   PaginatedBooks,
   PaginatedReviews,
   PaginatedUsers,
+  ReadingListResponse,
+  ReadingListStatusResponse,
   Review,
   ReviewListQuery,
   UpdateBookEditorialBody,
@@ -186,6 +188,27 @@ export const api = {
     return request<BookDto>(`/books/${bookId}/editorial`, {
       method: 'PATCH',
       body: JSON.stringify(body),
+    }, true);
+  },
+
+  getReadingList: async (): Promise<ReadingListResponse> => {
+    return request<ReadingListResponse>('/reading-list', {}, true);
+  },
+
+  getReadingListStatus: async (bookId: string): Promise<ReadingListStatusResponse> => {
+    return request<ReadingListStatusResponse>(`/reading-list/${bookId}/status`, {}, true);
+  },
+
+  addToReadingList: async (bookId: string): Promise<ReadingListStatusResponse> => {
+    return request<ReadingListStatusResponse>('/reading-list', {
+      method: 'POST',
+      body: JSON.stringify({ bookId }),
+    }, true);
+  },
+
+  removeFromReadingList: async (bookId: string): Promise<ReadingListStatusResponse> => {
+    return request<ReadingListStatusResponse>(`/reading-list/${bookId}`, {
+      method: 'DELETE',
     }, true);
   },
 };

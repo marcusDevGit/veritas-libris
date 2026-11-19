@@ -10,6 +10,7 @@ import { CatalogPage } from './pages/CatalogPage.js';
 import { BookDetailPage } from './pages/BookDetailPage.js';
 import { AdminPage } from './pages/AdminPage.js';
 import { CurationPage } from './pages/CurationPage.js';
+import { ReadingListPage } from './pages/ReadingListPage.js';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +47,7 @@ export const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<CatalogPage />} />
               <Route path="/livros/:id" element={<BookDetailPage />} />
+              <Route path="/minha-lista" element={<ReadingListPage />} />
               <Route path="/curadoria" element={<CurationPage />} />
               <Route path="/admin" element={<AdminPage />} />
             </Routes>
