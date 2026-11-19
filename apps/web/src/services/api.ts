@@ -4,6 +4,7 @@ import type {
   BookDto,
   BookListQuery,
   CreateReviewBody,
+  CreateSuggestionBody,
   CurationQueueQuery,
   CurationQueueResponse,
   ExternalBookResult,
@@ -17,6 +18,7 @@ import type {
   ReadingListStatusResponse,
   Review,
   ReviewListQuery,
+  SuggestionDto,
   UpdateBookEditorialBody,
   UserDto,
   UserRole,
@@ -210,5 +212,12 @@ export const api = {
     return request<ReadingListStatusResponse>(`/reading-list/${bookId}`, {
       method: 'DELETE',
     }, true);
+  },
+
+  createSuggestion: async (body: CreateSuggestionBody): Promise<SuggestionDto> => {
+    return request<SuggestionDto>('/suggestions', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
   },
 };
