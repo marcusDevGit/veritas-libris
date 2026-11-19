@@ -9,6 +9,7 @@ import { IsbnScannerModal } from './components/domain/IsbnScannerModal.js';
 import { CatalogPage } from './pages/CatalogPage.js';
 import { BookDetailPage } from './pages/BookDetailPage.js';
 import { AdminPage } from './pages/AdminPage.js';
+import { CurationPage } from './pages/CurationPage.js';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,6 +46,7 @@ export const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<CatalogPage />} />
               <Route path="/livros/:id" element={<BookDetailPage />} />
+              <Route path="/curadoria" element={<CurationPage />} />
               <Route path="/admin" element={<AdminPage />} />
             </Routes>
           </main>

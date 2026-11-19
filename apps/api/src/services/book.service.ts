@@ -13,7 +13,7 @@ import { findGoogleBookByIsbn } from "./google-books.service.js";
 import { enrichWithFallbackProviders } from "./external-books-providers.service.js";
 
 /** Forma de um documento `lean()` do Book (objeto simples, sem métodos do Mongoose). */
-type BookLean = BookAttrs & {
+export type BookLean = BookAttrs & {
   _id: Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
@@ -24,7 +24,7 @@ type BookLean = BookAttrs & {
  * ObjectId vira string (o JSON do cliente não conhece ObjectId) e campos
  * internos do Mongo (__v, score de busca) ficam de fora de propósito.
  */
-function toBookDto(doc: BookLean): BookDto {
+export function toBookDto(doc: BookLean): BookDto {
   return {
     _id: doc._id.toString(),
     isbn13: doc.isbn13,
