@@ -2,6 +2,7 @@ import type { ModifyResult, Types } from "mongoose";
 import type {
   BookDto,
   BookListQuery,
+  CatalogStats,
   ExternalBook,
   ExternalBookResult,
   PaginatedBooks,
@@ -9,6 +10,7 @@ import type {
 import { env } from "../config/env.js";
 import { NotFoundError } from "../errors/app-error.js";
 import { BookModel, type BookAttrs } from "../models/Book.model.js";
+import { buildBookFilter, buildBookSort } from "./book-query.utils.js";
 import { findGoogleBookByIsbn } from "./google-books.service.js";
 import { enrichWithFallbackProviders } from "./external-books-providers.service.js";
 
@@ -56,28 +58,69 @@ export function toBookDto(doc: BookLean): BookDto {
 
 
 export async function listBooks(query: BookListQuery): Promise<PaginatedBooks> {
-  const { q, adequacy, age, tags, page, limit } = query;
+  const { q, sort, page, limit } = query;
 
-  const filter: Record<string, unknown> = {};
-  if (q) filter["$text"] = { $search: q };
-  if (adequacy) filter["adequacyStatus"] = adequacy;
-  if (age) filter["recommendedAge"] = age;
-  if (tags && tags.length > 0) filter["tags"] = { $all: tags };
+  const filter = buildBookFilter(query, { includeAdequacy: true });
+  const statsFilter = buildBookFilter(query, { includeAdequacy: false });
+  const sortSpec = buildBookSort(sort, Boolean(q));
 
-  const [docs, total] = await Promise.all([
+  const [docs, total, groupedStats] = await Promise.all([
     q
       ? BookModel.find(filter, { score: { $meta: "textScore" } })
-          .sort({ score: { $meta: "textScore" } })
+          .sort(sortSpec)
           .skip((page - 1) * limit)
           .limit(limit)
           .lean<BookLean[]>()
       : BookModel.find(filter)
-          .sort({ title: 1, _id: 1 }) // _id desempata: paginação estável.
+          .sort(sortSpec)
           .skip((page - 1) * limit)
           .limit(limit)
           .lean<BookLean[]>(),
     BookModel.countDocuments(filter),
+    BookModel.aggregate<{
+      _id: string;
+      count: number;
+      reviewedCount: number;
+    }>([
+      { $match: statsFilter },
+      {
+        $group: {
+          _id: "$adequacyStatus",
+          count: { $sum: 1 },
+          reviewedCount: {
+            $sum: {
+              $cond: [
+                {
+                  $or: [
+                    { $ne: ["$adequacyStatus", "UNRATED"] },
+                    { $gt: ["$communityStats.totalReviews", 0] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+        },
+      },
+    ]),
   ]);
+
+  const stats: CatalogStats = {
+    totalAll: 0,
+    reviewed: 0,
+    recommended: 0,
+    withReservations: 0,
+    notRecommended: 0,
+  };
+
+  for (const bucket of groupedStats) {
+    stats.totalAll += bucket.count;
+    stats.reviewed += bucket.reviewedCount;
+    if (bucket._id === "RECOMMENDED") stats.recommended = bucket.count;
+    else if (bucket._id === "WITH_RESERVATIONS") stats.withReservations = bucket.count;
+    else if (bucket._id === "NOT_RECOMMENDED") stats.notRecommended = bucket.count;
+  }
 
   return {
     items: docs.map(toBookDto),
@@ -85,6 +128,7 @@ export async function listBooks(query: BookListQuery): Promise<PaginatedBooks> {
     limit,
     total,
     totalPages: Math.ceil(total / limit),
+    stats,
   };
 }
 

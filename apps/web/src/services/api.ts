@@ -82,6 +82,10 @@ export const api = {
     if (query.adequacy) params.set('adequacy', query.adequacy);
     if (query.age) params.set('age', query.age);
     if (query.tags && query.tags.length > 0) params.set('tags', query.tags.join(','));
+    if (query.familyMode) params.set('familyMode', 'true');
+    if (query.hasImprimatur) params.set('hasImprimatur', 'true');
+    if (query.stamp) params.set('stamp', query.stamp);
+    if (query.sort) params.set('sort', query.sort);
     if (query.page) params.set('page', String(query.page));
     if (query.limit) params.set('limit', String(query.limit));
 
