@@ -62,6 +62,18 @@ const EnvSchema = z.object({
     .enum(["true", "false"])
     .default("true")
     .transform((value) => value === "true"),
+
+  ADMIN_EMAILS: z
+    .string()
+    .optional()
+    .transform((value) =>
+      value === undefined || value.trim() === ""
+        ? []
+        : value
+            .split(",")
+            .map((email) => email.trim().toLowerCase())
+            .filter(Boolean),
+    ),
 }).refine(
   (config) => !(config.NODE_ENV === "production" && (!config.IMPORT_REQUIRES_AUTH || !config.REVIEW_REQUIRES_AUTH)),
   {

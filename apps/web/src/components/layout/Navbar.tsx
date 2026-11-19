@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookMarked, Search, ScanBarcode, Plus, LogIn, LogOut } from 'lucide-react';
+import { BookMarked, Search, ScanBarcode, Plus, LogIn, LogOut, ShieldCheck } from 'lucide-react';
 import { TopBanner } from './TopBanner.js';
 import { NotificationsPopover } from './NotificationsPopover.js';
 import { useAuth } from '../../contexts/AuthContext.js';
@@ -29,8 +29,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenScanner,
 }) => {
   const location = useLocation();
-  const { user, isLoading, signInWithGoogle, signOut } = useAuth();
+  const { user, profile, role, isAdmin, isLoading, signInWithGoogle, signOut } = useAuth();
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+
+  const roleLabel =
+    role === 'ADMIN'
+      ? profile?.isFounder
+        ? 'Superadmin'
+        : 'Administrador'
+      : role === 'CURATOR'
+        ? 'Curador'
+        : 'Autenticado';
 
   const userInitials = user?.displayName
     ? user.displayName
@@ -110,6 +119,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               Sobre a Curadoria
             </a>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className={`inline-flex items-center gap-1 transition-colors py-1 ${
+                  location.pathname === '/admin'
+                    ? 'text-primary font-bold border-b-2 border-primary'
+                    : 'text-secondary hover:text-primary'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Administração
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-4 sm:border-l sm:border-outline/20 sm:pl-6">
@@ -123,6 +145,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <NotificationsPopover />
+
+            {isAdmin && (
+              <Link
+                to="/admin"
+                title="Área do Administrador"
+                className="xl:hidden p-2 text-secondary hover:text-primary hover:bg-surface-container rounded-full transition-all"
+              >
+                <ShieldCheck className="w-4 h-4" />
+              </Link>
+            )}
 
             {onOpenImportModal && (
               <button
@@ -165,7 +197,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {user.displayName || 'Leitor'}
                   </span>
                   <span className="text-[10px] text-secondary font-bold uppercase mt-1 leading-none">
-                    Autenticado
+                    {roleLabel}
                   </span>
                 </div>
                 <button

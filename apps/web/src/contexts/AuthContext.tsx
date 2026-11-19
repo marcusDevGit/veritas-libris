@@ -5,24 +5,40 @@ import {
   signOut as firebaseSignOut,
   type User,
 } from 'firebase/auth';
+import type { UserDto, UserRole } from '@app/shared';
 import { auth, googleProvider, isFirebaseConfigured } from '../config/firebase.js';
-import { setAuthTokenProvider } from '../services/api.js';
+import { api, setAuthTokenProvider } from '../services/api.js';
 
 interface AuthContextValue {
   user: User | null;
+  profile: UserDto | null;
+  role: UserRole;
+  isCurator: boolean;
+  isAdmin: boolean;
   isLoading: boolean;
   isFirebaseConfigured: boolean;
   authError: string | null;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserDto | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(isFirebaseConfigured);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  const loadProfile = async () => {
+    try {
+      const me = await api.getCurrentUser();
+      setProfile(me);
+    } catch {
+      setProfile(null);
+    }
+  };
 
   useEffect(() => {
     if (!auth) {
@@ -39,7 +55,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const unsubscribe = onAuthStateChanged(activeAuth, (currentUser) => {
       setUser(currentUser);
-      setIsLoading(false);
+      if (currentUser) {
+        void loadProfile().finally(() => setIsLoading(false));
+      } else {
+        setProfile(null);
+        setIsLoading(false);
+      }
     });
 
     return () => {
@@ -67,17 +88,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     if (!auth) return;
     await firebaseSignOut(auth);
+    setProfile(null);
   };
+
+  const role: UserRole = profile?.role ?? 'READER';
+  const isAdmin = role === 'ADMIN';
+  const isCurator = role === 'CURATOR' || role === 'ADMIN';
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        profile,
+        role,
+        isCurator,
+        isAdmin,
         isLoading,
         isFirebaseConfigured,
         authError,
         signInWithGoogle,
         signOut,
+        refreshProfile: loadProfile,
       }}
     >
       {children}
