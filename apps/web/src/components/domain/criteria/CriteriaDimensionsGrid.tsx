@@ -9,14 +9,14 @@ const DIMENSIONS = [
     axis: 'Eixo I • Veritas Fidei',
     title: '1. Fidelidade Doutrinária & Teológica',
     description:
-      'Avaliação sistemática da conformidade com o Catecismo da Igreja Católica (CIC), identificando desvios doutrinários, relativismo ou sincretismo.',
+      'Avaliação sistemática da conformidade com o Catecismo da Igreja Católica (CIC). Identificação de heresias formais (gnosticismo moderno, pelagianismo, materialismo reducionista ou imanentismo), apologia ao relativismo e sincretismo esotérico.',
     highlightLabel: 'Distinção Crucial de Análise:',
     highlightText:
-      'Distingue-se a representação dramática do pecado humano da propaganda ideológica deliberada contra os dogmas revelados.',
+      'Distingue-se categoricamente a representação do pecado humano dramático (onde o erro gera consequências morais e a graça redime) da propaganda ideológica deliberada que promove a rebelião formal contra os dogmas revelados.',
     scales: [
       { dot: 'bg-error', label: '0–3.9: Dano Dogmático' },
-      { dot: 'bg-secondary', label: '4.0–7.9: Confuso' },
-      { dot: 'bg-primary-container', label: '8.0–10: Ortodoxia' },
+      { dot: 'bg-secondary', label: '4.0–7.9: Confuso / Neutro' },
+      { dot: 'bg-primary-container', label: '8.0–10: Ortodoxia Límpida' },
     ],
   },
   {
@@ -26,14 +26,14 @@ const DIMENSIONS = [
     axis: 'Eixo II • Pudor & Castitas',
     title: '2. Modéstia, Castidade & Pureza',
     description:
-      'Mapeamento de descrições voluptuosas, gratuidade erótica ou banalização do Matrimônio, zelando pela sobriedade moral do texto.',
+      'Mapeamento de descrições voluptuosas, gratuidade erótica, pornografia verbal e banalização do Sacramento Matrimonial. A análise foca no estímulo induzido ao leitor e na pureza da imaginação visual suscitada pelo texto.',
     highlightLabel: 'Exemplo Formativo Canônico:',
     highlightText:
-      'A tragédia de Sônia em Crime e Castigo é narrada com penitência e compaixão, sem estímulo lascivo.',
+      'A miséria e tragédia de Sônia Marmeladova em Crime e Castigo é narrada com penitência e compaixão bíblica, sem estímulo lascivo, diferindo intrinsecamente da literatura erótica contemporânea de gratuidade hedonista.',
     scales: [
-      { dot: 'bg-error', label: 'Crítico: Lascívia' },
+      { dot: 'bg-error', label: 'Crítico: Lascívia Explícita' },
       { dot: 'bg-secondary', label: 'Atenção: Sugestivo' },
-      { dot: 'bg-primary-container', label: 'Íntegro: Sóbrio' },
+      { dot: 'bg-primary-container', label: 'Íntegro: Sóbrio e Puro' },
     ],
   },
   {
@@ -43,10 +43,10 @@ const DIMENSIONS = [
     axis: 'Eixo III • Gravitas & Vulneratio',
     title: '3. Violência, Gravidade & Perturbação',
     description:
-      'Verificação do limiar psicológico: crueldade gráfica, terror opressivo, desespero ou ocultismo explícito.',
+      'Verificação do limiar psicológico: crueldade gráfica, terror psicológico opressivo, suicídio, automutilação, profanação e ocultismo explícito. A intenção não é censura pueril, mas a tutela da sensibilidade e da paz de espírito do leitor.',
     highlightLabel: 'Diretriz Pastoral Específica:',
     highlightText:
-      'A intenção não é censura pueril, mas a tutela da sensibilidade e da paz de espírito conforme a maturidade do leitor.',
+      'O mal nunca deve ser apresentado como invencível ou triunfante de forma absoluta. A violência canônica bíblica (como nos Livros dos Macabeus) possui telos salvífico; o niilismo moderno, por sua vez, induz ao desespero mórbido.',
     scales: [
       { dot: 'bg-error', label: 'Pesado / Opressivo' },
       { dot: 'bg-secondary', label: 'Moderado / Trágico' },
@@ -60,14 +60,14 @@ const DIMENSIONS = [
     axis: 'Eixo IV • Pulchritudo & Artes',
     title: '4. Mérito Literário & Beleza Estética',
     description:
-      'Auditoria de alta literatura: profundidade psicológica, rigor de composição poética, nobreza de linguagem e universalidade humana.',
+      'Auditoria de alta literatura: profundidade psicológica, rigor de composição poética, nobreza de linguagem, verossimilhança dramática e universalidade humana. A mediocridade sentimentalista também é avaliada criticamente.',
     highlightLabel: 'O Axioma de São Tomás de Aquino:',
     highlightText:
-      'Pulchrum est splendor veritatis. A verdade exige vestes condignas de nobreza artística e qualidade literária.',
+      'Pulchrum est splendor veritatis. A verdade exige vestes condignas de nobreza artística. Livros piedosos porém vazios de arte recebem ressalvas estéticas para evitar a deformação do bom gosto e a pieguice estéril.',
     scales: [
       { dot: 'bg-error', label: 'Trivial / Panfletário' },
       { dot: 'bg-secondary', label: 'Adequado / Popular' },
-      { dot: 'bg-primary-container', label: 'Clássico / Obra-prima' },
+      { dot: 'bg-primary-container', label: 'Obra-prima / Clássico' },
     ],
   },
 ];
@@ -85,7 +85,7 @@ export const CriteriaDimensionsGrid: React.FC = () => {
           </h2>
         </div>
         <p className="text-xs sm:text-sm text-on-surface-variant max-w-md">
-          Cada obra submetida ao índice é escrutinada através de quatro eixos rigorosos que congregam doutrina, moral, psicologia e arte.
+          Cada obra submetida ao índice é escrutinada de modo independente através de quatro eixos rigorosos que congregam doutrina, sensibilidade moral, psicologia e cânone artístico.
         </p>
       </div>
 
