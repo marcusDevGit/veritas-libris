@@ -61,7 +61,8 @@ docker compose up -d
 
 ### 4. Configurar Variáveis de Ambiente
 
-- **Backend (`apps/api/.env`):** Copie `apps/api/.env.example` para `apps/api/.env` e preencha `MONGO_URI`, credenciais do Firebase Admin e `GOOGLE_BOOKS_API_KEY`.
+- **Backend (`apps/api/.env`):** Copie `apps/api/.env.example` para `apps/api/.env` e preencha `MONGODB_URI`, credenciais do Firebase Admin e `GOOGLE_BOOKS_API_KEY`.
+  - Em `NODE_ENV=production`, `IMPORT_REQUIRES_AUTH=true` e `REVIEW_REQUIRES_AUTH=true` são obrigatórios (a API recusa iniciar caso estejam como `false`).
 - **Frontend (`apps/web/.env`):** Copie `apps/web/.env.example` para `apps/web/.env` e preencha as chaves públicas do Web App Firebase (`VITE_FIREBASE_*`).
 
 ### 5. Executar em Desenvolvimento
@@ -107,9 +108,10 @@ npm run build --workspace=@app/web
 | :--- | :--- | :---: | :--- |
 | `GET` | `/health` | Pública | Verificação de saúde da API e conexão MongoDB |
 | `GET` | `/api/v1/books` | Pública | Listagem paginada com filtros (`q`, `adequacy`, `age`, `tags`) |
-| `GET` | `/api/v1/books/external-search` | Pública | Busca externa normalizada na Google Books API |
+| `GET` | `/api/v1/books/external-search` | Pública *(20 req/min)* | Busca externa normalizada na Google Books API |
 | `GET` | `/api/v1/books/:id` | Pública | Detalhes completos da obra, ressalvas e estatísticas |
-| `POST` | `/api/v1/books/import` | Configurável | Importação idempotente de livro por ISBN-13 |
+| `POST` | `/api/v1/books/import` | Firebase JWT *(10 req/min)* | Importação idempotente de livro por ISBN-13 (`IMPORT_REQUIRES_AUTH=true` em prod) |
+| `PATCH` | `/api/v1/books/:id/refresh-metadata` | Pública *(10 req/min)* | Completa metadados bibliográficos via provedores externos |
 | `GET` | `/api/v1/books/:id/reviews` | Pública | Lista paginada de pareceres da obra |
 | `POST` | `/api/v1/books/:id/reviews` | Firebase JWT | Publica avaliação/ressalvas e recalcula o consenso |
 | `POST` | `/api/v1/reviews/:id/helpful` | Firebase JWT | Registra voto útil em um parecer (sem duplicidade) |

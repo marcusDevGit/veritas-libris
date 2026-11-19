@@ -11,6 +11,7 @@ import {
 } from "@app/shared";
 import { env } from "../config/env.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
+import { BOOK_RATE_LIMITS } from "../plugins/rate-limit.js";
 import {
   getBookById,
   importBookByIsbn,
@@ -45,6 +46,9 @@ export const bookRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/books/external-search",
     {
+      config: {
+        rateLimit: BOOK_RATE_LIMITS.externalSearch,
+      },
       schema: {
         querystring: ExternalSearchQuerySchema,
         response: { 200: ExternalSearchResponseSchema },
@@ -74,6 +78,9 @@ export const bookRoutes: FastifyPluginAsyncZod = async (app) => {
     "/books/import",
     {
       ...(env.IMPORT_REQUIRES_AUTH ? { preHandler: requireAuth } : {}),
+      config: {
+        rateLimit: BOOK_RATE_LIMITS.importBook,
+      },
       schema: {
         body: ImportBookBodySchema,
         response: { 200: ImportBookResponseSchema, 201: ImportBookResponseSchema },
@@ -88,6 +95,9 @@ export const bookRoutes: FastifyPluginAsyncZod = async (app) => {
   app.patch(
     "/books/:id/refresh-metadata",
     {
+      config: {
+        rateLimit: BOOK_RATE_LIMITS.refreshMetadata,
+      },
       schema: {
         params: BookIdParamsSchema,
         response: { 200: BookDtoSchema },

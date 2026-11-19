@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { env } from './config/env.js';
 import { errorHandler } from './middlewares/error-handler.js';
+import { registerRateLimit } from './plugins/rate-limit.js';
 import { bookRoutes } from './routes/books.routes.js';
 import { healthRoutes } from './routes/health.routes.js';
 import { reviewRoutes } from './routes/reviews.routes.js';
@@ -13,6 +14,7 @@ import { reviewRoutes } from './routes/reviews.routes.js';
  */
 export function buildApp(): FastifyInstance {
   const app = Fastify({
+    trustProxy: true,
     logger: {
       level: env.LOG_LEVEL,
       redact: ['req.headers.authorization'],
@@ -29,6 +31,8 @@ export function buildApp(): FastifyInstance {
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
+
+  void registerRateLimit(app);
 
   app.decorateRequest('authUser', null);
 
