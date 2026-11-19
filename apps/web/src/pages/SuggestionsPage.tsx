@@ -2,27 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import type { CreateSuggestionBody } from '@app/shared';
-import { Home, Info, ShieldCheck, Sparkles } from 'lucide-react';
+import { BookMarked, ExternalLink, Home, ShieldCheck } from 'lucide-react';
 import { api, ApiError } from '../services/api.js';
 import { SuggestionForm } from '../components/domain/suggestions/SuggestionForm.js';
-
-const PROCESS_STEPS = [
-  {
-    step: '1',
-    title: 'Recebimento & Protocolo',
-    desc: 'Sua indicação é registrada diretamente na fila de sugestões do sistema.',
-  },
-  {
-    step: '2',
-    title: 'Triagem pela Curadoria Oficial',
-    desc: 'Curadores avaliam relevância pastoral, ISBN e prioridade temática.',
-  },
-  {
-    step: '3',
-    title: 'Catalogação ou Parecer',
-    desc: 'A obra passa a integrar o acervo para análise e discernimento público.',
-  },
-];
+import { SuggestionsSidebar } from '../components/domain/suggestions/SuggestionsSidebar.js';
 
 export const SuggestionsPage: React.FC = () => {
   const mutation = useMutation({
@@ -36,7 +19,7 @@ export const SuggestionsPage: React.FC = () => {
     : null;
 
   return (
-    <div className="pt-[96px] sm:pt-[116px] pb-16 max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-8">
+    <div className="pt-[96px] sm:pt-[116px] pb-16 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col gap-8">
       <header className="flex flex-col gap-2">
         <nav aria-label="Navegação Estrutural" className="flex items-center gap-2 text-xs text-on-surface-variant">
           <Link to="/" className="hover:text-primary transition-colors inline-flex items-center gap-1">
@@ -47,11 +30,16 @@ export const SuggestionsPage: React.FC = () => {
           <span className="text-primary font-semibold">Enviar Sugestões</span>
         </nav>
 
+        <span className="inline-flex items-center gap-1.5 self-start px-3 py-1 rounded-full bg-secondary-container/50 text-on-secondary-container text-[11px] font-bold uppercase tracking-widest mt-1">
+          <ShieldCheck className="w-3.5 h-3.5 text-secondary" />
+          Contribuição dos Fiéis &amp; Leitores
+        </span>
+
         <h1 className="font-editorial text-2xl sm:text-4xl font-bold text-primary tracking-tight mt-1">
           Enviar Sugestões
         </h1>
-        <p className="text-sm sm:text-base text-on-surface-variant max-w-2xl">
-          Formulário de indicação de livros para exame pastoral ou sugestões de melhoria na plataforma.
+        <p className="text-sm sm:text-base text-on-surface-variant max-w-3xl">
+          Indique livros para análise prudente da curadoria editorial ou envie recomendações de melhorias para a plataforma.
         </p>
       </header>
 
@@ -66,50 +54,34 @@ export const SuggestionsPage: React.FC = () => {
           />
         </div>
 
-        <aside className="lg:col-span-5 flex flex-col gap-4">
-          <div className="bg-surface-container-lowest border border-outline/15 rounded-xl p-5 space-y-4">
-            <div className="flex items-center gap-2 text-primary font-bold text-sm">
-              <Info className="w-4 h-4 text-secondary" />
-              <span>O que acontece após o envio?</span>
-            </div>
-            <div className="space-y-3">
-              {PROCESS_STEPS.map((item) => (
-                <div key={item.step} className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-primary text-on-primary text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
-                    {item.step}
-                  </span>
-                  <div>
-                    <h3 className="text-xs font-bold text-primary">{item.title}</h3>
-                    <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                      {item.desc}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-surface-container-low border border-outline/15 rounded-xl p-5 space-y-2">
-            <div className="flex items-center gap-2 text-primary font-bold text-sm">
-              <ShieldCheck className="w-4 h-4 text-secondary" />
-              <span>Prioridades de Exame Pastoral</span>
-            </div>
-            <p className="text-xs text-on-surface-variant leading-relaxed">
-              Obras infantojuvenis, clássicos escolares e lançamentos de grande circulação recebem prioridade na fila curatorial.
-            </p>
-          </div>
-
-          <div className="bg-surface-container-low border border-outline/15 rounded-xl p-5 space-y-2">
-            <div className="flex items-center gap-2 text-primary font-bold text-sm">
-              <Sparkles className="w-4 h-4 text-secondary" />
-              <span>Dica rápida</span>
-            </div>
-            <p className="text-xs text-on-surface-variant leading-relaxed">
-              Se você estiver logado e tiver o título ou ISBN, também pode importar a obra diretamente pelo botão <strong>Avaliar / Importar</strong> no topo.
-            </p>
-          </div>
-        </aside>
+        <div className="lg:col-span-5">
+          <SuggestionsSidebar />
+        </div>
       </div>
+
+      <section className="p-5 rounded-xl bg-surface-container-low border border-outline/15 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3 text-center sm:text-left">
+          <div className="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+            <BookMarked className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-xs sm:text-sm font-bold text-primary">
+              Veritas Libris • Fidelitas, Prudentia, Sapientia
+            </h3>
+            <p className="text-xs text-on-surface-variant">
+              Colaborando para o discernimento estético e moral na cultura leitora católica.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          to="/criterios"
+          className="text-xs font-semibold text-primary hover:text-secondary inline-flex items-center gap-1.5 shrink-0"
+        >
+          <span>Ver Matriz de Critérios</span>
+          <ExternalLink className="w-3.5 h-3.5" />
+        </Link>
+      </section>
     </div>
   );
 };
