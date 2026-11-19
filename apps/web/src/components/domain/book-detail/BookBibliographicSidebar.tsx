@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { BookDto } from '@app/shared';
 import { ImprimaturSeal } from '../ImprimaturSeal.js';
 import {
@@ -38,6 +38,9 @@ export interface BookBibliographicSidebarProps {
   onOpenReviewModal?: () => void;
   onRefreshMetadata?: () => void;
   isRefreshingMetadata?: boolean;
+  isSavedInReadingList?: boolean;
+  isTogglingReadingList?: boolean;
+  onToggleReadingList?: () => void;
 }
 
 /**
@@ -55,8 +58,10 @@ export const BookBibliographicSidebar: React.FC<BookBibliographicSidebarProps> =
   onOpenReviewModal,
   onRefreshMetadata,
   isRefreshingMetadata = false,
+  isSavedInReadingList = false,
+  isTogglingReadingList = false,
+  onToggleReadingList,
 }) => {
-  const [isSaved, setIsSaved] = useState(false);
   const hasMissingMetadata = !book.publisher || !book.pageCount || !book.language;
 
   return (
@@ -106,14 +111,15 @@ export const BookBibliographicSidebar: React.FC<BookBibliographicSidebarProps> =
 
           <button
             type="button"
-            onClick={() => setIsSaved((prev) => !prev)}
-            className={`w-full h-10 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
-              isSaved
+            disabled={isTogglingReadingList}
+            onClick={onToggleReadingList}
+            className={`w-full h-10 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-60 ${
+              isSavedInReadingList
                 ? 'bg-secondary-container/40 text-secondary border border-secondary/30'
                 : 'bg-surface-container hover:bg-surface-container-high text-primary'
             }`}
           >
-            {isSaved ? (
+            {isSavedInReadingList ? (
               <>
                 <BookmarkCheck className="w-4 h-4 text-secondary" />
                 <span>Salvo na Lista de Leitura</span>

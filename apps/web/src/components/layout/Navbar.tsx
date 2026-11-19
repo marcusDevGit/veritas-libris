@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookMarked, Search, ScanBarcode, Plus, LogIn, LogOut, ShieldCheck, Feather } from 'lucide-react';
+import { BookMarked, Bookmark, Search, ScanBarcode, Plus, LogIn, LogOut, ShieldCheck, Feather } from 'lucide-react';
 import { TopBanner } from './TopBanner.js';
 import { NotificationsPopover } from './NotificationsPopover.js';
 import { useAuth } from '../../contexts/AuthContext.js';
@@ -107,6 +107,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               Catálogo
             </Link>
+            <Link
+              to="/minha-lista"
+              className={`transition-colors py-1 ${
+                location.pathname === '/minha-lista'
+                  ? 'text-primary font-bold border-b-2 border-primary'
+                  : 'hover:text-primary'
+              }`}
+            >
+              Minha Lista
+            </Link>
             <a
               href="#criterios"
               className="hover:text-primary transition-colors py-1"
@@ -158,6 +168,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <NotificationsPopover />
+
+            {user && (
+              <Link
+                to="/minha-lista"
+                title="Minha Lista de Leitura"
+                className="xl:hidden p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all"
+              >
+                <Bookmark className="w-4 h-4" />
+              </Link>
+            )}
 
             {isCurator && (
               <Link
