@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   Store,
   ExternalLink,
+  RefreshCw,
 } from 'lucide-react';
 
 const LANGUAGE_LABELS: Record<string, string> = {
@@ -35,6 +36,8 @@ function formatLanguage(code?: string): string {
 export interface BookBibliographicSidebarProps {
   book: BookDto;
   onOpenReviewModal?: () => void;
+  onRefreshMetadata?: () => void;
+  isRefreshingMetadata?: boolean;
 }
 
 /**
@@ -50,8 +53,11 @@ export interface BookBibliographicSidebarProps {
 export const BookBibliographicSidebar: React.FC<BookBibliographicSidebarProps> = ({
   book,
   onOpenReviewModal,
+  onRefreshMetadata,
+  isRefreshingMetadata = false,
 }) => {
   const [isSaved, setIsSaved] = useState(false);
+  const hasMissingMetadata = !book.publisher || !book.pageCount || !book.language;
 
   return (
     <aside className="lg:col-span-4 lg:sticky lg:top-32 flex flex-col gap-6">
@@ -161,6 +167,20 @@ export const BookBibliographicSidebar: React.FC<BookBibliographicSidebarProps> =
             </span>
           </div>
         </div>
+
+        {hasMissingMetadata && onRefreshMetadata && (
+          <button
+            type="button"
+            onClick={onRefreshMetadata}
+            disabled={isRefreshingMetadata}
+            className="w-full mt-3 py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border border-outline/15 disabled:opacity-60 cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-secondary ${isRefreshingMetadata ? 'animate-spin' : ''}`} />
+            <span>
+              {isRefreshingMetadata ? 'Buscando dados nas APIs...' : 'Completar Ficha Bibliográfica'}
+            </span>
+          </button>
+        )}
 
         {book.hasImprimatur && (
           <div className="w-full mt-4">

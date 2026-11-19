@@ -16,6 +16,7 @@ import {
   importBookByIsbn,
   listBooks,
   markAlreadyImported,
+  refreshBookMetadata,
 } from "../services/book.service.js";
 import { searchGoogleBooks } from "../services/google-books.service.js";
 
@@ -82,5 +83,16 @@ export const bookRoutes: FastifyPluginAsyncZod = async (app) => {
       const result = await importBookByIsbn(request.body.isbn13);
       return reply.status(result.created ? 201 : 200).send(result);
     },
+  );
+
+  app.patch(
+    "/books/:id/refresh-metadata",
+    {
+      schema: {
+        params: BookIdParamsSchema,
+        response: { 200: BookDtoSchema },
+      },
+    },
+    async (request) => refreshBookMetadata(request.params.id),
   );
 };

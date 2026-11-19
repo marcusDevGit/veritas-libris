@@ -208,3 +208,41 @@ export async function importBookByIsbn(isbn13: string): Promise<ImportResult> {
     return { created: false, book: toBookDto(winner) };
   }
 }
+
+export async function refreshBookMetadata(id: string): Promise<BookDto> {
+  const existing = await BookModel.findById(id).lean<BookLean>();
+  if (!existing) throw new NotFoundError("Livro não encontrado");
+
+  const googleExternal = await findGoogleBookByIsbn(existing.isbn13, {
+    apiKey: env.GOOGLE_BOOKS_API_KEY,
+  });
+  const enriched = await enrichWithFallbackProviders(existing.isbn13, googleExternal);
+  if (!enriched) return toBookDto(existing);
+
+  const updates: Record<string, unknown> = {};
+  if (!existing.publisher && enriched.publisher) updates["publisher"] = enriched.publisher;
+  if (!existing.pageCount && enriched.pageCount) updates["pageCount"] = enriched.pageCount;
+  if (!existing.language && enriched.language) updates["language"] = enriched.language;
+  if (!existing.coverUrl && enriched.coverUrl) updates["coverUrl"] = enriched.coverUrl;
+  if (!existing.publishedYear && enriched.publishedYear) updates["publishedYear"] = enriched.publishedYear;
+
+  const isExistingPt = existing.language?.toLowerCase().startsWith("pt") ?? false;
+  const isEnrichedPt = enriched.language?.toLowerCase().startsWith("pt") ?? false;
+  if ((!existing.synopsis || (!isExistingPt && isEnrichedPt)) && enriched.synopsis) {
+    updates["synopsis"] = enriched.synopsis;
+    if (enriched.language) updates["language"] = enriched.language;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return toBookDto(existing);
+  }
+
+  const updated = await BookModel.findByIdAndUpdate(
+    id,
+    { $set: updates },
+    { returnDocument: "after", runValidators: true },
+  ).lean<BookLean>();
+
+  if (!updated) throw new NotFoundError("Livro não encontrado");
+  return toBookDto(updated);
+}

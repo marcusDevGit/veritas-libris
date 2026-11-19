@@ -48,6 +48,13 @@ export const BookDetailPage: React.FC = () => {
     },
   });
 
+  const refreshMetadataMutation = useMutation({
+    mutationFn: () => api.refreshBookMetadata(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['book', id] });
+    },
+  });
+
   if (isBookLoading) {
     return (
       <div className="pt-[96px] sm:pt-[108px] w-full max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-pulse space-y-6">
@@ -95,6 +102,8 @@ export const BookDetailPage: React.FC = () => {
           <BookBibliographicSidebar
             book={book}
             onOpenReviewModal={() => setIsReviewModalOpen(true)}
+            onRefreshMetadata={() => refreshMetadataMutation.mutate()}
+            isRefreshingMetadata={refreshMetadataMutation.isPending}
           />
 
           <section className="lg:col-span-8 flex flex-col gap-8">
