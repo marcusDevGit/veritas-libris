@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookMarked, Search, ScanBarcode, Plus, LogIn, LogOut, ShieldCheck } from 'lucide-react';
+import { BookMarked, Bookmark, Search, ScanBarcode, Plus, LogIn, LogOut, ShieldCheck, Feather } from 'lucide-react';
 import { TopBanner } from './TopBanner.js';
 import { NotificationsPopover } from './NotificationsPopover.js';
 import { useAuth } from '../../contexts/AuthContext.js';
@@ -29,7 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenScanner,
 }) => {
   const location = useLocation();
-  const { user, profile, role, isAdmin, isLoading, signInWithGoogle, signOut } = useAuth();
+  const { user, profile, role, isCurator, isAdmin, isLoading, signInWithGoogle, signOut } = useAuth();
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   const roleLabel =
@@ -107,6 +107,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               Catálogo
             </Link>
+            <Link
+              to="/minha-lista"
+              className={`transition-colors py-1 ${
+                location.pathname === '/minha-lista'
+                  ? 'text-primary font-bold border-b-2 border-primary'
+                  : 'hover:text-primary'
+              }`}
+            >
+              Minha Lista
+            </Link>
             <a
               href="#criterios"
               className="hover:text-primary transition-colors py-1"
@@ -119,6 +129,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               Sobre a Curadoria
             </a>
+            {isCurator && (
+              <Link
+                to="/curadoria"
+                className={`inline-flex items-center gap-1 transition-colors py-1 ${
+                  location.pathname === '/curadoria'
+                    ? 'text-primary font-bold border-b-2 border-primary'
+                    : 'text-secondary hover:text-primary'
+                }`}
+              >
+                <Feather className="w-3.5 h-3.5" />
+                Curadoria
+              </Link>
+            )}
             {isAdmin && (
               <Link
                 to="/admin"
@@ -146,6 +169,25 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <NotificationsPopover />
 
+            {user && (
+              <Link
+                to="/minha-lista"
+                title="Minha Lista de Leitura"
+                className="xl:hidden p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all"
+              >
+                <Bookmark className="w-4 h-4" />
+              </Link>
+            )}
+
+            {isCurator && (
+              <Link
+                to="/curadoria"
+                title="Painel de Curadoria Oficial"
+                className="xl:hidden p-2 text-secondary hover:text-primary hover:bg-surface-container rounded-full transition-all"
+              >
+                <Feather className="w-4 h-4" />
+              </Link>
+            )}
             {isAdmin && (
               <Link
                 to="/admin"

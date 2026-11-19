@@ -4,6 +4,8 @@ import type {
   BookDto,
   BookListQuery,
   CreateReviewBody,
+  CurationQueueQuery,
+  CurationQueueResponse,
   ExternalBookResult,
   HelpfulVoteResponse,
   ImportBookResponse,
@@ -11,8 +13,11 @@ import type {
   PaginatedBooks,
   PaginatedReviews,
   PaginatedUsers,
+  ReadingListResponse,
+  ReadingListStatusResponse,
   Review,
   ReviewListQuery,
+  UpdateBookEditorialBody,
   UserDto,
   UserRole,
 } from '@app/shared';
@@ -79,6 +84,10 @@ export const api = {
     if (query.adequacy) params.set('adequacy', query.adequacy);
     if (query.age) params.set('age', query.age);
     if (query.tags && query.tags.length > 0) params.set('tags', query.tags.join(','));
+    if (query.familyMode) params.set('familyMode', 'true');
+    if (query.hasImprimatur) params.set('hasImprimatur', 'true');
+    if (query.stamp) params.set('stamp', query.stamp);
+    if (query.sort) params.set('sort', query.sort);
     if (query.page) params.set('page', String(query.page));
     if (query.limit) params.set('limit', String(query.limit));
 
@@ -162,5 +171,44 @@ export const api = {
 
   listAdminAuditLogs: async (): Promise<{ items: AuditLogDto[] }> => {
     return request<{ items: AuditLogDto[] }>('/admin/audit-logs', {}, true);
+  },
+
+  listCurationBooks: async (query: Partial<CurationQueueQuery> = {}): Promise<CurationQueueResponse> => {
+    const params = new URLSearchParams();
+    if (query.q) params.set('q', query.q);
+    if (query.filter) params.set('filter', query.filter);
+    if (query.page) params.set('page', String(query.page));
+    if (query.limit) params.set('limit', String(query.limit));
+
+    const queryString = params.toString();
+    return request<CurationQueueResponse>(`/curation/books${queryString ? `?${queryString}` : ''}`, {}, true);
+  },
+
+  updateBookEditorial: async (bookId: string, body: UpdateBookEditorialBody): Promise<BookDto> => {
+    return request<BookDto>(`/books/${bookId}/editorial`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }, true);
+  },
+
+  getReadingList: async (): Promise<ReadingListResponse> => {
+    return request<ReadingListResponse>('/reading-list', {}, true);
+  },
+
+  getReadingListStatus: async (bookId: string): Promise<ReadingListStatusResponse> => {
+    return request<ReadingListStatusResponse>(`/reading-list/${bookId}/status`, {}, true);
+  },
+
+  addToReadingList: async (bookId: string): Promise<ReadingListStatusResponse> => {
+    return request<ReadingListStatusResponse>('/reading-list', {
+      method: 'POST',
+      body: JSON.stringify({ bookId }),
+    }, true);
+  },
+
+  removeFromReadingList: async (bookId: string): Promise<ReadingListStatusResponse> => {
+    return request<ReadingListStatusResponse>(`/reading-list/${bookId}`, {
+      method: 'DELETE',
+    }, true);
   },
 };

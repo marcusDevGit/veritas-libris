@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../services/api.js';
-import type { AdequacyLevel, AgeRating } from '@app/shared';
+import type { AdequacyLevel, AgeRating, BookStampFilter } from '@app/shared';
 import { FamilyModeWidget } from '../components/domain/FamilyModeWidget.js';
 import {
   CatalogFilters,
@@ -22,15 +22,17 @@ export const CatalogPage: React.FC = () => {
   const initialAge = (searchParams.get('age') as AgeRating) || undefined;
   const initialPage = Number(searchParams.get('page')) || 1;
   const initialFamilyMode = searchParams.get('familyMode') === 'true';
+  const initialStamp = (searchParams.get('stamp') as BookStampFilter) || undefined;
+  const initialSort = (searchParams.get('sort') as SortOption) || 'most-reviewed';
 
   const [q, setQ] = useState(initialQ);
   const [adequacy, setAdequacy] = useState<AdequacyLevel | undefined>(initialAdequacy);
   const [age, setAge] = useState<AgeRating | undefined>(initialAge);
   const [category, setCategory] = useState<string | undefined>(undefined);
-  const [stamp, setStamp] = useState<string | undefined>(undefined);
+  const [stamp, setStamp] = useState<string | undefined>(initialStamp);
   const [page, setPage] = useState(initialPage);
   const [isFamilyMode, setIsFamilyMode] = useState(initialFamilyMode);
-  const [sortBy, setSortBy] = useState<SortOption>('most-reviewed');
+  const [sortBy, setSortBy] = useState<SortOption>(initialSort);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   useEffect(() => {
@@ -39,9 +41,11 @@ export const CatalogPage: React.FC = () => {
     if (adequacy) params.set('adequacy', adequacy);
     if (age) params.set('age', age);
     if (isFamilyMode) params.set('familyMode', 'true');
+    if (stamp) params.set('stamp', stamp);
+    if (sortBy !== 'most-reviewed') params.set('sort', sortBy);
     if (page > 1) params.set('page', String(page));
     setSearchParams(params, { replace: true });
-  }, [q, adequacy, age, isFamilyMode, page, setSearchParams]);
+  }, [q, adequacy, age, isFamilyMode, stamp, sortBy, page, setSearchParams]);
 
   const effectiveQuery = useMemo(() => {
     if (category) {
@@ -50,51 +54,30 @@ export const CatalogPage: React.FC = () => {
     return q || undefined;
   }, [q, category]);
 
+  const stampFilter =
+    stamp === 'imprimatur' || stamp === 'classico-cristao' ? stamp : undefined;
+
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['books', { q: effectiveQuery, adequacy, age, page }],
+    queryKey: [
+      'books',
+      { q: effectiveQuery, adequacy, age, familyMode: isFamilyMode, stamp: stampFilter, sort: sortBy, page },
+    ],
     queryFn: () =>
       api.getBooks({
         q: effectiveQuery,
         adequacy,
         age,
+        familyMode: isFamilyMode || undefined,
+        stamp: stampFilter,
+        sort: sortBy,
         page,
         limit: 12,
       }),
+    staleTime: 15_000,
+    refetchOnMount: 'always',
   });
 
-  const displayedBooks = useMemo(() => {
-    if (!data?.items) return [];
-    let items = [...data.items];
-
-    if (isFamilyMode) {
-      items = items.filter((book) => {
-        const isAdultOrMature = book.recommendedAge === '16+' || book.recommendedAge === '18+';
-        const hasHighSeverity = book.reservations.some((r) => r.severity === 'HIGH');
-        const isDisapproved = book.adequacyStatus === 'NOT_RECOMMENDED';
-        return !isAdultOrMature && !hasHighSeverity && !isDisapproved;
-      });
-    }
-
-    if (stamp === 'imprimatur') {
-      items = items.filter((book) => book.hasImprimatur);
-    } else if (stamp === 'classico-cristao') {
-      items = items.filter(
-        (book) =>
-          book.adequacyStatus === 'RECOMMENDED' &&
-          (book.publishedYear ? book.publishedYear < 1970 : true)
-      );
-    }
-
-    if (sortBy === 'alphabetical') {
-      items.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === 'recent') {
-      items.sort((a, b) => (b.publishedYear || 0) - (a.publishedYear || 0));
-    } else if (sortBy === 'strict-moral') {
-      items.sort((a, b) => a.reservations.length - b.reservations.length);
-    }
-
-    return items;
-  }, [data?.items, isFamilyMode, stamp, sortBy]);
+  const displayedBooks = data?.items ?? [];
 
   const handleResetFilters = () => {
     setQ('');
@@ -115,8 +98,8 @@ export const CatalogPage: React.FC = () => {
             setIsFamilyMode(val);
             setPage(1);
           }}
-          totalBooks={data?.total ?? 2480}
-          reviewedBooks={Math.round((data?.total ?? 2480) * 0.34)}
+          totalBooks={data?.stats.totalAll ?? data?.total ?? 0}
+          reviewedBooks={data?.stats.reviewed ?? 0}
         />
       </div>
 
@@ -142,15 +125,18 @@ export const CatalogPage: React.FC = () => {
           setPage(1);
         }}
         sortBy={sortBy}
-        onSortChange={setSortBy}
+        onSortChange={(val) => {
+          setSortBy(val);
+          setPage(1);
+        }}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         onResetFilters={handleResetFilters}
         counts={{
-          all: data?.total ?? 2480,
-          recommended: Math.round((data?.total ?? 2480) * 0.49),
-          withReservations: Math.round((data?.total ?? 2480) * 0.38),
-          notRecommended: Math.round((data?.total ?? 2480) * 0.13),
+          all: data?.stats.totalAll ?? 0,
+          recommended: data?.stats.recommended ?? 0,
+          withReservations: data?.stats.withReservations ?? 0,
+          notRecommended: data?.stats.notRecommended ?? 0,
         }}
       />
 

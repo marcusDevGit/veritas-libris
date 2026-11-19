@@ -55,6 +55,7 @@ export const ImportBookModal: React.FC<ImportBookModalProps> = ({
     mutationFn: (isbn13: string) => api.importBook(isbn13),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['books'] });
+      queryClient.invalidateQueries({ queryKey: ['curation-books'] });
       onClose();
       navigate(`/livros/${data.book._id}`);
     },

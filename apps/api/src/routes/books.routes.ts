@@ -3,14 +3,17 @@ import {
   BookDtoSchema,
   BookIdParamsSchema,
   BookListQuerySchema,
+  CurationQueueQuerySchema,
+  CurationQueueResponseSchema,
   ExternalSearchQuerySchema,
   ExternalSearchResponseSchema,
   ImportBookBodySchema,
   ImportBookResponseSchema,
   PaginatedBooksSchema,
+  UpdateBookEditorialBodySchema,
 } from "@app/shared";
 import { env } from "../config/env.js";
-import { requireAuth } from "../middlewares/auth.middleware.js";
+import { requireAuth, requireCurator } from "../middlewares/auth.middleware.js";
 import { BOOK_RATE_LIMITS } from "../plugins/rate-limit.js";
 import {
   getBookById,
@@ -19,6 +22,10 @@ import {
   markAlreadyImported,
   refreshBookMetadata,
 } from "../services/book.service.js";
+import {
+  listCurationBooks,
+  updateBookEditorial,
+} from "../services/curation.service.js";
 import { searchGoogleBooks } from "../services/google-books.service.js";
 
 /**
@@ -104,5 +111,35 @@ export const bookRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => refreshBookMetadata(request.params.id),
+  );
+
+  app.get(
+    "/curation/books",
+    {
+      preHandler: [requireAuth, requireCurator],
+      schema: {
+        querystring: CurationQueueQuerySchema,
+        response: { 200: CurationQueueResponseSchema },
+      },
+    },
+    async (request) => listCurationBooks(request.query),
+  );
+
+  app.patch(
+    "/books/:id/editorial",
+    {
+      preHandler: [requireAuth, requireCurator],
+      schema: {
+        params: BookIdParamsSchema,
+        body: UpdateBookEditorialBodySchema,
+        response: { 200: BookDtoSchema },
+      },
+    },
+    async (request) =>
+      updateBookEditorial(request.params.id, request.body, {
+        uid: request.authUser!.uid,
+        name: request.authUser!.name,
+        email: request.authUser!.email,
+      }),
   );
 };
