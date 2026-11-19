@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext.js';
 import { Navbar } from './components/layout/Navbar.js';
 import { Footer } from './components/layout/Footer.js';
+import { ScrollToTop } from './components/layout/ScrollToTop.js';
 import { CatalogPage } from './pages/CatalogPage.js';
 
 const BookDetailPage = lazy(() =>
@@ -60,6 +61,7 @@ export const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <div className="min-h-screen flex flex-col bg-surface text-on-surface">
             <Navbar
               searchTerm={searchTerm}

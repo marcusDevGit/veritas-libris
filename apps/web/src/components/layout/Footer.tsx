@@ -2,7 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, ExternalLink, Info } from 'lucide-react';
 
+const FOOTER_NAV_LINKS = [
+  { to: '/', label: 'Catálogo Completo' },
+  { to: '/criterios', label: 'Critérios do Índice' },
+  { to: '/sobre', label: 'Sobre a Curadoria' },
+  { to: '/sugestoes', label: 'Enviar Sugestões' },
+] as const;
+
 export const Footer: React.FC = () => {
+  const scrollToPageTop = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  };
+
   return (
     <footer className="w-full bg-surface-container-low border-t border-outline/15 text-on-surface">
       <div className="max-w-[1380px] mx-auto px-6 lg:px-8 pt-12 pb-10">
@@ -32,26 +43,17 @@ export const Footer: React.FC = () => {
               Navegação
             </h4>
             <ul className="flex flex-col gap-2.5 text-xs text-on-surface-variant">
-              <li>
-                <Link to="/" className="hover:text-primary transition-colors">
-                  Catálogo Completo
-                </Link>
-              </li>
-              <li>
-                <Link to="/criterios" className="hover:text-primary transition-colors">
-                  Critérios do Índice
-                </Link>
-              </li>
-              <li>
-                <Link to="/sobre" className="hover:text-primary transition-colors">
-                  Sobre a Curadoria
-                </Link>
-              </li>
-              <li>
-                <Link to="/sugestoes" className="hover:text-primary transition-colors">
-                  Enviar Sugestões
-                </Link>
-              </li>
+              {FOOTER_NAV_LINKS.map((link) => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    onClick={scrollToPageTop}
+                    className="hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
