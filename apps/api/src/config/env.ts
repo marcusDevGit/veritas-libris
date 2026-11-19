@@ -27,7 +27,12 @@ const EnvSchema = z.object({
   FIREBASE_PRIVATE_KEY: z
     .string()
     .min(1)
-    .transform((value) => value.replace(/\\n/g, "\n")),
+    .transform((value) =>
+      value
+        .trim()
+        .replace(/^["']|["']$/g, "")
+        .replace(/\\n/g, "\n"),
+    ),
 
   GOOGLE_BOOKS_API_KEY: z
     .string()
@@ -44,7 +49,7 @@ const EnvSchema = z.object({
         ? undefined
         : value
             .split(",")
-            .map((origin) => origin.trim())
+            .map((origin) => origin.trim().replace(/\/+$/, ""))
             .filter(Boolean),
     ),
 

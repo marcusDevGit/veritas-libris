@@ -10,6 +10,7 @@ import { env } from "../config/env.js";
 import { NotFoundError } from "../errors/app-error.js";
 import { BookModel, type BookAttrs } from "../models/Book.model.js";
 import { findGoogleBookByIsbn } from "./google-books.service.js";
+import { enrichWithFallbackProviders } from "./external-books-providers.service.js";
 
 /** Forma de um documento `lean()` do Book (objeto simples, sem métodos do Mongoose). */
 type BookLean = BookAttrs & {
@@ -34,6 +35,9 @@ function toBookDto(doc: BookLean): BookDto {
     coverUrl: doc.coverUrl,
     synopsis: doc.synopsis,
     publishedYear: doc.publishedYear,
+    publisher: doc.publisher,
+    pageCount: doc.pageCount,
+    language: doc.language,
     hasImprimatur: doc.hasImprimatur,
     editorialLock: doc.editorialLock ?? false,
     editorialLockedAt: doc.editorialLockedAt,
@@ -166,11 +170,12 @@ export async function importBookByIsbn(isbn13: string): Promise<ImportResult> {
   const existing = await BookModel.findOne({ isbn13 }).lean<BookLean>();
   if (existing) return { created: false, book: toBookDto(existing) };
 
-  const external = await findGoogleBookByIsbn(isbn13, {
+  const googleExternal = await findGoogleBookByIsbn(isbn13, {
     apiKey: env.GOOGLE_BOOKS_API_KEY,
   });
+  const external = await enrichWithFallbackProviders(isbn13, googleExternal);
   if (!external) {
-    throw new NotFoundError("Nenhum livro encontrado na Google Books para este ISBN");
+    throw new NotFoundError("Nenhum livro encontrado nas bases externas para este ISBN");
   }
 
   const insertOnly = { ...external, ...curationDefaults() };
@@ -202,4 +207,42 @@ export async function importBookByIsbn(isbn13: string): Promise<ImportResult> {
     if (!winner) throw error;
     return { created: false, book: toBookDto(winner) };
   }
+}
+
+export async function refreshBookMetadata(id: string): Promise<BookDto> {
+  const existing = await BookModel.findById(id).lean<BookLean>();
+  if (!existing) throw new NotFoundError("Livro não encontrado");
+
+  const googleExternal = await findGoogleBookByIsbn(existing.isbn13, {
+    apiKey: env.GOOGLE_BOOKS_API_KEY,
+  });
+  const enriched = await enrichWithFallbackProviders(existing.isbn13, googleExternal);
+  if (!enriched) return toBookDto(existing);
+
+  const updates: Record<string, unknown> = {};
+  if (!existing.publisher && enriched.publisher) updates["publisher"] = enriched.publisher;
+  if (!existing.pageCount && enriched.pageCount) updates["pageCount"] = enriched.pageCount;
+  if (!existing.language && enriched.language) updates["language"] = enriched.language;
+  if (!existing.coverUrl && enriched.coverUrl) updates["coverUrl"] = enriched.coverUrl;
+  if (!existing.publishedYear && enriched.publishedYear) updates["publishedYear"] = enriched.publishedYear;
+
+  const isExistingPt = existing.language?.toLowerCase().startsWith("pt") ?? false;
+  const isEnrichedPt = enriched.language?.toLowerCase().startsWith("pt") ?? false;
+  if ((!existing.synopsis || (!isExistingPt && isEnrichedPt)) && enriched.synopsis) {
+    updates["synopsis"] = enriched.synopsis;
+    if (enriched.language) updates["language"] = enriched.language;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return toBookDto(existing);
+  }
+
+  const updated = await BookModel.findByIdAndUpdate(
+    id,
+    { $set: updates },
+    { returnDocument: "after", runValidators: true },
+  ).lean<BookLean>();
+
+  if (!updated) throw new NotFoundError("Livro não encontrado");
+  return toBookDto(updated);
 }

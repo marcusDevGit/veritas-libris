@@ -108,7 +108,7 @@ export const CatalogPage: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen">
-      <div className="pt-[108px] w-full">
+      <div className="pt-[96px] sm:pt-[108px] w-full">
         <FamilyModeWidget
           isFamilyMode={isFamilyMode}
           onToggleFamilyMode={(val) => {
@@ -154,7 +154,7 @@ export const CatalogPage: React.FC = () => {
         }}
       />
 
-      <main className="w-full max-w-[1380px] mx-auto px-6 lg:px-8 py-8 flex-grow">
+      <main className="w-full max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-grow">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-2 border-b border-outline/15">
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-sm font-bold text-primary">

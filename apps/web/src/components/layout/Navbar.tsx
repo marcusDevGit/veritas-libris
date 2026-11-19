@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookMarked, Search, ScanBarcode, Plus, Bell, LogIn, LogOut } from 'lucide-react';
+import { BookMarked, Search, ScanBarcode, Plus, LogIn, LogOut } from 'lucide-react';
 import { TopBanner } from './TopBanner.js';
+import { NotificationsPopover } from './NotificationsPopover.js';
 import { useAuth } from '../../contexts/AuthContext.js';
 
 export interface NavbarProps {
@@ -29,6 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const location = useLocation();
   const { user, isLoading, signInWithGoogle, signOut } = useAuth();
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   const userInitials = user?.displayName
     ? user.displayName
@@ -43,17 +45,17 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
       <TopBanner />
 
-      <div className="h-20 max-w-[1380px] mx-auto px-6 lg:px-8 flex items-center justify-between gap-4 sm:gap-6">
-        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="p-2 bg-primary text-on-primary rounded-xl group-hover:bg-primary-container transition-colors shadow-xs">
-              <BookMarked className="w-5 h-5 text-secondary-container" />
+      <div className="h-16 sm:h-20 max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-6">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0 min-w-0">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
+            <div className="p-1.5 sm:p-2 bg-primary text-on-primary rounded-xl group-hover:bg-primary-container transition-colors shadow-xs shrink-0">
+              <BookMarked className="w-4 h-4 sm:w-5 sm:h-5 text-secondary-container" />
             </div>
-            <div className="flex flex-col">
-              <span className="font-editorial text-xl sm:text-2xl font-bold tracking-tight text-primary leading-none group-hover:text-primary-container transition-colors">
+            <div className="flex flex-col min-w-0">
+              <span className="font-editorial text-base sm:text-2xl font-bold tracking-tight text-primary leading-none group-hover:text-primary-container transition-colors truncate">
                 Veritas Libris
               </span>
-              <span className="text-[10px] sm:text-xs tracking-widest text-secondary font-bold uppercase mt-1">
+              <span className="text-[9px] sm:text-xs tracking-widest text-secondary font-bold uppercase mt-0.5 sm:mt-1 truncate">
                 Índice de Leitura
               </span>
             </div>
@@ -110,15 +112,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             </a>
           </nav>
 
-          <div className="flex items-center gap-3 sm:gap-4 sm:border-l sm:border-outline/20 sm:pl-6">
+          <div className="flex items-center gap-2 sm:gap-4 sm:border-l sm:border-outline/20 sm:pl-6">
             <button
               type="button"
-              aria-label="Notificações"
-              className="relative p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all hidden sm:inline-flex"
+              aria-label="Abrir busca"
+              onClick={() => setIsMobileSearchOpen((prev) => !prev)}
+              className="sm:hidden p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all"
             >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error" />
+              <Search className="w-4 h-4" />
             </button>
+
+            <NotificationsPopover />
 
             {onOpenImportModal && (
               <button
@@ -149,8 +153,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                       {userInitials}
                     </div>
                   )}
-                  <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary" />
+                  <span
+                    className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5"
+                    title="Conectado"
+                  >
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 ring-2 ring-surface" />
                   </span>
                 </div>
                 <div className="hidden 2xl:flex flex-col text-left">
@@ -183,6 +190,29 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       </div>
+
+      {isMobileSearchOpen && (
+        <div className="sm:hidden px-4 pb-3 pt-1 bg-surface border-t border-outline/10">
+          <div className="relative flex items-center w-full">
+            <Search className="w-4 h-4 text-on-surface-variant absolute left-3 pointer-events-none" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              placeholder="Buscar título, autor ou ISBN..."
+              className="w-full h-10 pl-9 pr-10 rounded-lg bg-surface-container-lowest border border-outline/25 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary-container/20"
+            />
+            <button
+              type="button"
+              onClick={onOpenScanner}
+              title="Ler código de barras / ISBN"
+              className="absolute right-2 p-1.5 text-on-surface-variant hover:text-primary"
+            >
+              <ScanBarcode className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

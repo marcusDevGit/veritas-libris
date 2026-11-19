@@ -96,6 +96,12 @@ export const api = {
     }, true);
   },
 
+  refreshBookMetadata: async (id: string): Promise<BookDto> => {
+    return request<BookDto>(`/books/${id}/refresh-metadata`, {
+      method: 'PATCH',
+    });
+  },
+
   getReviewsByBook: async (bookId: string, query: Partial<ReviewListQuery> = {}): Promise<PaginatedReviews> => {
     const params = new URLSearchParams();
     if (query.page) params.set('page', String(query.page));
