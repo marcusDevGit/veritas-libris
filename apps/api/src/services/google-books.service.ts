@@ -182,14 +182,16 @@ async function fetchVolumes(
   query: string,
   maxResults: number,
   { apiKey }: GoogleBooksOptions,
+  langRestrict?: string,
 ): Promise<unknown[]> {
   const params = new URLSearchParams({
     q: query,
     maxResults: String(maxResults),
     printType: "books",
     fields:
-      "items(id,volumeInfo(title,subtitle,authors,description,publishedDate,imageLinks,industryIdentifiers))",
+      "items(id,volumeInfo(title,subtitle,authors,description,publishedDate,publisher,pageCount,language,imageLinks,industryIdentifiers))",
   });
+  if (langRestrict) params.set("langRestrict", langRestrict);
   if (apiKey) params.set("key", apiKey);
 
   let response: Response;
@@ -237,15 +239,35 @@ export async function searchGoogleBooks(
   options: GoogleBooksOptions = {},
 ): Promise<ExternalBook[]> {
   const isbn13 = normalizeIsbn(query);
-  const googleQuery = isbn13 ? `isbn:${isbn13}` : query;
+  if (isbn13) {
+    const items = await fetchVolumes(`isbn:${isbn13}`, limit, options);
+    const books = items
+      .map(mapGoogleVolume)
+      .filter((book): book is ExternalBook => book !== null);
+    return dedupeByIsbn(books);
+  }
 
-  const items = await fetchVolumes(googleQuery, limit, options);
-
-  const books = items
+  const ptItems = await fetchVolumes(query, limit, options, "pt");
+  let books = ptItems
     .map(mapGoogleVolume)
     .filter((book): book is ExternalBook => book !== null);
 
-  return dedupeByIsbn(books);
+  if (books.length < limit) {
+    const globalItems = await fetchVolumes(query, limit, options);
+    const globalBooks = globalItems
+      .map(mapGoogleVolume)
+      .filter((book): book is ExternalBook => book !== null);
+    books = [...books, ...globalBooks];
+  }
+
+  const uniqueBooks = dedupeByIsbn(books);
+  uniqueBooks.sort((a, b) => {
+    const aPt = a.language?.toLowerCase().startsWith("pt") ? 0 : 1;
+    const bPt = b.language?.toLowerCase().startsWith("pt") ? 0 : 1;
+    return aPt - bPt;
+  });
+
+  return uniqueBooks.slice(0, limit);
 }
 
 /** Busca um livro específico pelo ISBN-13. Retorna `null` se a Google não o conhece. */
