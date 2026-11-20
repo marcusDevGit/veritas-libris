@@ -4,6 +4,7 @@ import {
   CreateReviewBodySchema,
   DeleteReviewResponseSchema,
   HelpfulVoteResponseSchema,
+  MyReviewsListResponseSchema,
   ObjectIdSchema,
   PaginatedReviewsSchema,
   ReviewListQuerySchema,
@@ -15,6 +16,7 @@ import { requireAuth } from '../middlewares/auth.middleware.js';
 import {
   deleteReview,
   listReviewsByBook,
+  listReviewsByUser,
   upsertReview,
   voteReviewHelpful,
 } from '../services/review.service.js';
@@ -118,5 +120,18 @@ export const reviewRoutes: FastifyPluginAsyncZod = async (app) => {
         name: request.authUser!.name,
         isCurator: request.authUser!.isCurator,
       }),
+  );
+
+  app.get(
+    '/reviews/me',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        response: {
+          200: MyReviewsListResponseSchema,
+        },
+      },
+    },
+    async (request) => listReviewsByUser(request.authUser!.uid),
   );
 };

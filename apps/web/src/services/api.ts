@@ -1,5 +1,6 @@
 import type {
   AdminUsersQuery,
+  ArchiveNotificationsResponse,
   AuditLogDto,
   BookDto,
   BookListQuery,
@@ -12,6 +13,7 @@ import type {
   HelpfulVoteResponse,
   ImportBookResponse,
   InviteUserBody,
+  MyReviewsListResponse,
   NotificationListResponse,
   PaginatedBooks,
   PaginatedReviews,
@@ -154,6 +156,10 @@ export const api = {
     );
   },
 
+  listMyReviews: async (): Promise<MyReviewsListResponse> => {
+    return request<MyReviewsListResponse>('/reviews/me', {}, true);
+  },
+
   getCurrentUser: async (): Promise<UserDto> => {
     return request<UserDto>('/auth/me', {}, true);
   },
@@ -270,5 +276,21 @@ export const api = {
 
   markNotificationRead: async (id: string): Promise<{ read: boolean }> => {
     return request<{ read: boolean }>(`/notifications/${id}/read`, { method: 'PATCH' }, true);
+  },
+
+  archiveReadNotifications: async (): Promise<ArchiveNotificationsResponse> => {
+    return request<ArchiveNotificationsResponse>(
+      '/notifications/read',
+      { method: 'DELETE' },
+      true,
+    );
+  },
+
+  archiveNotification: async (id: string): Promise<ArchiveNotificationsResponse> => {
+    return request<ArchiveNotificationsResponse>(
+      `/notifications/${id}`,
+      { method: 'DELETE' },
+      true,
+    );
   },
 };

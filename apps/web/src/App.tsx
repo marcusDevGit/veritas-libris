@@ -13,6 +13,9 @@ const BookDetailPage = lazy(() =>
 const ReadingListPage = lazy(() =>
   import('./pages/ReadingListPage.js').then((m) => ({ default: m.ReadingListPage })),
 );
+const MyReviewsPage = lazy(() =>
+  import('./pages/MyReviewsPage.js').then((m) => ({ default: m.MyReviewsPage })),
+);
 const CurationPage = lazy(() =>
   import('./pages/CurationPage.js').then((m) => ({ default: m.CurationPage })),
 );
@@ -79,6 +82,7 @@ export const App: React.FC = () => {
                   <Route path="/" element={<CatalogPage />} />
                   <Route path="/livros/:id" element={<BookDetailPage />} />
                   <Route path="/minha-lista" element={<ReadingListPage />} />
+                  <Route path="/meus-pareceres" element={<MyReviewsPage />} />
                   <Route path="/criterios" element={<CriteriaPage />} />
                   <Route path="/sobre" element={<AboutCurationPage />} />
                   <Route path="/sugestoes" element={<SuggestionsPage />} />

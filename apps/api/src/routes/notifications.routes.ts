@@ -1,11 +1,14 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import {
+  ArchiveNotificationsResponseSchema,
   BookIdParamsSchema,
   NotificationListResponseSchema,
 } from '@app/shared';
 import { requireAuth } from '../middlewares/auth.middleware.js';
 import {
+  archiveNotification,
+  archiveReadNotifications,
   listUserNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
@@ -44,5 +47,28 @@ export const notificationRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => markNotificationAsRead(request.authUser!.uid, request.params.id),
+  );
+
+  app.delete(
+    '/notifications/read',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        response: { 200: ArchiveNotificationsResponseSchema },
+      },
+    },
+    async (request) => archiveReadNotifications(request.authUser!.uid),
+  );
+
+  app.delete(
+    '/notifications/:id',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        params: BookIdParamsSchema,
+        response: { 200: ArchiveNotificationsResponseSchema },
+      },
+    },
+    async (request) => archiveNotification(request.authUser!.uid, request.params.id),
   );
 };

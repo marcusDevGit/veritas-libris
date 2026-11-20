@@ -3,6 +3,7 @@ import type {
   CreateReviewBody,
   DeleteReviewResponse,
   HelpfulVoteResponse,
+  MyReviewsListResponse,
   PaginatedReviews,
   Review,
   ReviewListQuery,
@@ -265,5 +266,61 @@ export async function deleteReview(
   return {
     deletedId: reviewId,
     bookId: bookObjectId.toString(),
+  };
+}
+
+/**
+ * Lista os pareceres publicados pelo usuário autenticado com resumo das obras associadas.
+ */
+export async function listReviewsByUser(
+  userId: string,
+  limit = 50,
+): Promise<MyReviewsListResponse> {
+  const [reviews, total] = await Promise.all([
+    ReviewModel.find({ userId })
+      .sort({ updatedAt: -1 })
+      .limit(limit)
+      .lean<ReviewLean[]>(),
+    ReviewModel.countDocuments({ userId }),
+  ]);
+
+  if (reviews.length === 0) {
+    return { items: [], total: 0 };
+  }
+
+  const bookIds = Array.from(new Set(reviews.map((r) => r.bookId.toString()))).map(
+    (id) => new Types.ObjectId(id),
+  );
+  const books = await BookModel.find(
+    { _id: { $in: bookIds } },
+    { title: 1, authors: 1, coverUrl: 1, adequacyStatus: 1, recommendedAge: 1 },
+  ).lean<
+    Array<
+      Pick<BookAttrs, "title" | "authors" | "coverUrl" | "adequacyStatus" | "recommendedAge"> & {
+        _id: Types.ObjectId;
+      }
+    >
+  >();
+
+  const bookMap = new Map(books.map((b) => [b._id.toString(), b]));
+
+  return {
+    items: reviews.map((rev) => {
+      const book = bookMap.get(rev.bookId.toString());
+      return {
+        ...toReviewDto(rev),
+        book: book
+          ? {
+              _id: book._id.toString(),
+              title: book.title,
+              authors: book.authors,
+              ...(book.coverUrl ? { coverUrl: book.coverUrl } : {}),
+              adequacyStatus: book.adequacyStatus,
+              recommendedAge: book.recommendedAge,
+            }
+          : null,
+      };
+    }),
+    total,
   };
 }
