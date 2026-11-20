@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { AdequacyLevelSchema, AgeRatingSchema } from '../constants/doctrine.js';
-import { ObjectIdSchema } from './book.schema.js';
+import { ObjectIdSchema, ReservationItemSchema } from './book.schema.js';
 import { BookDtoSchema } from './catalog.schema.js';
 
 export const CurationFilterSchema = z.enum(['all', 'unlocked', 'locked', 'imprimatur']);
@@ -42,6 +42,29 @@ export const UpdateBookEditorialBodySchema = z.object({
     .trim()
     .max(2500, 'A síntese editorial deve ter no máximo 2500 caracteres')
     .optional(),
+  tags: z.array(z.string().trim().min(1).max(40)).max(20).optional(),
+  reservations: z.array(ReservationItemSchema).max(20).optional(),
   alternatives: z.array(ObjectIdSchema).max(10, 'No máximo 10 obras alternativas').default([]),
 });
 export type UpdateBookEditorialBody = z.infer<typeof UpdateBookEditorialBodySchema>;
+
+export const EditorialAiCitationSchema = z.object({
+  documentTitle: z.string().nullable().optional(),
+  documentAuthor: z.string().nullable().optional(),
+  documentYear: z.string().nullable().optional(),
+  documentReference: z.string().nullable().optional(),
+  citedText: z.string(),
+  sourceUrl: z.string().nullable().optional(),
+});
+export type EditorialAiCitation = z.infer<typeof EditorialAiCitationSchema>;
+
+export const EditorialAiDraftResponseSchema = z.object({
+  draftText: z.string(),
+  suggestedAdequacy: AdequacyLevelSchema.nullable().optional(),
+  suggestedAge: AgeRatingSchema.nullable().optional(),
+  recommendationRationale: z.string().nullable().optional(),
+  citations: z.array(EditorialAiCitationSchema),
+  cached: z.boolean(),
+  generatedAt: z.string(),
+});
+export type EditorialAiDraftResponse = z.infer<typeof EditorialAiDraftResponseSchema>;

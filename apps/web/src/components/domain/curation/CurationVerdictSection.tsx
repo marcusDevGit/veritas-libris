@@ -62,7 +62,7 @@ export const CurationVerdictSection: React.FC<CurationVerdictSectionProps> = ({
             </h3>
           </div>
           <p className="text-xs text-on-surface-variant mt-1">
-            Quando ativada, o veredito oficial definido abaixo sobrepõe o cálculo automático da comunidade. Ao desativar, o consenso comunitário é restaurado.
+            Quando ativada, homologa o parecer oficial e conclui a obra na fila de curadoria. Enquanto permanecer desativada, o consenso comunitário continua aberto e a obra segue listada como Pendente.
           </p>
         </div>
 

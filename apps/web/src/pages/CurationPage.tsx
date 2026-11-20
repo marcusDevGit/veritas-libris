@@ -279,6 +279,7 @@ export const CurationPage: React.FC = () => {
                 <CurationEditorialEditor
                   book={selectedBook}
                   isSaving={saveEditorialMutation.isPending}
+                  feedback={feedback}
                   onSave={(body) =>
                     saveEditorialMutation.mutate({ bookId: selectedBook._id, body })
                   }

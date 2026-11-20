@@ -5,6 +5,7 @@ import {
   BookListQuerySchema,
   CurationQueueQuerySchema,
   CurationQueueResponseSchema,
+  EditorialAiDraftResponseSchema,
   ExternalSearchQuerySchema,
   ExternalSearchResponseSchema,
   ImportBookBodySchema,
@@ -27,6 +28,7 @@ import {
   updateBookEditorial,
 } from "../services/curation.service.js";
 import { searchGoogleBooks } from "../services/google-books.service.js";
+import { generateEditorialAiDraft } from "../services/magisterium.service.js";
 
 /**
  * Rotas HTTP do catálogo. Só traduzem HTTP <-> services: nenhuma regra de negócio aqui.
@@ -140,6 +142,25 @@ export const bookRoutes: FastifyPluginAsyncZod = async (app) => {
         uid: request.authUser!.uid,
         name: request.authUser!.name,
         email: request.authUser!.email,
+      }),
+  );
+
+  app.post(
+    "/curation/books/:id/ai-draft",
+    {
+      preHandler: [requireAuth, requireCurator],
+      config: {
+        rateLimit: BOOK_RATE_LIMITS.aiDraft,
+      },
+      schema: {
+        params: BookIdParamsSchema,
+        response: { 200: EditorialAiDraftResponseSchema },
+      },
+    },
+    async (request) =>
+      generateEditorialAiDraft(request.params.id, {
+        uid: request.authUser!.uid,
+        name: request.authUser!.name,
       }),
   );
 };

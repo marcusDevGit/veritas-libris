@@ -70,7 +70,11 @@ bookSchema.index({ tags: 1 });
 bookSchema.index({ title: 1 });
 bookSchema.index(
   { title: 'text', subtitle: 'text', authors: 'text' },
-  { default_language: 'portuguese', weights: { title: 5, authors: 3, subtitle: 1 } },
+  {
+    default_language: 'portuguese',
+    language_override: 'textSearchLanguage',
+    weights: { title: 5, authors: 3, subtitle: 1 },
+  },
 );
 
 export const BookModel = model<BookAttrs>('Book', bookSchema);
