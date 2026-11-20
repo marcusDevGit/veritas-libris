@@ -1,6 +1,6 @@
 # Arquitetura do Sistema — Veritas Libris
 
-Este documento descreve a organização interna do monorepo, o fluxo de dados e as principais decisões arquiteturais adotadas até a versão **v1.1.0**.
+Este documento descreve a organização interna do monorepo, o fluxo de dados e as principais decisões arquiteturais adotadas até a versão **v1.3.0**.
 
 ---
 
@@ -29,11 +29,12 @@ Funciona como **Single Source of Truth (SSOT)** para contratos entre frontend e 
 - **`plugins/`**: `rate-limit.ts` usando `@fastify/rate-limit` no modo opt-in (`global: false`).
 - **`routes/`**: camada fina que traduz HTTP ↔ Services com validação automática de `params`, `querystring`, `body` e `response` via `fastify-type-provider-zod`.
 - **`services/`**: regras de negócio isoladas, acompanhadas de funções puras testáveis (`*.utils.ts` + `*.utils.test.ts`).
-- **`models/`**: schemas Mongoose (`Book`, `Review`, `User`, `ReadingListItem`, `Notification`, `Suggestion`, `AuditLog`).
+- **`models/`**: schemas Mongoose (`Book`, `Review`, `User`, `ReadingListItem`, `Notification`, `Suggestion`, `AuditLog`, `EditorialAiDraft`).
 
-### Provedores Externos de Livros
+### Provedores Externos & Copiloto Magisterium AI
 - `google-books.service.ts` realiza buscas e normaliza volumes da Google Books API (removendo tags HTML, normalizando capa HTTPS e validando ISBN).
 - `external-books-providers.service.ts` combina metadados da Google Books, **BrasilAPI ISBN** e **Open Library**, preenchendo lacunas bibliográficas e priorizando sinopses em português (`PT-BR`).
+- `magisterium.service.ts` integra `https://www.magisterium.com/api/v1/chat/completions` (`magisterium-1`) exclusivamente pelo servidor (`MAGISTERIUM_API_KEY`) com cache em `EditorialAiDraftModel` por hash SHA-256 dos metadados/ressalvas e auditoria `AI_DRAFT_GENERATED`. Na interface (`/curadoria`), `CurationAiAssistantBox` informa explicitamente aos curadores os limites da IA e exige revisão manual antes de salvar.
 
 ### Motor de Consenso (`consensus.service.ts`)
 - Calcula o veredito da obra (`RECOMMENDED`, `WITH_RESERVATIONS`, `NOT_RECOMMENDED`, `UNRATED`) a partir dos pareceres em `ReviewModel`.

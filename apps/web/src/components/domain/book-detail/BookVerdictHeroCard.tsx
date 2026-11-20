@@ -134,6 +134,16 @@ export const BookVerdictHeroCard: React.FC<BookVerdictHeroCardProps> = ({ book }
                 <AlertTriangle className="w-4 h-4" />
                 <span>Contém Ressalva Doutrinária</span>
               </span>
+            ) : book.adequacyStatus === 'NOT_RECOMMENDED' ? (
+              <span className="text-error flex items-center gap-1">
+                <AlertTriangle className="w-4 h-4" />
+                <span>Obra Desaconselhada</span>
+              </span>
+            ) : book.reservations.length > 0 ? (
+              <span className="text-secondary flex items-center gap-1">
+                <AlertTriangle className="w-4 h-4" />
+                <span>Contém Pontos de Cautela</span>
+              </span>
             ) : (
               <span className="text-secondary flex items-center gap-1">
                 <CheckCircle2 className="w-4 h-4" />
@@ -149,7 +159,7 @@ export const BookVerdictHeroCard: React.FC<BookVerdictHeroCardProps> = ({ book }
             <span>Síntese do Discernimento Editorial</span>
           </h3>
 
-          <p className="text-sm text-on-surface leading-relaxed">
+          <p className="text-sm text-on-surface leading-relaxed whitespace-pre-line">
             {book.editorialSummary ||
               (book.adequacyStatus === 'UNRATED'
                 ? 'Esta obra foi catalogada no acervo e aguarda as primeiras análises morais e doutrinárias de curadores e leitores da comunidade.'

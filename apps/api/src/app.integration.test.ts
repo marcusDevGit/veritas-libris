@@ -77,6 +77,7 @@ describe('API HTTP integration (buildApp)', () => {
       { method: 'GET', url: '/api/v1/reading-list' },
       { method: 'GET', url: '/api/v1/reviews/me' },
       { method: 'GET', url: '/api/v1/curation/books' },
+      { method: 'POST', url: '/api/v1/curation/books/507f1f77bcf86cd799439011/ai-draft' },
       { method: 'GET', url: '/api/v1/suggestions' },
       {
         method: 'PATCH',

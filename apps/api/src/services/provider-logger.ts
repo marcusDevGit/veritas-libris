@@ -1,4 +1,8 @@
-export type ExternalProviderName = 'google-books' | 'brasil-api' | 'open-library';
+export type ExternalProviderName =
+  | 'google-books'
+  | 'brasil-api'
+  | 'open-library'
+  | 'magisterium-ai';
 
 export interface ProviderFailureLog {
   provider: ExternalProviderName;

@@ -4,7 +4,8 @@ export type AuditAction =
   | 'ROLE_UPDATED'
   | 'EDITORIAL_LOCK_UPDATED'
   | 'SUGGESTION_TRIAGED'
-  | 'REVIEW_MODERATED';
+  | 'REVIEW_MODERATED'
+  | 'AI_DRAFT_GENERATED';
 
 export interface AuditLogAttrs {
   action: AuditAction;
@@ -20,7 +21,13 @@ const auditLogSchema = new Schema<AuditLogAttrs>(
   {
     action: {
       type: String,
-      enum: ['ROLE_UPDATED', 'EDITORIAL_LOCK_UPDATED', 'SUGGESTION_TRIAGED', 'REVIEW_MODERATED'],
+      enum: [
+        'ROLE_UPDATED',
+        'EDITORIAL_LOCK_UPDATED',
+        'SUGGESTION_TRIAGED',
+        'REVIEW_MODERATED',
+        'AI_DRAFT_GENERATED',
+      ],
       required: true,
     },
     actorUid: { type: String, required: true, trim: true },

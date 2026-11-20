@@ -2,6 +2,18 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.3.0] - 2026-11-20
+### Added
+- **Copiloto de Curadoria com Magisterium AI (`/curadoria`):** rota `POST /api/v1/curation/books/:id/ai-draft` protegida por autenticação, papel de curador/admin e rate limit (`5 req/min`), cache determinístico em MongoDB (`EditorialAiDraftModel`), log de auditoria `AI_DRAFT_GENERATED` e componente `CurationAiAssistantBox` com aviso permanente de limites/cota e aplicação apenas manual ao rascunho.
+- **Paridade de 4 pontos na Curadoria:** `PATCH /api/v1/books/:id/editorial` e `CurationEditorialEditor` agora permitem editar `tags` e `reservations` oficiais quando `editorialLock` está ativo, mantendo a ficha pública coerente em casos de discordância com a comunidade.
+
+### Fixed
+- Definido `language_override: 'textSearchLanguage'` no índice `$text` de `BookModel` para evitar erro `Location17262` ao importar livros com `language: 'pt-BR'`.
+- Atualizado o parser de `magisterium.utils.ts` (`PROMPT_VERSION = 'v5'`) para limpar formatações Markdown antes da extração de `VEREDITO`, `IDADE`, `JUSTIFICATIVA` e `SÍNTESE`.
+- Ajustado o selo de alerta em `BookVerdictHeroCard` para exibir `Obra Desaconselhada` ou `Contém Pontos de Cautela` em vez de `Sem Heresia Dogmática Formal` quando a obra é `NOT_RECOMMENDED` ou possui ressalvas.
+
+---
+
 ## [1.2.0] - 2026-11-19
 ### Added
 - **Painel de Triagem de Sugestões (`/curadoria`):** aba dedicada com filtros por status (`PENDING`, `REVIEWED`, `ACCEPTED`, `DISMISSED`), nota de resolução, endpoint `PATCH /api/v1/suggestions/:id`, auditoria (`SUGGESTION_TRIAGED`) e importação rápida via ISBN-13.

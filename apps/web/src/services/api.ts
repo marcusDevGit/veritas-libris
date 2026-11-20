@@ -9,6 +9,7 @@ import type {
   CurationQueueQuery,
   CurationQueueResponse,
   DeleteReviewResponse,
+  EditorialAiDraftResponse,
   ExternalBookResult,
   HelpfulVoteResponse,
   ImportBookResponse,
@@ -210,6 +211,14 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(body),
     }, true);
+  },
+
+  generateEditorialAiDraft: async (bookId: string): Promise<EditorialAiDraftResponse> => {
+    return request<EditorialAiDraftResponse>(
+      `/curation/books/${bookId}/ai-draft`,
+      { method: 'POST' },
+      true,
+    );
   },
 
   getReadingList: async (): Promise<ReadingListResponse> => {

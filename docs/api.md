@@ -50,6 +50,7 @@ Todos os endpoints de negócio são registrados em `apps/api/src/app.ts` sob o p
 | :--- | :--- | :---: | :--- |
 | `GET` | `/api/v1/curation/books` | `requireAuth` + `requireCurator` | Lista a fila de obras para curadoria editorial (`CurationQueueQuerySchema`). |
 | `PATCH` | `/api/v1/books/:id/editorial` | `requireAuth` + `requireCurator` | Atualiza veredito oficial, trava editorial (`editorialLock`), nota editorial e obras alternativas (`alternatives`), registrando em `AuditLog` e disparando notificações (`EDITORIAL_UPDATE`) aos leitores com a obra salva. |
+| `POST` | `/api/v1/curation/books/:id/ai-draft` | `requireAuth` + `requireCurator` *(5 req / 1 min)* | Consulta a Magisterium AI (`magisterium-1`) com cache em banco por hash de entrada para gerar rascunho doutrinário revisável e citações oficiais, gravando `AI_DRAFT_GENERATED` em `AuditLog`. |
 
 ---
 
