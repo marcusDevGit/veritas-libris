@@ -2,7 +2,9 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import {
   BookIdParamsSchema,
   CreateReviewBodySchema,
+  DeleteReviewResponseSchema,
   HelpfulVoteResponseSchema,
+  MyReviewsListResponseSchema,
   ObjectIdSchema,
   PaginatedReviewsSchema,
   ReviewListQuerySchema,
@@ -12,7 +14,9 @@ import { z } from 'zod';
 import { env } from '../config/env.js';
 import { requireAuth } from '../middlewares/auth.middleware.js';
 import {
+  deleteReview,
   listReviewsByBook,
+  listReviewsByUser,
   upsertReview,
   voteReviewHelpful,
 } from '../services/review.service.js';
@@ -97,5 +101,37 @@ export const reviewRoutes: FastifyPluginAsyncZod = async (app) => {
 
       return voteReviewHelpful(reviewId, userId);
     },
+  );
+
+  app.delete(
+    '/reviews/:id',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        params: ReviewIdParamsSchema,
+        response: {
+          200: DeleteReviewResponseSchema,
+        },
+      },
+    },
+    async (request) =>
+      deleteReview(request.params.id, {
+        uid: request.authUser!.uid,
+        name: request.authUser!.name,
+        isCurator: request.authUser!.isCurator,
+      }),
+  );
+
+  app.get(
+    '/reviews/me',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        response: {
+          200: MyReviewsListResponseSchema,
+        },
+      },
+    },
+    async (request) => listReviewsByUser(request.authUser!.uid),
   );
 };

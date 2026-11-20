@@ -6,8 +6,14 @@ import { BookMarked, ExternalLink, Home, ShieldCheck } from 'lucide-react';
 import { api, ApiError } from '../services/api.js';
 import { SuggestionForm } from '../components/domain/suggestions/SuggestionForm.js';
 import { SuggestionsSidebar } from '../components/domain/suggestions/SuggestionsSidebar.js';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 
 export const SuggestionsPage: React.FC = () => {
+  usePageMeta(
+    'Enviar Sugestões',
+    'Indique obras literárias para exame da curadoria ou envie sugestões de melhoria para a plataforma Veritas Libris.',
+  );
+
   const mutation = useMutation({
     mutationFn: (payload: CreateSuggestionBody) => api.createSuggestion(payload),
   });

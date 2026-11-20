@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, CheckCheck, ShieldCheck, BookOpen } from 'lucide-react';
+import { Bell, CheckCheck, ShieldCheck, BookOpen, Archive, X } from 'lucide-react';
 import type { NotificationDto } from '@app/shared';
 import { useAuth } from '../../contexts/AuthContext.js';
 import { api } from '../../services/api.js';
@@ -77,9 +77,24 @@ export const NotificationsPopover: React.FC = () => {
     },
   });
 
+  const archiveReadMutation = useMutation({
+    mutationFn: api.archiveReadNotifications,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
+    },
+  });
+
+  const archiveOneMutation = useMutation({
+    mutationFn: api.archiveNotification,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
+    },
+  });
+
   const unreadCount = user
     ? (data?.unreadCount ?? 0)
     : guestNotifications.filter((n) => !n.read).length;
+  const hasReadUserNotifications = Boolean(user && data?.items.some((n) => n.read));
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -131,17 +146,30 @@ export const NotificationsPopover: React.FC = () => {
               <ShieldCheck className="w-4 h-4 text-secondary" />
               <span className="text-xs font-bold text-primary">Central de Avisos</span>
             </div>
-            {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={handleMarkAllAsRead}
-                disabled={markAllMutation.isPending}
-                className="text-[11px] font-semibold text-secondary hover:text-primary flex items-center gap-1 cursor-pointer disabled:opacity-50"
-              >
-                <CheckCheck className="w-3.5 h-3.5" />
-                <span>Marcar como lidas</span>
-              </button>
-            )}
+            <div className="flex items-center gap-2.5">
+              {unreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={handleMarkAllAsRead}
+                  disabled={markAllMutation.isPending}
+                  className="text-[11px] font-semibold text-secondary hover:text-primary flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                >
+                  <CheckCheck className="w-3.5 h-3.5" />
+                  <span>Marcar como lidas</span>
+                </button>
+              )}
+              {hasReadUserNotifications && (
+                <button
+                  type="button"
+                  onClick={() => archiveReadMutation.mutate()}
+                  disabled={archiveReadMutation.isPending}
+                  className="text-[11px] font-semibold text-outline hover:text-primary flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                >
+                  <Archive className="w-3.5 h-3.5" />
+                  <span>Limpar lidas</span>
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="divide-y divide-outline/10 max-h-80 overflow-y-auto">
@@ -166,32 +194,45 @@ export const NotificationsPopover: React.FC = () => {
                 data!.items.map((item) => {
                   const Icon = item.type === 'EDITORIAL_UPDATE' ? ShieldCheck : BookOpen;
                   return (
-                    <Link
+                    <div
                       key={item.id}
-                      to={`/livros/${item.bookId}`}
-                      onClick={() => handleItemClick(item)}
                       className={`p-4 flex items-start gap-3 transition-colors hover:bg-surface-container-low ${
                         item.read ? 'bg-surface-container-lowest' : 'bg-secondary-container/15'
                       }`}
                     >
-                      <div className="p-2 rounded-lg bg-surface-container text-primary shrink-0 mt-0.5">
-                        <Icon className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-xs font-bold text-primary truncate">{item.title}</p>
-                          <span className="text-[10px] text-outline shrink-0">
-                            {formatRelativeTime(item.createdAt)}
-                          </span>
+                      <Link
+                        to={`/livros/${item.bookId}`}
+                        onClick={() => handleItemClick(item)}
+                        className="flex items-start gap-3 flex-1 min-w-0"
+                      >
+                        <div className="p-2 rounded-lg bg-surface-container text-primary shrink-0 mt-0.5">
+                          <Icon className="w-3.5 h-3.5" />
                         </div>
-                        <p className="text-[11px] font-semibold text-secondary truncate mt-0.5">
-                          {item.bookTitle}
-                        </p>
-                        <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
-                          {item.description}
-                        </p>
-                      </div>
-                    </Link>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs font-bold text-primary truncate">{item.title}</p>
+                            <span className="text-[10px] text-outline shrink-0">
+                              {formatRelativeTime(item.createdAt)}
+                            </span>
+                          </div>
+                          <p className="text-[11px] font-semibold text-secondary truncate mt-0.5">
+                            {item.bookTitle}
+                          </p>
+                          <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
+                            {item.description}
+                          </p>
+                        </div>
+                      </Link>
+                      <button
+                        type="button"
+                        aria-label={`Arquivar notificação ${item.title}`}
+                        onClick={() => archiveOneMutation.mutate(item.id)}
+                        disabled={archiveOneMutation.isPending}
+                        className="p-1 text-outline hover:text-primary rounded transition-colors shrink-0 cursor-pointer disabled:opacity-50"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   );
                 })
               )

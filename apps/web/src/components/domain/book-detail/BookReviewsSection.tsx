@@ -1,13 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import type { Review } from '@app/shared';
 import { AdequacyBadge } from '../AdequacyBadge.js';
-import { ThumbsUp, ShieldCheck, MessageSquare } from 'lucide-react';
+import { ThumbsUp, ShieldCheck, MessageSquare, Pencil, Trash2, ShieldAlert } from 'lucide-react';
 
 export interface BookReviewsSectionProps {
   reviews: Review[];
   totalReviews: number;
   isLoading: boolean;
+  currentUserId?: string;
+  canModerate?: boolean;
+  deletingReviewId?: string | null;
   onVoteHelpful: (reviewId: string) => void;
+  onEditReview?: (review: Review) => void;
+  onDeleteReview?: (reviewId: string) => void;
 }
 
 type ReviewFilterTab = 'ALL' | 'CURATORS' | 'READERS';
@@ -29,9 +34,15 @@ export const BookReviewsSection: React.FC<BookReviewsSectionProps> = ({
   reviews,
   totalReviews,
   isLoading,
+  currentUserId,
+  canModerate = false,
+  deletingReviewId = null,
   onVoteHelpful,
+  onEditReview,
+  onDeleteReview,
 }) => {
   const [activeTab, setActiveTab] = useState<ReviewFilterTab>('ALL');
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
 
   const curatorCount = useMemo(
     () => reviews.filter((r) => r.isCurator).length,
@@ -159,8 +170,8 @@ export const BookReviewsSection: React.FC<BookReviewsSectionProps> = ({
                 {rev.comment}
               </p>
 
-              <div className="flex items-center justify-between pt-3 border-t border-outline/10">
-                <div className="flex items-center gap-2 text-xs text-outline">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-outline/10">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-outline">
                   {rev.isCurator && (
                     <span className="flex items-center gap-1 text-secondary font-medium">
                       <ShieldCheck className="w-4 h-4" />
@@ -169,14 +180,73 @@ export const BookReviewsSection: React.FC<BookReviewsSectionProps> = ({
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => rev._id && onVoteHelpful(rev._id)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors border border-outline/15 cursor-pointer"
-                >
-                  <ThumbsUp className="w-3.5 h-3.5" />
-                  <span>Útil ({rev.helpfulVotes})</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {rev._id && currentUserId && rev.userId === currentUserId && onEditReview && (
+                    <button
+                      type="button"
+                      onClick={() => onEditReview(rev)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors border border-outline/15 cursor-pointer"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      <span>Editar</span>
+                    </button>
+                  )}
+
+                  {rev._id &&
+                    onDeleteReview &&
+                    ((currentUserId && rev.userId === currentUserId) || canModerate) &&
+                    (confirmingDeleteId === rev._id ? (
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-error-container/50 border border-error/30 text-xs">
+                        <span className="font-semibold text-error">Confirmar remoção?</span>
+                        <button
+                          type="button"
+                          disabled={deletingReviewId === rev._id}
+                          onClick={() => {
+                            setConfirmingDeleteId(null);
+                            if (rev._id) onDeleteReview(rev._id);
+                          }}
+                          className="px-2 py-0.5 rounded bg-error text-on-error font-bold cursor-pointer disabled:opacity-50"
+                        >
+                          Sim
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingDeleteId(null)}
+                          className="px-2 py-0.5 rounded bg-surface text-on-surface font-semibold cursor-pointer"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={deletingReviewId === rev._id}
+                        onClick={() => rev._id && setConfirmingDeleteId(rev._id)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface hover:bg-error-container/40 text-error text-xs font-semibold transition-colors border border-error/20 cursor-pointer disabled:opacity-50"
+                      >
+                        {currentUserId && rev.userId === currentUserId ? (
+                          <>
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Excluir</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShieldAlert className="w-3.5 h-3.5" />
+                            <span>Moderar</span>
+                          </>
+                        )}
+                      </button>
+                    ))}
+
+                  <button
+                    type="button"
+                    onClick={() => rev._id && onVoteHelpful(rev._id)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors border border-outline/15 cursor-pointer"
+                  >
+                    <ThumbsUp className="w-3.5 h-3.5" />
+                    <span>Útil ({rev.helpfulVotes})</span>
+                  </button>
+                </div>
               </div>
             </article>
           ))}

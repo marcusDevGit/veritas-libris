@@ -4,8 +4,14 @@ import { Compass, HeartHandshake, Send } from 'lucide-react';
 import { AboutHeroQuote } from '../components/domain/about/AboutHeroQuote.js';
 import { AboutMissionTriad } from '../components/domain/about/AboutMissionTriad.js';
 import { AboutOperationsAndFoundations } from '../components/domain/about/AboutOperationsAndFoundations.js';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 
 export const AboutCurationPage: React.FC = () => {
+  usePageMeta(
+    'Sobre a Curadoria',
+    'Entenda a missão pastoral, a independência editorial e a equipe de curadoria literária do Veritas Libris.',
+  );
+
   return (
     <div className="pt-[84px] sm:pt-[100px] pb-16 flex flex-col gap-10">
       <AboutHeroQuote />

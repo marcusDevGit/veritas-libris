@@ -1,11 +1,23 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
+import { z } from 'zod';
 import {
   CreateSuggestionBodySchema,
+  ObjectIdSchema,
   SuggestionDtoSchema,
+  SuggestionListQuerySchema,
   SuggestionListResponseSchema,
+  UpdateSuggestionStatusBodySchema,
 } from '@app/shared';
 import { requireAuth, requireCurator } from '../middlewares/auth.middleware.js';
-import { createSuggestion, listSuggestions } from '../services/suggestion.service.js';
+import {
+  createSuggestion,
+  listSuggestions,
+  triageSuggestion,
+} from '../services/suggestion.service.js';
+
+const SuggestionIdParamsSchema = z.object({
+  id: ObjectIdSchema,
+});
 
 export const suggestionRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
@@ -33,9 +45,27 @@ export const suggestionRoutes: FastifyPluginAsyncZod = async (app) => {
     {
       preHandler: [requireAuth, requireCurator],
       schema: {
+        querystring: SuggestionListQuerySchema,
         response: { 200: SuggestionListResponseSchema },
       },
     },
-    async () => ({ items: await listSuggestions() }),
+    async (request) => listSuggestions(request.query),
+  );
+
+  app.patch(
+    '/suggestions/:id',
+    {
+      preHandler: [requireAuth, requireCurator],
+      schema: {
+        params: SuggestionIdParamsSchema,
+        body: UpdateSuggestionStatusBodySchema,
+        response: { 200: SuggestionDtoSchema },
+      },
+    },
+    async (request) =>
+      triageSuggestion(request.params.id, request.body, {
+        uid: request.authUser!.uid,
+        name: request.authUser!.name,
+      }),
   );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { AuditLogDto } from '@app/shared';
-import { KeyRound, Lock, ShieldCheck } from 'lucide-react';
+import { ClipboardCheck, KeyRound, Lock, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 interface AdminAuditTimelineProps {
   logs: AuditLogDto[];
@@ -40,11 +40,19 @@ export const AdminAuditTimeline: React.FC<AdminAuditTimelineProps> = ({ logs, is
                     className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
                       log.action === 'ROLE_UPDATED'
                         ? 'bg-primary/10 text-primary'
-                        : 'bg-secondary-container text-secondary'
+                        : log.action === 'SUGGESTION_TRIAGED'
+                          ? 'bg-success-container text-success'
+                          : log.action === 'REVIEW_MODERATED'
+                            ? 'bg-error-container text-error'
+                            : 'bg-secondary-container text-secondary'
                     }`}
                   >
                     {log.action === 'ROLE_UPDATED' ? (
                       <KeyRound className="w-4 h-4" />
+                    ) : log.action === 'SUGGESTION_TRIAGED' ? (
+                      <ClipboardCheck className="w-4 h-4" />
+                    ) : log.action === 'REVIEW_MODERATED' ? (
+                      <ShieldAlert className="w-4 h-4" />
                     ) : (
                       <Lock className="w-4 h-4" />
                     )}

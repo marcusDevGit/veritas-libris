@@ -67,3 +67,31 @@ export const HelpfulVoteResponseSchema = z.object({
   voted: z.boolean(),
 });
 export type HelpfulVoteResponse = z.infer<typeof HelpfulVoteResponseSchema>;
+
+export const DeleteReviewResponseSchema = z.object({
+  deletedId: ObjectIdSchema,
+  bookId: ObjectIdSchema,
+});
+export type DeleteReviewResponse = z.infer<typeof DeleteReviewResponseSchema>;
+
+export const MyReviewBookSummarySchema = z.object({
+  _id: ObjectIdSchema,
+  title: z.string(),
+  authors: z.array(z.string()),
+  coverUrl: z.string().optional(),
+  adequacyStatus: AdequacyLevelSchema,
+  recommendedAge: AgeRatingSchema,
+});
+export type MyReviewBookSummary = z.infer<typeof MyReviewBookSummarySchema>;
+
+export const MyReviewItemSchema = ReviewSchema.extend({
+  _id: ObjectIdSchema,
+  book: MyReviewBookSummarySchema.nullable(),
+});
+export type MyReviewItem = z.infer<typeof MyReviewItemSchema>;
+
+export const MyReviewsListResponseSchema = z.object({
+  items: z.array(MyReviewItemSchema),
+  total: z.number().int().nonnegative(),
+});
+export type MyReviewsListResponse = z.infer<typeof MyReviewsListResponseSchema>;

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext.js';
 import { Navbar } from './components/layout/Navbar.js';
 import { Footer } from './components/layout/Footer.js';
+import { ScrollToTop } from './components/layout/ScrollToTop.js';
 import { CatalogPage } from './pages/CatalogPage.js';
 
 const BookDetailPage = lazy(() =>
@@ -11,6 +12,9 @@ const BookDetailPage = lazy(() =>
 );
 const ReadingListPage = lazy(() =>
   import('./pages/ReadingListPage.js').then((m) => ({ default: m.ReadingListPage })),
+);
+const MyReviewsPage = lazy(() =>
+  import('./pages/MyReviewsPage.js').then((m) => ({ default: m.MyReviewsPage })),
 );
 const CurationPage = lazy(() =>
   import('./pages/CurationPage.js').then((m) => ({ default: m.CurationPage })),
@@ -60,6 +64,7 @@ export const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <div className="min-h-screen flex flex-col bg-surface text-on-surface">
             <Navbar
               searchTerm={searchTerm}
@@ -77,6 +82,7 @@ export const App: React.FC = () => {
                   <Route path="/" element={<CatalogPage />} />
                   <Route path="/livros/:id" element={<BookDetailPage />} />
                   <Route path="/minha-lista" element={<ReadingListPage />} />
+                  <Route path="/meus-pareceres" element={<MyReviewsPage />} />
                   <Route path="/criterios" element={<CriteriaPage />} />
                   <Route path="/sobre" element={<AboutCurationPage />} />
                   <Route path="/sugestoes" element={<SuggestionsPage />} />

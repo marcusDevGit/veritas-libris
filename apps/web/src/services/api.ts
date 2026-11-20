@@ -1,5 +1,6 @@
 import type {
   AdminUsersQuery,
+  ArchiveNotificationsResponse,
   AuditLogDto,
   BookDto,
   BookListQuery,
@@ -7,10 +8,12 @@ import type {
   CreateSuggestionBody,
   CurationQueueQuery,
   CurationQueueResponse,
+  DeleteReviewResponse,
   ExternalBookResult,
   HelpfulVoteResponse,
   ImportBookResponse,
   InviteUserBody,
+  MyReviewsListResponse,
   NotificationListResponse,
   PaginatedBooks,
   PaginatedReviews,
@@ -20,7 +23,10 @@ import type {
   Review,
   ReviewListQuery,
   SuggestionDto,
+  SuggestionListQuery,
+  SuggestionListResponse,
   UpdateBookEditorialBody,
+  UpdateSuggestionStatusBody,
   UserDto,
   UserRole,
 } from '@app/shared';
@@ -142,6 +148,18 @@ export const api = {
     }, true);
   },
 
+  deleteReview: async (reviewId: string): Promise<DeleteReviewResponse> => {
+    return request<DeleteReviewResponse>(
+      `/reviews/${reviewId}`,
+      { method: 'DELETE' },
+      true,
+    );
+  },
+
+  listMyReviews: async (): Promise<MyReviewsListResponse> => {
+    return request<MyReviewsListResponse>('/reviews/me', {}, true);
+  },
+
   getCurrentUser: async (): Promise<UserDto> => {
     return request<UserDto>('/auth/me', {}, true);
   },
@@ -222,6 +240,32 @@ export const api = {
     });
   },
 
+  listSuggestions: async (
+    query: Partial<SuggestionListQuery> = {},
+  ): Promise<SuggestionListResponse> => {
+    const params = new URLSearchParams();
+    if (query.status) params.set('status', query.status);
+    if (query.type) params.set('type', query.type);
+    if (query.q) params.set('q', query.q);
+    if (query.limit) params.set('limit', String(query.limit));
+    const qs = params.toString();
+    return request<SuggestionListResponse>(`/suggestions${qs ? `?${qs}` : ''}`, {}, true);
+  },
+
+  triageSuggestion: async (
+    id: string,
+    body: UpdateSuggestionStatusBody,
+  ): Promise<SuggestionDto> => {
+    return request<SuggestionDto>(
+      `/suggestions/${id}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      },
+      true,
+    );
+  },
+
   listNotifications: async (): Promise<NotificationListResponse> => {
     return request<NotificationListResponse>('/notifications', {}, true);
   },
@@ -232,5 +276,21 @@ export const api = {
 
   markNotificationRead: async (id: string): Promise<{ read: boolean }> => {
     return request<{ read: boolean }>(`/notifications/${id}/read`, { method: 'PATCH' }, true);
+  },
+
+  archiveReadNotifications: async (): Promise<ArchiveNotificationsResponse> => {
+    return request<ArchiveNotificationsResponse>(
+      '/notifications/read',
+      { method: 'DELETE' },
+      true,
+    );
+  },
+
+  archiveNotification: async (id: string): Promise<ArchiveNotificationsResponse> => {
+    return request<ArchiveNotificationsResponse>(
+      `/notifications/${id}`,
+      { method: 'DELETE' },
+      true,
+    );
   },
 };

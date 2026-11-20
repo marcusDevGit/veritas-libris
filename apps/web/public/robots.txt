@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /curadoria
+Disallow: /minha-lista
+
+Sitemap: https://veritas-libris.pages.dev/sitemap.xml
