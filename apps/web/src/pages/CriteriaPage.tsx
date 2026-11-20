@@ -6,8 +6,14 @@ import { CriteriaDimensionsGrid } from '../components/domain/criteria/CriteriaDi
 import { CriteriaVerdictsSection } from '../components/domain/criteria/CriteriaVerdictsSection.js';
 import { CriteriaAgeSection } from '../components/domain/criteria/CriteriaAgeSection.js';
 import { CriteriaConsensusSection } from '../components/domain/criteria/CriteriaConsensusSection.js';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 
 export const CriteriaPage: React.FC = () => {
+  usePageMeta(
+    'Critérios do Índice',
+    'Conheça as 4 dimensões de discernimento moral e literário, faixas etárias e regras do motor de consenso do Veritas Libris.',
+  );
+
   return (
     <div className="pt-[84px] sm:pt-[100px] pb-16 flex flex-col gap-12">
       <CriteriaHeroSection />

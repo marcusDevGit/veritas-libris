@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { ExternalBook } from '@app/shared';
+import { logProviderFailure, type ExternalProviderName } from './provider-logger.js';
 
 const BRASIL_API_ISBN_URL = 'https://brasilapi.com.br/api/isbn/v1';
 const OPEN_LIBRARY_API_URL = 'https://openlibrary.org/api/books';
@@ -155,15 +156,36 @@ export function mergeBookMetadata(
   };
 }
 
-async function fetchJsonWithTimeout(url: string): Promise<unknown | null> {
+async function fetchJsonWithTimeout(
+  url: string,
+  provider: ExternalProviderName,
+  operation: string,
+): Promise<unknown | null> {
+  const startedAt = Date.now();
   try {
     const response = await fetch(url, {
       signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
       headers: { Accept: 'application/json' },
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      logProviderFailure({
+        provider,
+        operation,
+        durationMs: Date.now() - startedAt,
+        statusCode: response.status,
+        reason: `HTTP ${response.status}`,
+      });
+      return null;
+    }
     return await response.json();
-  } catch {
+  } catch (error) {
+    logProviderFailure({
+      provider,
+      operation,
+      durationMs: Date.now() - startedAt,
+      errorName: error instanceof Error ? error.name : 'UnknownError',
+      reason: error instanceof Error ? error.message : 'Falha de rede',
+    });
     return null;
   }
 }
@@ -171,7 +193,11 @@ async function fetchJsonWithTimeout(url: string): Promise<unknown | null> {
 export async function fetchBrasilApiByIsbn(
   isbn13: string,
 ): Promise<Partial<ExternalBook> | null> {
-  const data = await fetchJsonWithTimeout(`${BRASIL_API_ISBN_URL}/${isbn13}`);
+  const data = await fetchJsonWithTimeout(
+    `${BRASIL_API_ISBN_URL}/${isbn13}`,
+    'brasil-api',
+    'isbn_lookup',
+  );
   return data ? mapBrasilApiVolume(data, isbn13) : null;
 }
 
@@ -183,7 +209,11 @@ export async function fetchOpenLibraryByIsbn(
     format: 'json',
     jscmd: 'data',
   });
-  const data = await fetchJsonWithTimeout(`${OPEN_LIBRARY_API_URL}?${params.toString()}`);
+  const data = await fetchJsonWithTimeout(
+    `${OPEN_LIBRARY_API_URL}?${params.toString()}`,
+    'open-library',
+    'isbn_lookup',
+  );
   return data ? mapOpenLibraryVolume(data, isbn13) : null;
 }
 

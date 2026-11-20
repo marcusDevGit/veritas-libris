@@ -4,6 +4,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { env } from './config/env.js';
 import { errorHandler } from './middlewares/error-handler.js';
 import { registerRateLimit } from './plugins/rate-limit.js';
+import { registerSecurityHeaders } from './plugins/security-headers.js';
 import { adminRoutes } from './routes/admin.routes.js';
 import { authRoutes } from './routes/auth.routes.js';
 import { bookRoutes } from './routes/books.routes.js';
@@ -38,6 +39,7 @@ export function buildApp(): FastifyInstance {
   });
 
   void registerRateLimit(app);
+  registerSecurityHeaders(app);
 
   app.decorateRequest('authUser', null);
 

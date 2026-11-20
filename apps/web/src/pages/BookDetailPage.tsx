@@ -10,6 +10,7 @@ import { BookReservationsSection } from '../components/domain/book-detail/BookRe
 import { BookSynopsisAccordion } from '../components/domain/book-detail/BookSynopsisAccordion.js';
 import { BookReviewsSection } from '../components/domain/book-detail/BookReviewsSection.js';
 import { ReviewModal } from '../components/domain/review-modal/ReviewModal.js';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 import { Button } from '../components/ui/Button.js';
 import { ArrowLeft } from 'lucide-react';
 
@@ -36,6 +37,11 @@ export const BookDetailPage: React.FC = () => {
     queryFn: () => api.getBookById(id!),
     enabled: !!id,
   });
+
+  usePageMeta(
+    book ? `${book.title} — ${book.authors[0] ?? 'Obra'}` : undefined,
+    book?.synopsis?.slice(0, 155),
+  );
 
   const { data: reviewsData, isLoading: isReviewsLoading } = useQuery({
     queryKey: ['book-reviews', id],
