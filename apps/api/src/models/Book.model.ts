@@ -78,3 +78,20 @@ bookSchema.index(
 );
 
 export const BookModel = model<BookAttrs>('Book', bookSchema);
+
+/**
+ * Garante que o índice $text antigo (sem language_override) seja recriado no MongoDB
+ * quando a coleção já existia antes da atualização do schema.
+ */
+export async function ensureBookTextIndex(): Promise<void> {
+  try {
+    const indexes = await BookModel.collection.indexes();
+    const textIndex = indexes.find((idx) => idx.name === 'title_text_subtitle_text_authors_text');
+    if (textIndex && textIndex.language_override !== 'textSearchLanguage') {
+      await BookModel.collection.dropIndex('title_text_subtitle_text_authors_text');
+      await BookModel.createIndexes();
+    }
+  } catch {
+    // Coleção ainda não inicializada ou índice já ajustado
+  }
+}
