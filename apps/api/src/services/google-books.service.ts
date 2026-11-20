@@ -11,6 +11,7 @@ import {
   ExternalServiceError,
   ExternalServiceTimeoutError,
 } from "../errors/app-error.js";
+import { logProviderFailure } from "./provider-logger.js";
 
 const GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes";
 const REQUEST_TIMEOUT_MS = 8_000;
@@ -194,6 +195,7 @@ async function fetchVolumes(
   if (langRestrict) params.set("langRestrict", langRestrict);
   if (apiKey) params.set("key", apiKey);
 
+  const startedAt = Date.now();
   let response: Response;
   try {
     response = await fetch(`${GOOGLE_BOOKS_URL}?${params.toString()}`, {
@@ -201,19 +203,40 @@ async function fetchVolumes(
       headers: { Accept: "application/json" },
     });
   } catch (error) {
-    if (error instanceof Error && error.name === "TimeoutError") {
+    const isTimeout = error instanceof Error && error.name === "TimeoutError";
+    logProviderFailure({
+      provider: "google-books",
+      operation: langRestrict ? `volumes_${langRestrict}` : "volumes_search",
+      durationMs: Date.now() - startedAt,
+      errorName: error instanceof Error ? error.name : "UnknownError",
+      reason: isTimeout ? "Timeout" : error instanceof Error ? error.message : "Erro de rede",
+    });
+    if (isTimeout) {
       throw new ExternalServiceTimeoutError();
     }
     throw new ExternalServiceError();
   }
 
   if (!response.ok) {
+    logProviderFailure({
+      provider: "google-books",
+      operation: langRestrict ? `volumes_${langRestrict}` : "volumes_search",
+      durationMs: Date.now() - startedAt,
+      statusCode: response.status,
+      reason: `HTTP ${response.status}`,
+    });
     throw new ExternalServiceError();
   }
 
   const body: unknown = await response.json().catch(() => null);
   const parsed = GoogleResponseSchema.safeParse(body);
   if (!parsed.success) {
+    logProviderFailure({
+      provider: "google-books",
+      operation: langRestrict ? `volumes_${langRestrict}` : "volumes_search",
+      durationMs: Date.now() - startedAt,
+      reason: "Payload fora do schema esperado",
+    });
     throw new ExternalServiceError();
   }
 

@@ -26,9 +26,13 @@ describe('API HTTP integration (buildApp)', () => {
     }
   });
 
-  it('GET /health retorna 503 degraded quando MongoDB não está conectado', async () => {
+  it('GET /health retorna 503 degraded quando MongoDB não está conectado e envia headers de segurança', async () => {
     const res = await app.inject({ method: 'GET', url: '/health' });
     assert.equal(res.statusCode, 503);
+    assert.equal(res.headers['x-content-type-options'], 'nosniff');
+    assert.equal(res.headers['x-frame-options'], 'DENY');
+    assert.equal(res.headers['referrer-policy'], 'strict-origin-when-cross-origin');
+    assert.equal(res.headers['cross-origin-resource-policy'], 'cross-origin');
 
     const body = res.json() as { status: string; database: string; uptimeSeconds: number };
     assert.equal(body.status, 'degraded');
