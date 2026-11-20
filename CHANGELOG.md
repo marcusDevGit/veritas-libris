@@ -2,9 +2,18 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
-## [Unreleased]
+## [1.2.0] - 2026-11-19
+### Added
+- **Painel de Triagem de Sugestões (`/curadoria`):** aba dedicada com filtros por status (`PENDING`, `REVIEWED`, `ACCEPTED`, `DISMISSED`), nota de resolução, endpoint `PATCH /api/v1/suggestions/:id`, auditoria (`SUGGESTION_TRIAGED`) e importação rápida via ISBN-13.
+- **Gerenciamento e Moderação de Pareceres:** edição de parecer existente no `ReviewModal`, rota `DELETE /api/v1/reviews/:id` para autor ou moderador (`CURATOR`/`ADMIN`) com recálculo automático de consenso e log `REVIEW_MODERATED`.
+- **Perfil do Leitor & Arquivamento de Notificações:** página `/meus-pareceres` (`GET /api/v1/reviews/me`), atalho no `ProfileMenu` e limpeza/arquivamento lógico de avisos (`DELETE /api/v1/notifications/read` e `DELETE /api/v1/notifications/:id`).
+- **Suíte de Testes e CI:** configuração de **Vitest + React Testing Library** no `@app/web` (`11` testes em 6 arquivos), suíte de integração HTTP da API (`buildApp().inject()`) e inclusão no `.github/workflows/ci.yml`.
+- **Hardening HTTP, SEO e Observabilidade:** plugin nativo de cabeçalhos de segurança (`security-headers.ts`), logs estruturados de falha para provedores externos (`provider-logger.ts`), meta tags Open Graph dinâmicas (`usePageMeta`), `robots.txt` e `sitemap.xml`.
+- **Documentação Técnica:** atualização do `README.md` e criação de `docs/api.md`, `docs/architecture.md` e `CHANGELOG.md`.
+
 ### Fixed
 - Adicionado componente `ScrollToTop` e reset de rolagem nos links do `Footer` para redirecionar automaticamente ao início da página ao navegar entre rotas.
+- Preservado o código `RATE_LIMIT_EXCEEDED` em respostas `429` no `errorHandler`.
 
 ---
 
