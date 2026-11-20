@@ -15,6 +15,11 @@ export const BOOK_RATE_LIMITS = {
     max: 10,
     timeWindow: '1 minute',
   },
+  aiDraft: {
+    max: 5,
+    timeWindow: '1 minute',
+    keyGenerator: (request: FastifyRequest) => request.authUser?.uid ?? request.ip,
+  },
 } as const;
 
 /**

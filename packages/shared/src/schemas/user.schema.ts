@@ -73,6 +73,7 @@ export const AuditLogDtoSchema = z.object({
     'EDITORIAL_LOCK_UPDATED',
     'SUGGESTION_TRIAGED',
     'REVIEW_MODERATED',
+    'AI_DRAFT_GENERATED',
   ]),
   actorUid: z.string(),
   actorName: z.string(),

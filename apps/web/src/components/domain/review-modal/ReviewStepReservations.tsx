@@ -6,6 +6,10 @@ export interface ReviewStepReservationsProps {
   adequacyVote: Exclude<AdequacyLevel, 'UNRATED'>;
   reservations: ReservationItem[];
   onChangeReservations: (items: ReservationItem[]) => void;
+  disabled?: boolean;
+  hideStepLabel?: boolean;
+  title?: string;
+  subtitle?: string;
 }
 
 const TOPIC_OPTIONS: Array<{ value: ReservationTopic; label: string }> = [
@@ -37,6 +41,10 @@ export const ReviewStepReservations: React.FC<ReviewStepReservationsProps> = ({
   adequacyVote,
   reservations,
   onChangeReservations,
+  disabled = false,
+  hideStepLabel = false,
+  title = 'Pontos de Inadequação & Alertas',
+  subtitle = 'Mapeie com precisão capitular os trechos sensíveis para guiar pais, diretores espirituais e educadores.',
 }) => {
   const requiresReservation = adequacyVote !== 'RECOMMENDED';
 
@@ -71,12 +79,16 @@ export const ReviewStepReservations: React.FC<ReviewStepReservationsProps> = ({
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-secondary uppercase tracking-wider">
-            Etapa 3
-          </span>
-          <span className="text-outline text-xs">•</span>
+          {!hideStepLabel && (
+            <>
+              <span className="text-xs font-bold text-secondary uppercase tracking-wider">
+                Etapa 3
+              </span>
+              <span className="text-outline text-xs">•</span>
+            </>
+          )}
           <h3 className="font-editorial text-lg font-bold text-primary">
-            Pontos de Inadequação & Alertas
+            {title}
           </h3>
         </div>
 
@@ -88,7 +100,7 @@ export const ReviewStepReservations: React.FC<ReviewStepReservationsProps> = ({
       </div>
 
       <p className="text-xs sm:text-sm text-on-surface-variant -mt-2">
-        Mapeie com precisão capitular os trechos sensíveis para guiar pais, diretores espirituais e educadores.
+        {subtitle}
       </p>
 
       <div className="flex flex-col gap-4">
@@ -104,11 +116,12 @@ export const ReviewStepReservations: React.FC<ReviewStepReservationsProps> = ({
                     Tópico / Categoria
                   </label>
                   <select
+                    disabled={disabled}
                     value={item.topic}
                     onChange={(e) =>
                       handleUpdateItem(idx, 'topic', e.target.value as ReservationTopic)
                     }
-                    className="w-full h-10 px-3 bg-surface-container-lowest border border-outline/20 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-10 px-3 bg-surface-container-lowest border border-outline/20 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {TOPIC_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -124,6 +137,7 @@ export const ReviewStepReservations: React.FC<ReviewStepReservationsProps> = ({
                   </label>
                   <input
                     type="text"
+                    disabled={disabled}
                     value={item.reference || ''}
                     onChange={(e) =>
                       handleUpdateItem(
@@ -133,16 +147,17 @@ export const ReviewStepReservations: React.FC<ReviewStepReservationsProps> = ({
                       )
                     }
                     placeholder="Ex: Parte 1, Cap. VII (pág. 89)"
-                    className="w-full h-10 px-3 bg-surface-container-lowest border border-outline/20 rounded-lg text-xs text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-10 px-3 bg-surface-container-lowest border border-outline/20 rounded-lg text-xs text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
 
               <button
                 type="button"
+                disabled={disabled}
                 onClick={() => handleRemoveItem(idx)}
                 title="Remover ressalva"
-                className="text-on-surface-variant hover:text-error p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer"
+                className="text-on-surface-variant hover:text-error p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -171,8 +186,9 @@ export const ReviewStepReservations: React.FC<ReviewStepReservationsProps> = ({
                     <button
                       key={sev.value}
                       type="button"
+                      disabled={disabled}
                       onClick={() => handleUpdateItem(idx, 'severity', sev.value)}
-                      className={`px-3 py-1 text-xs rounded flex items-center gap-1 transition-all cursor-pointer ${activeStyle}`}
+                      className={`px-3 py-1 text-xs rounded flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${activeStyle}`}
                     >
                       {isSelected && sev.value === 'HIGH' && <AlertOctagon className="w-3 h-3" />}
                       {isSelected && sev.value === 'MEDIUM' && <AlertCircle className="w-3 h-3" />}
@@ -189,10 +205,11 @@ export const ReviewStepReservations: React.FC<ReviewStepReservationsProps> = ({
               </label>
               <textarea
                 rows={2}
+                disabled={disabled}
                 value={item.description}
                 onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
                 placeholder="Descreva objetivamente o trecho e por que exige cautela..."
-                className="w-full p-3 rounded-lg bg-surface-container-lowest border border-outline/20 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+                className="w-full p-3 rounded-lg bg-surface-container-lowest border border-outline/20 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary resize-none disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
           </div>
@@ -201,8 +218,9 @@ export const ReviewStepReservations: React.FC<ReviewStepReservationsProps> = ({
 
       <button
         type="button"
+        disabled={disabled}
         onClick={handleAddItem}
-        className="w-full py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors border border-outline/15 cursor-pointer"
+        className="w-full py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors border border-outline/15 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <PlusCircle className="w-4 h-4 text-secondary" />
         <span>

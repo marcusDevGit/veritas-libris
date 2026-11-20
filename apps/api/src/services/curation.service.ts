@@ -12,7 +12,7 @@ import { BookModel } from '../models/Book.model.js';
 import { ReviewModel } from '../models/Review.model.js';
 import { calculateConsensus } from './consensus.service.js';
 import { toBookDto, type BookLean } from './book.service.js';
-import { sanitizeAlternativeIds } from './curation.utils.js';
+import { sanitizeAlternativeIds, sanitizeTags } from './curation.utils.js';
 import { notifyReadingListWatchers } from './notification.service.js';
 
 function escapeRegex(value: string): string {
@@ -110,6 +110,12 @@ export async function updateBookEditorial(
   if (body.editorialLock) {
     setUpdate.adequacyStatus = body.adequacyStatus;
     setUpdate.recommendedAge = body.recommendedAge;
+    if (body.tags !== undefined) {
+      setUpdate.tags = sanitizeTags(body.tags);
+    }
+    if (body.reservations !== undefined) {
+      setUpdate.reservations = body.reservations;
+    }
     setUpdate.editorialLockedAt = new Date();
     setUpdate.editorialLockedBy = actor.email ?? actor.name;
   } else {
@@ -150,7 +156,7 @@ export async function updateBookEditorial(
     details: body.editorialLock
       ? `Aplicou Trava Editorial: ${updated.adequacyStatus} (${updated.recommendedAge})${
           updated.hasImprimatur ? ' • Com Imprimatur' : ''
-        }`
+        } • ${updated.tags.length} tag(s), ${updated.reservations.length} ressalva(s)`
       : 'Desativou Trava Editorial e restaurou consenso comunitário',
   });
 

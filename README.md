@@ -8,7 +8,7 @@ Plataforma de **Curadoria e Discernimento Literário Católico** construída em 
 
 - **[Arquitetura do Sistema](docs/architecture.md)** — Camadas do monorepo, modelos Mongoose, motor de consenso, RBAC, notificações e estratégia de build.
 - **[Referência da API (`/api/v1`)](docs/api.md)** — Endpoints completos, parâmetros, autenticação, papéis exigidos e rate limits.
-- **[Changelog](CHANGELOG.md)** — Histórico de versões (`v1.0.0`, `v1.0.1`, `v1.1.0`).
+- **[Changelog](CHANGELOG.md)** — Histórico de versões (`v1.0.0`, `v1.0.1`, `v1.1.0`, `v1.2.0`, `v1.3.0`).
 
 ---
 
@@ -27,7 +27,7 @@ veritas-libris/
 ├── .github/workflows/ # Pipeline CI (build, testes unitários e typecheck)
 ├── docker-compose.yml # MongoDB local para desenvolvimento
 ├── railway.toml       # Configuração de build/deploy Docker da API no Railway
-└── package.json       # Configuração raiz dos workspaces (v1.1.0)
+└── package.json       # Configuração raiz dos workspaces (v1.3.0)
 ```
 
 ---
@@ -111,6 +111,7 @@ Copie `apps/api/.env.example` para `apps/api/.env` e `apps/web/.env.example` par
 | `IMPORT_REQUIRES_AUTH` | Não | `true` | Exige Bearer JWT no `POST /api/v1/books/import` *(obrigatório `true` em `production`)* |
 | `REVIEW_REQUIRES_AUTH` | Não | `true` | Exige Bearer JWT nas rotas de parecer/voto útil *(obrigatório `true` em `production`)* |
 | `ADMIN_EMAILS` | Não | `""` | Lista de e-mails separados por vírgula promovidos automaticamente a `ADMIN` |
+| `MAGISTERIUM_API_KEY` | Não | `undefined` | Chave da Magisterium AI (exclusiva do servidor) para o copiloto de curadoria |
 
 #### Frontend (`apps/web/.env`)
 
@@ -165,7 +166,7 @@ Consulte os detalhes completos em **[docs/api.md](docs/api.md)**:
 - **Saúde:** `GET /health`
 - **Autenticação:** `GET /api/v1/auth/me`
 - **Catálogo & Importação:** `GET /api/v1/books`, `GET /api/v1/books/external-search`, `GET /api/v1/books/:id`, `POST /api/v1/books/import`, `PATCH /api/v1/books/:id/refresh-metadata`
-- **Curadoria:** `GET /api/v1/curation/books`, `PATCH /api/v1/books/:id/editorial`
+- **Curadoria:** `GET /api/v1/curation/books`, `PATCH /api/v1/books/:id/editorial`, `POST /api/v1/curation/books/:id/ai-draft`
 - **Avaliações:** `GET /api/v1/books/:id/reviews`, `POST /api/v1/books/:id/reviews`, `POST /api/v1/reviews/:id/helpful`
 - **Minha Lista:** `GET /api/v1/reading-list`, `GET /api/v1/reading-list/:id/status`, `POST /api/v1/reading-list`, `DELETE /api/v1/reading-list/:id`
 - **Notificações:** `GET /api/v1/notifications`, `PATCH /api/v1/notifications/read-all`, `PATCH /api/v1/notifications/:id/read`

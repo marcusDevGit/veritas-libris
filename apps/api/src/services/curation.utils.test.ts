@@ -1,20 +1,16 @@
-import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { sanitizeAlternativeIds } from './curation.utils.js';
+import assert from 'node:assert/strict';
+import { sanitizeAlternativeIds, sanitizeTags } from './curation.utils.js';
 
 describe('curation.utils', () => {
-  it('sanitizeAlternativeIds remove o próprio ID da obra e duplicatas preservando a ordem', () => {
-    const bookId = '507f1f77bcf86cd799439011';
-    const input = [
-      '507f1f77bcf86cd799439012',
-      bookId,
-      '507f1f77bcf86cd799439013',
-      '507f1f77bcf86cd799439012',
-    ];
+  it('sanitizeAlternativeIds remove o próprio ID e duplicatas preservando a ordem', () => {
+    assert.deepEqual(sanitizeAlternativeIds('b1', ['b2', 'b1', 'b3', 'b2']), ['b2', 'b3']);
+  });
 
-    assert.deepEqual(sanitizeAlternativeIds(bookId, input), [
-      '507f1f77bcf86cd799439012',
-      '507f1f77bcf86cd799439013',
+  it('sanitizeTags faz trim, ignora vazios e deduplica sem diferenciar maiúsculas', () => {
+    assert.deepEqual(sanitizeTags(['  Apologética ', '', 'apologética', 'Virtudes Cristãs']), [
+      'Apologética',
+      'Virtudes Cristãs',
     ]);
   });
 });
