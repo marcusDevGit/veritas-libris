@@ -1,5 +1,10 @@
 import { Types } from 'mongoose';
-import type { NotificationDto, NotificationListResponse, NotificationType } from '@app/shared';
+import type {
+  ArchiveNotificationsResponse,
+  NotificationDto,
+  NotificationListResponse,
+  NotificationType,
+} from '@app/shared';
 import { NotificationModel, type NotificationAttrs } from '../models/Notification.model.js';
 import { ReadingListItemModel } from '../models/ReadingListItem.model.js';
 import { buildNotificationPayloads } from './notification.utils.js';
@@ -57,12 +62,13 @@ export async function listUserNotifications(
   userId: string,
   limit = 20,
 ): Promise<NotificationListResponse> {
+  const activeFilter = { userId, archived: { $ne: true } };
   const [docs, unreadCount] = await Promise.all([
-    NotificationModel.find({ userId })
+    NotificationModel.find(activeFilter)
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean<Array<NotificationAttrs & { _id: unknown }>>(),
-    NotificationModel.countDocuments({ userId, read: false }),
+    NotificationModel.countDocuments({ ...activeFilter, read: false }),
   ]);
 
   return {
@@ -73,7 +79,7 @@ export async function listUserNotifications(
 
 export async function markAllNotificationsAsRead(userId: string): Promise<{ updated: number }> {
   const result = await NotificationModel.updateMany(
-    { userId, read: false },
+    { userId, read: false, archived: { $ne: true } },
     { $set: { read: true } },
   );
   return { updated: result.modifiedCount };
@@ -88,4 +94,25 @@ export async function markNotificationAsRead(
     { $set: { read: true } },
   );
   return { read: true };
+}
+
+export async function archiveReadNotifications(
+  userId: string,
+): Promise<ArchiveNotificationsResponse> {
+  const result = await NotificationModel.updateMany(
+    { userId, read: true, archived: { $ne: true } },
+    { $set: { archived: true } },
+  );
+  return { archived: result.modifiedCount };
+}
+
+export async function archiveNotification(
+  userId: string,
+  notificationId: string,
+): Promise<ArchiveNotificationsResponse> {
+  const result = await NotificationModel.updateOne(
+    { _id: new Types.ObjectId(notificationId), userId, archived: { $ne: true } },
+    { $set: { read: true, archived: true } },
+  );
+  return { archived: result.modifiedCount };
 }

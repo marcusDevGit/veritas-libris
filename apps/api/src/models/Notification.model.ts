@@ -9,6 +9,7 @@ export interface NotificationAttrs {
   title: string;
   description: string;
   read: boolean;
+  archived: boolean;
   createdAt: Date;
 }
 
@@ -21,6 +22,7 @@ const notificationSchema = new Schema<NotificationAttrs>(
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
     read: { type: Boolean, default: false, index: true },
+    archived: { type: Boolean, default: false, index: true },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },
@@ -29,5 +31,6 @@ const notificationSchema = new Schema<NotificationAttrs>(
 );
 
 notificationSchema.index({ userId: 1, createdAt: -1 });
+notificationSchema.index({ userId: 1, archived: 1, createdAt: -1 });
 
 export const NotificationModel = model<NotificationAttrs>('Notification', notificationSchema);

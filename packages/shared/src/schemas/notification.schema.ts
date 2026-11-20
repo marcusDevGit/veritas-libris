@@ -21,3 +21,8 @@ export const NotificationListResponseSchema = z.object({
   unreadCount: z.number().int().nonnegative(),
 });
 export type NotificationListResponse = z.infer<typeof NotificationListResponseSchema>;
+
+export const ArchiveNotificationsResponseSchema = z.object({
+  archived: z.number().int().nonnegative(),
+});
+export type ArchiveNotificationsResponse = z.infer<typeof ArchiveNotificationsResponseSchema>;

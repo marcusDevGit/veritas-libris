@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bookmark, Feather, LogOut, ShieldCheck } from 'lucide-react';
+import { Bookmark, Feather, LogOut, MessageSquareText, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext.js';
 
 export const ProfileMenu: React.FC = () => {
@@ -114,6 +114,15 @@ export const ProfileMenu: React.FC = () => {
             >
               <Bookmark className="w-4 h-4 text-secondary" />
               <span>Minha Lista de Leitura</span>
+            </Link>
+
+            <Link
+              to="/meus-pareceres"
+              onClick={() => setIsOpen(false)}
+              className="px-4 py-2.5 hover:bg-surface-container-low flex items-center gap-2.5 transition-colors"
+            >
+              <MessageSquareText className="w-4 h-4 text-secondary" />
+              <span>Meus Pareceres</span>
             </Link>
 
             {isCurator && (

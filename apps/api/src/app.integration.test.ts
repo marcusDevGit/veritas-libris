@@ -73,7 +73,9 @@ describe('API HTTP integration (buildApp)', () => {
     const protectedEndpoints: Array<{ method: 'GET' | 'POST' | 'PATCH' | 'DELETE'; url: string; payload?: unknown }> = [
       { method: 'GET', url: '/api/v1/auth/me' },
       { method: 'GET', url: '/api/v1/notifications' },
+      { method: 'DELETE', url: '/api/v1/notifications/read' },
       { method: 'GET', url: '/api/v1/reading-list' },
+      { method: 'GET', url: '/api/v1/reviews/me' },
       { method: 'GET', url: '/api/v1/curation/books' },
       { method: 'GET', url: '/api/v1/suggestions' },
       {

@@ -8,6 +8,8 @@ const mockUseAuth = vi.fn();
 const mockListNotifications = vi.fn();
 const mockMarkAllNotificationsRead = vi.fn();
 const mockMarkNotificationRead = vi.fn();
+const mockArchiveReadNotifications = vi.fn();
+const mockArchiveNotification = vi.fn();
 
 vi.mock('../../contexts/AuthContext.js', () => ({
   useAuth: () => mockUseAuth(),
@@ -18,6 +20,8 @@ vi.mock('../../services/api.js', () => ({
     listNotifications: () => mockListNotifications(),
     markAllNotificationsRead: () => mockMarkAllNotificationsRead(),
     markNotificationRead: (id: string) => mockMarkNotificationRead(id),
+    archiveReadNotifications: () => mockArchiveReadNotifications(),
+    archiveNotification: (id: string) => mockArchiveNotification(id),
   },
 }));
 
@@ -84,6 +88,41 @@ describe('NotificationsPopover', () => {
     fireEvent.click(link);
     await waitFor(() => {
       expect(mockMarkNotificationRead).toHaveBeenCalledWith('notif-1');
+    });
+  });
+
+  it('permite limpar notificações lidas e arquivar item individual', async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: 'u-1' } });
+    mockListNotifications.mockResolvedValue({
+      unreadCount: 0,
+      items: [
+        {
+          id: 'notif-read',
+          bookId: 'book-9',
+          bookTitle: 'Confissões',
+          type: 'EDITORIAL_UPDATE',
+          title: 'Parecer oficial atualizado',
+          description: 'Trava editorial aplicada.',
+          read: true,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    });
+    mockArchiveReadNotifications.mockResolvedValue({ archived: 1 });
+    mockArchiveNotification.mockResolvedValue({ archived: 1 });
+
+    renderPopover();
+    fireEvent.click(screen.getByRole('button', { name: 'Notificações' }));
+
+    const clearReadBtn = await screen.findByRole('button', { name: /Limpar lidas/i });
+    fireEvent.click(clearReadBtn);
+    await waitFor(() => {
+      expect(mockArchiveReadNotifications).toHaveBeenCalledTimes(1);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Arquivar notificação Parecer oficial atualizado/i }));
+    await waitFor(() => {
+      expect(mockArchiveNotification).toHaveBeenCalledWith('notif-read');
     });
   });
 });

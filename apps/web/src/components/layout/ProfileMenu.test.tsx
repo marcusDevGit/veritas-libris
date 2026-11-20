@@ -34,6 +34,7 @@ describe('ProfileMenu', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Abrir menu do perfil' }));
 
     expect(screen.getByText('Minha Lista de Leitura')).toBeInTheDocument();
+    expect(screen.getByText('Meus Pareceres')).toBeInTheDocument();
     expect(screen.queryByText('Painel de Curadoria')).not.toBeInTheDocument();
     expect(screen.queryByText('Administração')).not.toBeInTheDocument();
 
