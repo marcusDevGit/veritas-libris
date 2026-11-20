@@ -20,7 +20,10 @@ import type {
   Review,
   ReviewListQuery,
   SuggestionDto,
+  SuggestionListQuery,
+  SuggestionListResponse,
   UpdateBookEditorialBody,
+  UpdateSuggestionStatusBody,
   UserDto,
   UserRole,
 } from '@app/shared';
@@ -220,6 +223,32 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(body),
     });
+  },
+
+  listSuggestions: async (
+    query: Partial<SuggestionListQuery> = {},
+  ): Promise<SuggestionListResponse> => {
+    const params = new URLSearchParams();
+    if (query.status) params.set('status', query.status);
+    if (query.type) params.set('type', query.type);
+    if (query.q) params.set('q', query.q);
+    if (query.limit) params.set('limit', String(query.limit));
+    const qs = params.toString();
+    return request<SuggestionListResponse>(`/suggestions${qs ? `?${qs}` : ''}`, {}, true);
+  },
+
+  triageSuggestion: async (
+    id: string,
+    body: UpdateSuggestionStatusBody,
+  ): Promise<SuggestionDto> => {
+    return request<SuggestionDto>(
+      `/suggestions/${id}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      },
+      true,
+    );
   },
 
   listNotifications: async (): Promise<NotificationListResponse> => {

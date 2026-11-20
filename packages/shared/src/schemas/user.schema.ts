@@ -68,7 +68,7 @@ export type InviteUserBody = z.infer<typeof InviteUserBodySchema>;
 
 export const AuditLogDtoSchema = z.object({
   id: z.string(),
-  action: z.enum(['ROLE_UPDATED', 'EDITORIAL_LOCK_UPDATED']),
+  action: z.enum(['ROLE_UPDATED', 'EDITORIAL_LOCK_UPDATED', 'SUGGESTION_TRIAGED']),
   actorUid: z.string(),
   actorName: z.string(),
   targetId: z.string(),

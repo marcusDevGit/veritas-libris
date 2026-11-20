@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-export type AuditAction = 'ROLE_UPDATED' | 'EDITORIAL_LOCK_UPDATED';
+export type AuditAction = 'ROLE_UPDATED' | 'EDITORIAL_LOCK_UPDATED' | 'SUGGESTION_TRIAGED';
 
 export interface AuditLogAttrs {
   action: AuditAction;
@@ -16,7 +16,7 @@ const auditLogSchema = new Schema<AuditLogAttrs>(
   {
     action: {
       type: String,
-      enum: ['ROLE_UPDATED', 'EDITORIAL_LOCK_UPDATED'],
+      enum: ['ROLE_UPDATED', 'EDITORIAL_LOCK_UPDATED', 'SUGGESTION_TRIAGED'],
       required: true,
     },
     actorUid: { type: String, required: true, trim: true },
