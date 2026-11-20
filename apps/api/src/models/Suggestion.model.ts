@@ -1,5 +1,10 @@
 import { model, Schema } from 'mongoose';
-import { SUGGESTION_TYPES, type SuggestionType } from '@app/shared';
+import {
+  SUGGESTION_STATUSES,
+  SUGGESTION_TYPES,
+  type SuggestionStatus,
+  type SuggestionType,
+} from '@app/shared';
 
 export interface SuggestionAttrs {
   type: SuggestionType;
@@ -9,6 +14,11 @@ export interface SuggestionAttrs {
   senderName?: string;
   senderEmail?: string;
   message: string;
+  status: SuggestionStatus;
+  reviewedByUid?: string;
+  reviewedByName?: string;
+  reviewedAt?: Date;
+  resolutionNote?: string;
   createdAt: Date;
 }
 
@@ -21,6 +31,16 @@ const suggestionSchema = new Schema<SuggestionAttrs>(
     senderName: { type: String, trim: true },
     senderEmail: { type: String, trim: true, lowercase: true },
     message: { type: String, required: true, trim: true },
+    status: {
+      type: String,
+      enum: [...SUGGESTION_STATUSES],
+      default: 'PENDING',
+      required: true,
+    },
+    reviewedByUid: { type: String, trim: true },
+    reviewedByName: { type: String, trim: true },
+    reviewedAt: { type: Date },
+    resolutionNote: { type: String, trim: true },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },
@@ -29,5 +49,6 @@ const suggestionSchema = new Schema<SuggestionAttrs>(
 );
 
 suggestionSchema.index({ createdAt: -1 });
+suggestionSchema.index({ status: 1, createdAt: -1 });
 
 export const SuggestionModel = model<SuggestionAttrs>('Suggestion', suggestionSchema);
