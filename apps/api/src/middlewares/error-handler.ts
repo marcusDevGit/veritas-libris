@@ -44,7 +44,8 @@ export function errorHandler(error: FastifyError | Error, request: FastifyReques
 
   const statusCode = 'statusCode' in error && typeof error.statusCode === 'number' ? error.statusCode : 500;
   if (statusCode >= 400 && statusCode < 500) {
-    const body: ErrorBody = { statusCode, code: 'BAD_REQUEST', message: error.message };
+    const errorCode = 'code' in error && typeof error.code === 'string' ? error.code : 'BAD_REQUEST';
+    const body: ErrorBody = { statusCode, code: errorCode, message: error.message };
     void reply.status(statusCode).send(body);
     return;
   }
