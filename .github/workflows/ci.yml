@@ -44,5 +44,8 @@ jobs:
       - name: Typecheck @app/web
         run: npm run typecheck --workspace=@app/web
 
+      - name: Test @app/web
+        run: npm test --workspace=@app/web
+
       - name: Build @app/web
         run: npm run build --workspace=@app/web
