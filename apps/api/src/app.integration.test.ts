@@ -66,7 +66,7 @@ describe('API HTTP integration (buildApp)', () => {
   });
 
   it('bloqueia acesso sem token Bearer (401) em todas as rotas autenticadas', async () => {
-    const protectedEndpoints: Array<{ method: 'GET' | 'POST' | 'PATCH'; url: string; payload?: unknown }> = [
+    const protectedEndpoints: Array<{ method: 'GET' | 'POST' | 'PATCH' | 'DELETE'; url: string; payload?: unknown }> = [
       { method: 'GET', url: '/api/v1/auth/me' },
       { method: 'GET', url: '/api/v1/notifications' },
       { method: 'GET', url: '/api/v1/reading-list' },
@@ -77,6 +77,7 @@ describe('API HTTP integration (buildApp)', () => {
         url: '/api/v1/suggestions/507f1f77bcf86cd799439011',
         payload: { status: 'ACCEPTED' },
       },
+      { method: 'DELETE', url: '/api/v1/reviews/507f1f77bcf86cd799439011' },
       { method: 'GET', url: '/api/v1/admin/users' },
       { method: 'POST', url: '/api/v1/books/import', payload: { isbn13: '9788535902778' } },
     ];

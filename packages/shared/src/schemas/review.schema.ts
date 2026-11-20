@@ -67,3 +67,9 @@ export const HelpfulVoteResponseSchema = z.object({
   voted: z.boolean(),
 });
 export type HelpfulVoteResponse = z.infer<typeof HelpfulVoteResponseSchema>;
+
+export const DeleteReviewResponseSchema = z.object({
+  deletedId: ObjectIdSchema,
+  bookId: ObjectIdSchema,
+});
+export type DeleteReviewResponse = z.infer<typeof DeleteReviewResponseSchema>;

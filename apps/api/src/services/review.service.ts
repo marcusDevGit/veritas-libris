@@ -1,16 +1,19 @@
-import { Types } from 'mongoose';
+import { type HydratedDocument, Types } from "mongoose";
 import type {
   CreateReviewBody,
+  DeleteReviewResponse,
   HelpfulVoteResponse,
   PaginatedReviews,
   Review,
   ReviewListQuery,
-} from '@app/shared';
-import { NotFoundError } from '../errors/app-error.js';
-import { BookModel } from '../models/Book.model.js';
-import { ReviewModel, type ReviewAttrs } from '../models/Review.model.js';
-import { calculateConsensus } from './consensus.service.js';
-import { notifyReadingListWatchers } from './notification.service.js';
+} from "@app/shared";
+import { ForbiddenError, NotFoundError } from "../errors/app-error.js";
+import { AuditLogModel } from "../models/AuditLog.model.js";
+import { BookModel, type BookAttrs } from "../models/Book.model.js";
+import { ReviewModel, type ReviewAttrs } from "../models/Review.model.js";
+import { calculateConsensus } from "./consensus.service.js";
+import { notifyReadingListWatchers } from "./notification.service.js";
+import { evaluateReviewDeletion } from "./review-moderation.utils.js";
 
 export interface UpsertReviewInput {
   bookId: string;
@@ -44,6 +47,37 @@ function toReviewDto(doc: ReviewLean): Review & { _id: string } {
   };
 }
 
+async function recalculateBookConsensus(
+  book: HydratedDocument<BookAttrs>,
+): Promise<void> {
+  const allReviews = await ReviewModel.find({ bookId: book._id }).lean<
+    ReviewAttrs[]
+  >();
+
+  const consensus = calculateConsensus({
+    currentEditorialLock: book.editorialLock,
+    reviews: allReviews,
+  });
+
+  book.communityStats = consensus.communityStats;
+  book.reservations = consensus.reservations;
+  if (consensus.tags.length > 0) {
+    const mergedTags = new Set([...book.tags, ...consensus.tags]);
+    book.tags = Array.from(mergedTags);
+  }
+
+  if (
+    !book.editorialLock &&
+    consensus.adequacyStatus &&
+    consensus.recommendedAge
+  ) {
+    book.adequacyStatus = consensus.adequacyStatus;
+    book.recommendedAge = consensus.recommendedAge;
+  }
+
+  await book.save();
+}
+
 /**
  * Cria ou atualiza uma avaliação e recalcula o consenso do livro
  */
@@ -57,7 +91,7 @@ export async function upsertReview({
   const bookObjectId = new Types.ObjectId(bookId);
   const book = await BookModel.findById(bookObjectId);
   if (!book) {
-    throw new NotFoundError('Livro não encontrado');
+    throw new NotFoundError("Livro não encontrado");
   }
 
   const reviewDoc = await ReviewModel.findOneAndUpdate(
@@ -73,39 +107,20 @@ export async function upsertReview({
         comment: data.comment,
       },
     },
-    { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
+    { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
   ).lean<ReviewLean>();
 
   if (!reviewDoc) {
-    throw new Error('Falha ao persistir avaliação');
+    throw new Error("Falha ao persistir avaliação");
   }
 
-  const allReviews = await ReviewModel.find({ bookId: bookObjectId }).lean<ReviewAttrs[]>();
-
-  const consensus = calculateConsensus({
-    currentEditorialLock: book.editorialLock,
-    reviews: allReviews,
-  });
-
-  book.communityStats = consensus.communityStats;
-  book.reservations = consensus.reservations;
-  if (consensus.tags.length > 0) {
-    const mergedTags = new Set([...book.tags, ...consensus.tags]);
-    book.tags = Array.from(mergedTags);
-  }
-
-  if (!book.editorialLock && consensus.adequacyStatus && consensus.recommendedAge) {
-    book.adequacyStatus = consensus.adequacyStatus;
-    book.recommendedAge = consensus.recommendedAge;
-  }
-
-  await book.save();
+  await recalculateBookConsensus(book);
 
   try {
     await notifyReadingListWatchers({
       bookId: book._id,
       bookTitle: book.title,
-      type: 'NEW_REVIEW',
+      type: "NEW_REVIEW",
       actorUid: userId,
       actorName: userName,
     });
@@ -127,7 +142,7 @@ export async function listReviewsByBook(
   const bookObjectId = new Types.ObjectId(bookId);
   const bookExists = await BookModel.exists({ _id: bookObjectId });
   if (!bookExists) {
-    throw new NotFoundError('Livro não encontrado');
+    throw new NotFoundError("Livro não encontrado");
   }
 
   const { page, limit } = query;
@@ -172,10 +187,10 @@ export async function voteReviewHelpful(
         $pull: { helpfulUserIds: userId },
         $inc: { helpfulVotes: -1 },
       },
-      { returnDocument: 'after' },
+      { returnDocument: "after" },
     ).lean<ReviewLean>();
 
-    if (!updated) throw new NotFoundError('Avaliação não encontrada');
+    if (!updated) throw new NotFoundError("Avaliação não encontrada");
 
     return {
       reviewId,
@@ -190,16 +205,65 @@ export async function voteReviewHelpful(
       $addToSet: { helpfulUserIds: userId },
       $inc: { helpfulVotes: 1 },
     },
-    { returnDocument: 'after' },
+    { returnDocument: "after" },
   ).lean<ReviewLean>();
 
   if (!updated) {
-    throw new NotFoundError('Avaliação não encontrada');
+    throw new NotFoundError("Avaliação não encontrada");
   }
 
   return {
     reviewId,
     helpfulVotes: updated.helpfulVotes,
     voted: true,
+  };
+}
+
+/**
+ * Exclui um parecer (pelo próprio autor ou via moderação de curador/admin)
+ * e recalcula o consenso da obra imediatamente.
+ */
+export async function deleteReview(
+  reviewId: string,
+  actor: { uid: string; name: string; isCurator: boolean },
+): Promise<DeleteReviewResponse> {
+  const reviewObjectId = new Types.ObjectId(reviewId);
+  const review = await ReviewModel.findById(reviewObjectId);
+  if (!review) {
+    throw new NotFoundError("Avaliação não encontrada");
+  }
+
+  const decision = evaluateReviewDeletion(review.userId, actor);
+  if (!decision.allowed) {
+    throw new ForbiddenError(
+      "Você não tem permissão para remover este parecer",
+    );
+  }
+
+  const bookObjectId = review.bookId;
+  const targetAuthorName = review.userName;
+  await ReviewModel.deleteOne({ _id: reviewObjectId });
+
+  const book = await BookModel.findById(bookObjectId);
+  if (book) {
+    await recalculateBookConsensus(book);
+  }
+
+  if (decision.isModeration) {
+    await AuditLogModel.create({
+      action: "REVIEW_MODERATED",
+      actorUid: actor.uid,
+      actorName: actor.name,
+      targetId: reviewId,
+      targetLabel: book
+        ? `${book.title} (parecer de ${targetAuthorName})`
+        : targetAuthorName,
+      details: "removeu parecer via moderação",
+    });
+  }
+
+  return {
+    deletedId: reviewId,
+    bookId: bookObjectId.toString(),
   };
 }
