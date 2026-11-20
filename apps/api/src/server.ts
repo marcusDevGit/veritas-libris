@@ -1,12 +1,14 @@
 import { buildApp } from './app.js';
 import { connectDatabase, disconnectDatabase } from './config/database.js';
 import { env } from './config/env.js';
+import { ensureBookTextIndex } from './models/Book.model.js';
 
 async function main(): Promise<void> {
   const app = buildApp();
 
   try {
     await connectDatabase(env.MONGODB_URI);
+    await ensureBookTextIndex();
     app.log.info('MongoDB conectado');
 
     await app.listen({ host: env.HOST, port: env.PORT });
