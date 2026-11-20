@@ -7,6 +7,7 @@ import type {
   CreateSuggestionBody,
   CurationQueueQuery,
   CurationQueueResponse,
+  DeleteReviewResponse,
   ExternalBookResult,
   HelpfulVoteResponse,
   ImportBookResponse,
@@ -143,6 +144,14 @@ export const api = {
     return request<HelpfulVoteResponse>(`/reviews/${reviewId}/helpful`, {
       method: 'POST',
     }, true);
+  },
+
+  deleteReview: async (reviewId: string): Promise<DeleteReviewResponse> => {
+    return request<DeleteReviewResponse>(
+      `/reviews/${reviewId}`,
+      { method: 'DELETE' },
+      true,
+    );
   },
 
   getCurrentUser: async (): Promise<UserDto> => {

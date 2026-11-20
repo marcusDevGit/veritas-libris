@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CreateReviewBodySchema,
@@ -6,6 +6,7 @@ import {
   type AgeRating,
   type BookDto,
   type ReservationItem,
+  type Review,
 } from '@app/shared';
 import { api, ApiError } from '../../../services/api.js';
 import { useAuth } from '../../../contexts/AuthContext.js';
@@ -20,6 +21,7 @@ export interface ReviewModalProps {
   book: BookDto;
   isOpen: boolean;
   onClose: () => void;
+  initialReview?: Review | null;
 }
 
 /**
@@ -35,6 +37,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
   book,
   isOpen,
   onClose,
+  initialReview = null,
 }) => {
   const { user, signInWithGoogle, authError } = useAuth();
   const queryClient = useQueryClient();
@@ -46,6 +49,25 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
   const [reservations, setReservations] = useState<ReservationItem[]>([]);
   const [comment, setComment] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setCurrentStep(1);
+    setValidationError(null);
+    if (initialReview) {
+      setAdequacyVote(initialReview.adequacyVote);
+      setAgeVote(initialReview.ageVote);
+      setSuggestedTags(initialReview.suggestedTags ?? []);
+      setReservations(initialReview.reservations ?? []);
+      setComment(initialReview.comment);
+    } else {
+      setAdequacyVote('RECOMMENDED');
+      setAgeVote(book.recommendedAge || 'ALL');
+      setSuggestedTags(book.tags || []);
+      setReservations([]);
+      setComment('');
+    }
+  }, [isOpen, initialReview, book.recommendedAge, book.tags]);
 
   const step1Ref = useRef<HTMLDivElement>(null);
   const step2Ref = useRef<HTMLDivElement>(null);

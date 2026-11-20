@@ -23,7 +23,7 @@ import { ArrowLeft } from 'lucide-react';
  */
 export const BookDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { user, signInWithGoogle } = useAuth();
+  const { user, isCurator, signInWithGoogle } = useAuth();
   const queryClient = useQueryClient();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
@@ -47,6 +47,18 @@ export const BookDetailPage: React.FC = () => {
     mutationFn: (reviewId: string) => api.voteReviewHelpful(reviewId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['book-reviews', id] });
+    },
+  });
+
+  const deleteReviewMutation = useMutation({
+    mutationFn: (reviewId: string) => api.deleteReview(reviewId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['book', id] }),
+        queryClient.invalidateQueries({ queryKey: ['book-reviews', id] }),
+        queryClient.invalidateQueries({ queryKey: ['books'] }),
+        queryClient.invalidateQueries({ queryKey: ['admin-audit-logs'] }),
+      ]);
     },
   });
 
@@ -145,7 +157,14 @@ export const BookDetailPage: React.FC = () => {
               reviews={reviewsData?.items ?? []}
               totalReviews={reviewsData?.total ?? 0}
               isLoading={isReviewsLoading}
+              currentUserId={user?.uid}
+              canModerate={isCurator}
+              deletingReviewId={
+                deleteReviewMutation.isPending ? deleteReviewMutation.variables ?? null : null
+              }
               onVoteHelpful={(reviewId) => helpfulMutation.mutate(reviewId)}
+              onEditReview={() => setIsReviewModalOpen(true)}
+              onDeleteReview={(reviewId) => deleteReviewMutation.mutate(reviewId)}
             />
           </section>
         </div>
@@ -154,6 +173,7 @@ export const BookDetailPage: React.FC = () => {
       <ReviewModal
         book={book}
         isOpen={isReviewModalOpen}
+        initialReview={reviewsData?.items.find((r) => user && r.userId === user.uid) ?? null}
         onClose={() => setIsReviewModalOpen(false)}
       />
     </div>
