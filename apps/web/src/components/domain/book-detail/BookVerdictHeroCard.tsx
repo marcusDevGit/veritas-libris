@@ -1,5 +1,5 @@
 import React from 'react';
-import type { BookDto } from '@app/shared';
+import { formatBookTitle, type BookDto } from '@app/shared';
 import { AdequacyBadge } from '../AdequacyBadge.js';
 import { CommunityStatsBar } from '../CommunityStatsBar.js';
 import {
@@ -108,7 +108,7 @@ export const BookVerdictHeroCard: React.FC<BookVerdictHeroCardProps> = ({ book }
           Parecer Doutrinário Geral
         </span>
         <h1 className="font-editorial text-2xl sm:text-3xl font-bold text-primary tracking-tight">
-          {book.title}
+          {formatBookTitle(book.title)}
         </h1>
         <p className="text-base sm:text-lg font-editorial text-on-surface-variant mt-0.5">
           Por <span className="text-primary font-semibold">{book.authors.join(', ')}</span>

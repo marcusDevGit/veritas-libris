@@ -74,17 +74,20 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
   const step3Ref = useRef<HTMLDivElement>(null);
   const step4Ref = useRef<HTMLDivElement>(null);
 
+  const buildPayload = () => ({
+    adequacyVote,
+    ageVote,
+    suggestedTags,
+    reservations: reservations.map((item) => ({
+      ...item,
+      description: item.description.trim(),
+      reference: item.reference?.trim() || undefined,
+    })),
+    comment: comment.trim(),
+  });
+
   const mutation = useMutation({
-    mutationFn: () => {
-      const payload = {
-        adequacyVote,
-        ageVote,
-        suggestedTags,
-        reservations,
-        comment: comment.trim(),
-      };
-      return api.submitReview(book._id!, payload);
-    },
+    mutationFn: () => api.submitReview(book._id!, buildPayload()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['book', book._id] });
       queryClient.invalidateQueries({ queryKey: ['book-reviews', book._id] });
@@ -120,13 +123,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       return;
     }
 
-    const parsed = CreateReviewBodySchema.safeParse({
-      adequacyVote,
-      ageVote,
-      suggestedTags,
-      reservations,
-      comment: comment.trim(),
-    });
+    const parsed = CreateReviewBodySchema.safeParse(buildPayload());
 
     if (!parsed.success) {
       const firstIssue = parsed.error.issues[0];

@@ -166,7 +166,7 @@ export const BookReviewsSection: React.FC<BookReviewsSectionProps> = ({
                 </div>
               </div>
 
-              <p className="text-sm text-on-surface leading-relaxed">
+              <p className="text-sm text-on-surface leading-relaxed whitespace-pre-line">
                 {rev.comment}
               </p>
 
