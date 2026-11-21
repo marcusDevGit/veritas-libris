@@ -1,11 +1,12 @@
 import type { ModifyResult, Types } from "mongoose";
-import type {
-  BookDto,
-  BookListQuery,
-  CatalogStats,
-  ExternalBook,
-  ExternalBookResult,
-  PaginatedBooks,
+import {
+  formatBookTitle,
+  type BookDto,
+  type BookListQuery,
+  type CatalogStats,
+  type ExternalBook,
+  type ExternalBookResult,
+  type PaginatedBooks,
 } from "@app/shared";
 import { env } from "../config/env.js";
 import { NotFoundError } from "../errors/app-error.js";
@@ -222,7 +223,11 @@ export async function importBookByIsbn(isbn13: string): Promise<ImportResult> {
     throw new NotFoundError("Nenhum livro encontrado nas bases externas para este ISBN");
   }
 
-  const insertOnly = { ...external, ...curationDefaults() };
+  const insertOnly = {
+    ...external,
+    title: formatBookTitle(external.title),
+    ...curationDefaults(),
+  };
 
   try {
     const result = await BookModel.findOneAndUpdate(

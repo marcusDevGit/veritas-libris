@@ -2,6 +2,17 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.3.1] - 2026-11-20
+### Added
+- **Padronização de títulos (`formatBookTitle`):** utilitário compartilhado em `@app/shared` com Title Case editorial em PT-BR (preservando preposições/artigos no meio do título e algarismos romanos), aplicado na importação (`book.service.ts`) e na exibição (`BookCard`, `BookVerdictHeroCard`, `CurationBookSummaryHeader`).
+
+### Fixed
+- **Migração automática do índice `$text` no boot (`ensureBookTextIndex`):** garante a recriação do índice textual antigo em `books` com `language_override: 'textSearchLanguage'` em ambientes já existentes.
+- **Quebra de parágrafos em pareceres:** adicionada `whitespace-pre-line` em `BookReviewsSection` para preservar espaçamento entre parágrafos.
+- **Campo opcional de referência nas ressalvas:** `ReviewStepReservations` e `ReviewModal` agora normalizam `reference` vazio para `undefined`, evitando erro Zod (`>=1 characters`) ao deixar o capítulo/trecho em branco.
+
+---
+
 ## [1.3.0] - 2026-11-20
 ### Added
 - **Copiloto de Curadoria com Magisterium AI (`/curadoria`):** rota `POST /api/v1/curation/books/:id/ai-draft` protegida por autenticação, papel de curador/admin e rate limit (`5 req/min`), cache determinístico em MongoDB (`EditorialAiDraftModel`), log de auditoria `AI_DRAFT_GENERATED` e componente `CurationAiAssistantBox` com aviso permanente de limites/cota e aplicação apenas manual ao rascunho.

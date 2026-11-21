@@ -1,5 +1,5 @@
 import React from 'react';
-import type { BookDto } from '@app/shared';
+import { formatBookTitle, type BookDto } from '@app/shared';
 import { BookOpen } from 'lucide-react';
 
 interface CurationBookSummaryHeaderProps {
@@ -27,7 +27,7 @@ export const CurationBookSummaryHeader: React.FC<CurationBookSummaryHeaderProps>
 
       <div className="flex-1 min-w-0">
         <h2 className="font-editorial text-xl font-bold text-primary leading-snug">
-          {book.title}
+          {formatBookTitle(book.title)}
         </h2>
         <p className="text-sm text-on-surface-variant mt-0.5">
           {book.authors.join(', ')}

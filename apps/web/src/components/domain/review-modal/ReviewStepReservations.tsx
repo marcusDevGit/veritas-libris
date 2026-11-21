@@ -55,7 +55,7 @@ export const ReviewStepReservations: React.FC<ReviewStepReservationsProps> = ({
         topic: 'DOCTRINAL_ERROR',
         severity: adequacyVote === 'NOT_RECOMMENDED' ? 'HIGH' : 'MEDIUM',
         description: '',
-        reference: '',
+        reference: undefined,
       },
     ]);
   };

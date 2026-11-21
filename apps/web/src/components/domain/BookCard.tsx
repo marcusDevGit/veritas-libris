@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import type { BookDto } from '@app/shared';
+import { formatBookTitle, type BookDto } from '@app/shared';
 import {
   BookOpen,
   CheckCircle2,
@@ -43,6 +43,7 @@ const TOPIC_LABELS: Record<string, string> = {
  * - Tags temáticas e rodapé com número de pareceres e link direto
  */
 export const BookCard: React.FC<BookCardProps> = ({ book, reviewCount = 0 }) => {
+  const displayTitle = formatBookTitle(book.title);
   const hasHighSeverity = book.reservations.some((r) => r.severity === 'HIGH');
   const mainReservation = book.reservations[0];
 
@@ -121,7 +122,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, reviewCount = 0 }) => 
         {book.coverUrl ? (
           <img
             src={book.coverUrl}
-            alt={`Capa de ${book.title}`}
+            alt={`Capa de ${displayTitle}`}
             className="w-36 h-52 object-cover rounded shadow-md group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
@@ -134,7 +135,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, reviewCount = 0 }) => 
               <div className="flex flex-col items-center">
                 <BookOpen className="w-6 h-6 text-secondary-container mb-1 stroke-[1.5]" />
                 <span className="text-[11px] font-editorial text-surface font-bold leading-tight line-clamp-3">
-                  {book.title}
+                  {displayTitle}
                 </span>
               </div>
               <span className="text-[8px] uppercase tracking-wider text-surface-variant">
@@ -167,7 +168,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, reviewCount = 0 }) => 
 
           <Link to={`/livros/${book._id}`}>
             <h2 className="font-editorial text-base font-bold text-primary group-hover:text-primary-container transition-colors line-clamp-1 mt-1">
-              {book.title}
+              {displayTitle}
             </h2>
           </Link>
           <p className="text-xs text-on-surface-variant line-clamp-1">
