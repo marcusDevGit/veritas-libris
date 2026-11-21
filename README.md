@@ -8,7 +8,7 @@ Plataforma de **Curadoria e Discernimento Literário Católico** construída em 
 
 - **[Arquitetura do Sistema](docs/architecture.md)** — Camadas do monorepo, modelos Mongoose, motor de consenso, RBAC, notificações e estratégia de build.
 - **[Referência da API (`/api/v1`)](docs/api.md)** — Endpoints completos, parâmetros, autenticação, papéis exigidos e rate limits.
-- **[Changelog](CHANGELOG.md)** — Histórico de versões (`v1.0.0`, `v1.0.1`, `v1.1.0`, `v1.2.0`, `v1.3.0`, `v1.3.1`).
+- **[Changelog](CHANGELOG.md)** — Histórico de versões (`v1.0.0`, `v1.0.1`, `v1.1.0`, `v1.2.0`, `v1.3.0`, `v1.3.1`, `v1.3.2`).
 
 ---
 
@@ -27,7 +27,7 @@ veritas-libris/
 ├── .github/workflows/ # Pipeline CI (build, testes unitários e typecheck)
 ├── docker-compose.yml # MongoDB local para desenvolvimento
 ├── railway.toml       # Configuração de build/deploy Docker da API no Railway
-└── package.json       # Configuração raiz dos workspaces (v1.3.1)
+└── package.json       # Configuração raiz dos workspaces (v1.3.2)
 ```
 
 ---

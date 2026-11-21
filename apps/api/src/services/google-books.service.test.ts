@@ -59,8 +59,8 @@ describe("normalizeCoverUrl", () => {
 });
 
 describe("stripHtml", () => {
-  it("remove tags e normaliza espaços", () => {
-    assert.equal(stripHtml("<p>Olá,<br>mundo</p>  <b>forte</b>"), "Olá, mundo forte");
+  it("remove tags e preserva quebras de linha de parágrafos", () => {
+    assert.equal(stripHtml("<p>Olá,<br>mundo</p>  <b>forte</b>"), "Olá,\nmundo\nforte");
   });
 
   it("devolve undefined quando sobra nada", () => {

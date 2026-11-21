@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.3.2] - 2026-11-20
+### Fixed
+- **Preservação de parágrafos na sinopse (`stripHtml`):** `google-books.service.ts` passa a preservar quebras de linha (`\n`) em tags de bloco (`<p>`, `<br>`, `<div>`, `<li>`), permitindo que `BookSynopsisAccordion` exiba os parágrafos com espaçamento.
+- **Rótulos de ressalvas no catálogo (`BookCard`):** substituído o mapa local desatualizado por `RESERVATION_TOPIC_LABELS` de `@app/shared`, exibindo os tópicos em português em vez de chaves cruas (`DOCTRINAL_ERROR`, `MORAL_RELATIVISM`, `SENSUAL_CONTENT`).
+
+---
+
 ## [1.3.1] - 2026-11-20
 ### Added
 - **Padronização de títulos (`formatBookTitle`):** utilitário compartilhado em `@app/shared` com Title Case editorial em PT-BR (preservando preposições/artigos no meio do título e algarismos romanos), aplicado na importação (`book.service.ts`) e na exibição (`BookCard`, `BookVerdictHeroCard`, `CurationBookSummaryHeader`).

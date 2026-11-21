@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { formatBookTitle, type BookDto } from '@app/shared';
+import { formatBookTitle, RESERVATION_TOPIC_LABELS, type BookDto } from '@app/shared';
 import {
   BookOpen,
   CheckCircle2,
@@ -18,20 +18,6 @@ export interface BookCardProps {
   book: BookDto;
   reviewCount?: number;
 }
-
-/**
- * Mapeamento dos tópicos de ressalva para rótulos legíveis em português
- */
-const TOPIC_LABELS: Record<string, string> = {
-  HERESY_OR_DOCTRINAL_ERROR: 'Erro Doutrinário / Heresia',
-  IMMODESTY_OR_SEXUAL_CONTENT: 'Imodéstia / Conteúdo Sexual',
-  GRAVE_VIOLENCE_OR_CRUELTY: 'Violência Grave / Crueldade',
-  BLASPHEMY_OR_SACRILEGE: 'Blasfêmia / Sacrilégio',
-  OCCULTISM_OR_SUPERSTITION: 'Ocultismo / Superstição',
-  SCANDAL_OR_MORAL_SUBVERSION: 'Subversão Moral / Escândalo',
-  RELATIVISM_OR_SYNCRETISM: 'Relativismo / Sincretismo',
-  OTHER: 'Atenção Formativa',
-};
 
 /**
  * BookCard — Card Editorial do Catálogo Veritas Libris
@@ -179,14 +165,14 @@ export const BookCard: React.FC<BookCardProps> = ({ book, reviewCount = 0 }) => 
             <div className="p-2.5 bg-error-container/30 border border-error/20 rounded-lg text-xs text-on-error-container mt-1 leading-snug">
               <strong>Risco Doutrinário:</strong>{' '}
               <span className="line-clamp-2">
-                {mainReservation.description || TOPIC_LABELS[mainReservation.topic] || 'Contém graves desvios da moral ou da fé.'}
+                {mainReservation.description || RESERVATION_TOPIC_LABELS[mainReservation.topic] || 'Contém graves desvios da moral ou da fé.'}
               </span>
             </div>
           ) : book.adequacyStatus === 'WITH_RESERVATIONS' && mainReservation ? (
             <div className="p-2.5 bg-secondary-container/20 border border-secondary-container/30 rounded-lg text-xs text-on-secondary-fixed-variant mt-1 leading-snug">
               <strong>Atenção Formativa:</strong>{' '}
               <span className="line-clamp-2">
-                {mainReservation.description || TOPIC_LABELS[mainReservation.topic] || 'Exige maturidade espiritual e discernimento leitor.'}
+                {mainReservation.description || RESERVATION_TOPIC_LABELS[mainReservation.topic] || 'Exige maturidade espiritual e discernimento leitor.'}
               </span>
             </div>
           ) : book.synopsis ? (
@@ -208,7 +194,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, reviewCount = 0 }) => 
                   key={i}
                   className="px-2 py-0.5 bg-surface-container text-on-surface-variant rounded text-[10px] font-medium"
                 >
-                  {TOPIC_LABELS[r.topic] || r.topic}
+                  {RESERVATION_TOPIC_LABELS[r.topic] || r.topic}
                 </span>
               ))
             ) : (

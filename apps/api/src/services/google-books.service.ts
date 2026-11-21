@@ -104,9 +104,11 @@ export function stripHtml(raw: string | undefined): string | undefined {
   if (!raw) return undefined;
 
   const text = raw
-    .replace(/<\/?(p|br|div|li|ul|ol|h[1-6])\b[^>]*>/gi, " ")
+    .replace(/\r\n/g, "\n")
+    .replace(/<\/?(p|br|div|li|ul|ol|h[1-6])\b[^>]*>/gi, "\n")
     .replace(/<[^>]*>/g, "")
-    .replace(/\s+/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/ *\n+ */g, "\n")
     .trim();
 
   if (text.length === 0) return undefined;
