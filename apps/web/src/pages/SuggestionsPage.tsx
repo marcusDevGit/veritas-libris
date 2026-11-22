@@ -80,13 +80,22 @@ export const SuggestionsPage: React.FC = () => {
           </div>
         </div>
 
-        <Link
-          to="/criterios"
-          className="text-xs font-semibold text-primary hover:text-secondary inline-flex items-center gap-1.5 shrink-0"
-        >
-          <span>Ver Matriz de Critérios</span>
-          <ExternalLink className="w-3.5 h-3.5" />
-        </Link>
+        <div className="flex flex-wrap items-center gap-4 shrink-0">
+          <Link
+            to="/guia"
+            className="text-xs font-semibold text-primary hover:text-secondary inline-flex items-center gap-1.5"
+          >
+            <span>Guia da Plataforma</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </Link>
+          <Link
+            to="/criterios"
+            className="text-xs font-semibold text-primary hover:text-secondary inline-flex items-center gap-1.5"
+          >
+            <span>Ver Matriz de Critérios</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </section>
     </div>
   );

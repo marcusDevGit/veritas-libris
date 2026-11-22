@@ -187,6 +187,12 @@ export const CurationPage: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               Sessão Ativa: <strong className="text-on-surface">{profile?.name ?? user.displayName}</strong>
             </span>
+            <Link
+              to="/guia"
+              className="text-xs font-semibold text-primary hover:text-secondary underline underline-offset-2"
+            >
+              Diretrizes da Curadoria
+            </Link>
           </div>
         </div>
 
