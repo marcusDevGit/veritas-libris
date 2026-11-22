@@ -7,6 +7,7 @@ const FOOTER_NAV_LINKS = [
   { to: '/criterios', label: 'Critérios do Índice' },
   { to: '/sobre', label: 'Sobre a Curadoria' },
   { to: '/sugestoes', label: 'Enviar Sugestões' },
+  { to: '/guia', label: 'Guia da Plataforma' },
 ] as const;
 
 export const Footer: React.FC = () => {

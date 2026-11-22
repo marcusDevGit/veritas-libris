@@ -2,6 +2,14 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.4.0] - 2026-11-22
+### Added
+- **Manual Completo da Plataforma (`docs/guia-veritas.md`):** guia oficial cobrindo critérios de discernimento, motor de consenso, papéis (`READER`, `CURATOR`, `ADMIN`), Copiloto IA, sugestões e funcionalidades.
+- **Página Interativa `/guia` (`GuidePage.tsx`):** central navegável por abas no `@app/web` (`Critérios & Consenso`, `Papéis & Conduta`, `Sugestões & Indicação`, `Curadoria & Moderação`, `Funcionalidades do App`), com atalhos contextuais no `Footer`, `/curadoria` e `/sugestoes`, inclusão no `sitemap.xml` e teste `GuidePage.test.tsx`.
+- **README & Prévia Visual:** `README.md` simplificado e enriquecido com capturas do Stitch em `docs/images/`.
+
+---
+
 ## [1.3.2] - 2026-11-20
 ### Fixed
 - **Preservação de parágrafos na sinopse (`stripHtml`):** `google-books.service.ts` passa a preservar quebras de linha (`\n`) em tags de bloco (`<p>`, `<br>`, `<div>`, `<li>`), permitindo que `BookSynopsisAccordion` exiba os parágrafos com espaçamento.

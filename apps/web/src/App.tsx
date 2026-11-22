@@ -31,6 +31,9 @@ const AboutCurationPage = lazy(() =>
 const SuggestionsPage = lazy(() =>
   import('./pages/SuggestionsPage.js').then((m) => ({ default: m.SuggestionsPage })),
 );
+const GuidePage = lazy(() =>
+  import('./pages/GuidePage.js').then((m) => ({ default: m.GuidePage })),
+);
 const ImportBookModal = lazy(() =>
   import('./components/domain/ImportBookModal.js').then((m) => ({ default: m.ImportBookModal })),
 );
@@ -86,6 +89,7 @@ export const App: React.FC = () => {
                   <Route path="/criterios" element={<CriteriaPage />} />
                   <Route path="/sobre" element={<AboutCurationPage />} />
                   <Route path="/sugestoes" element={<SuggestionsPage />} />
+                  <Route path="/guia" element={<GuidePage />} />
                   <Route path="/curadoria" element={<CurationPage />} />
                   <Route path="/admin" element={<AdminPage />} />
                 </Routes>
