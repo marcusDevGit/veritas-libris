@@ -1,13 +1,19 @@
 import { z } from 'zod';
 
-export const NOTIFICATION_TYPES = ['NEW_REVIEW', 'EDITORIAL_UPDATE'] as const;
+export const NOTIFICATION_TYPES = [
+  'NEW_REVIEW',
+  'EDITORIAL_UPDATE',
+  'REVIEW_HELPFUL',
+  'ROLE_UPDATED',
+] as const;
 export const NotificationTypeSchema = z.enum(NOTIFICATION_TYPES);
 export type NotificationType = z.infer<typeof NotificationTypeSchema>;
 
 export const NotificationDtoSchema = z.object({
   id: z.string(),
-  bookId: z.string(),
-  bookTitle: z.string(),
+  bookId: z.string().optional(),
+  bookTitle: z.string().optional(),
+  link: z.string().optional(),
   type: NotificationTypeSchema,
   title: z.string(),
   description: z.string(),

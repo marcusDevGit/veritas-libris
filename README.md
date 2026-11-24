@@ -19,7 +19,7 @@ Plataforma de **Curadoria e Discernimento Literário Católico** em monorepo Typ
 | **[Manual da Plataforma](docs/guia-veritas.md)** | Critérios, papéis (`READER`, `CURATOR`, `ADMIN`), curadoria, Copiloto IA e sugestões |
 | **[Arquitetura do Sistema](docs/architecture.md)** | Camadas do monorepo, modelos Mongoose, motor de consenso, RBAC e deploy |
 | **[Referência da API](docs/api.md)** | Endpoints `/api/v1`, autenticação, papéis exigidos e rate limits |
-| **[Changelog](CHANGELOG.md)** | Histórico de versões (`v1.0.0` até `v1.4.2`) |
+| **[Changelog](CHANGELOG.md)** | Histórico de versões (`v1.0.0` até `v1.6.0`) |
 
 ---
 
@@ -54,7 +54,7 @@ veritas-libris/
 
 ## Como Rodar Localmente
 
-**Pré-requisitos:** Node.js `>= 20`, Docker (MongoDB) e projeto Firebase com login Google.
+**Pré-requisitos:** Node.js `>= 20`, Docker (MongoDB) e projeto Firebase com provedores **Google** e **E-mail/Senha** habilitados (configure obrigatoriamente **One account per email address** em *Firebase Authentication → Settings → User account linking* para evitar contas duplicadas).
 
 ```bash
 # 1. Instalar dependências

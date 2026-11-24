@@ -46,3 +46,7 @@ export function buildNotificationPayloads(
     description,
   }));
 }
+
+export function buildReviewHelpfulDedupKey(reviewId: string, voterUid: string): string {
+  return `helpful:${reviewId}:${voterUid}`;
+}

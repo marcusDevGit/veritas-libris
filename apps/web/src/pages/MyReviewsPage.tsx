@@ -8,7 +8,7 @@ import { usePageMeta } from '../hooks/usePageMeta.js';
 import { AdequacyBadge } from '../components/domain/AdequacyBadge.js';
 
 export const MyReviewsPage: React.FC = () => {
-  const { user, isLoading: authLoading, signInWithGoogle } = useAuth();
+  const { user, isLoading: authLoading, openAuthModal } = useAuth();
   const queryClient = useQueryClient();
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
@@ -54,7 +54,7 @@ export const MyReviewsPage: React.FC = () => {
           </p>
           <button
             type="button"
-            onClick={signInWithGoogle}
+            onClick={openAuthModal}
             className="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container transition-colors cursor-pointer"
           >
             Entrar com Google

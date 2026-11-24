@@ -4,16 +4,18 @@ import type {
   NotificationDto,
   NotificationListResponse,
   NotificationType,
+  UserRole,
 } from '@app/shared';
 import { NotificationModel, type NotificationAttrs } from '../models/Notification.model.js';
 import { ReadingListItemModel } from '../models/ReadingListItem.model.js';
-import { buildNotificationPayloads } from './notification.utils.js';
+import { buildNotificationPayloads, buildReviewHelpfulDedupKey } from './notification.utils.js';
 
 function toNotificationDto(doc: NotificationAttrs & { _id: unknown }): NotificationDto {
   return {
     id: String(doc._id),
-    bookId: doc.bookId.toString(),
-    bookTitle: doc.bookTitle,
+    bookId: doc.bookId ? doc.bookId.toString() : undefined,
+    bookTitle: doc.bookTitle ?? undefined,
+    link: doc.link ?? undefined,
     type: doc.type,
     title: doc.title,
     description: doc.description,
@@ -56,6 +58,65 @@ export async function notifyReadingListWatchers(options: {
       read: false,
     })),
   );
+}
+
+export async function notifyReviewHelpful(options: {
+  reviewId: string;
+  bookId: Types.ObjectId | string;
+  bookTitle: string;
+  authorUid: string;
+  voterUid: string;
+  helpfulVotes: number;
+}): Promise<void> {
+  if (!options.authorUid || options.authorUid === options.voterUid) {
+    return;
+  }
+
+  const dedupKey = buildReviewHelpfulDedupKey(options.reviewId, options.voterUid);
+  const alreadyNotified = await NotificationModel.exists({
+    userId: options.authorUid,
+    dedupKey,
+  });
+  if (alreadyNotified) {
+    return;
+  }
+
+  const bookObjectId =
+    typeof options.bookId === 'string' ? new Types.ObjectId(options.bookId) : options.bookId;
+
+  await NotificationModel.create({
+    userId: options.authorUid,
+    bookId: bookObjectId,
+    bookTitle: options.bookTitle,
+    link: `/livros/${bookObjectId.toString()}`,
+    dedupKey,
+    type: 'REVIEW_HELPFUL',
+    title: `Seu parecer em "${options.bookTitle}" foi marcado como útil`,
+    description: `Sua avaliação recebeu um voto útil e agora soma ${options.helpfulVotes} ${
+      options.helpfulVotes === 1 ? 'voto útil' : 'votos úteis'
+    }.`,
+    read: false,
+  });
+}
+
+export async function notifyRoleUpdated(options: {
+  targetUid: string;
+  nextRole: UserRole;
+  actorName: string;
+}): Promise<void> {
+  if (options.nextRole !== 'CURATOR' && options.nextRole !== 'ADMIN') {
+    return;
+  }
+
+  const roleLabel = options.nextRole === 'ADMIN' ? 'Administrador' : 'Curador Oficial';
+  await NotificationModel.create({
+    userId: options.targetUid,
+    link: '/curadoria',
+    type: 'ROLE_UPDATED',
+    title: `Você foi promovido a ${roleLabel}`,
+    description: `${options.actorName} habilitou seu acesso como ${roleLabel}. O Painel de Curadoria (/curadoria) já está disponível para você.`,
+    read: false,
+  });
 }
 
 export async function listUserNotifications(

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, CheckCheck, ShieldCheck, BookOpen, Archive, X } from 'lucide-react';
+import { Bell, CheckCheck, ShieldCheck, BookOpen, Archive, X, ThumbsUp, Feather } from 'lucide-react';
 import type { NotificationDto } from '@app/shared';
 import { useAuth } from '../../contexts/AuthContext.js';
 import { api } from '../../services/api.js';
@@ -192,7 +192,17 @@ export const NotificationsPopover: React.FC = () => {
                 </div>
               ) : (
                 data!.items.map((item) => {
-                  const Icon = item.type === 'EDITORIAL_UPDATE' ? ShieldCheck : BookOpen;
+                  const Icon =
+                    item.type === 'EDITORIAL_UPDATE'
+                      ? ShieldCheck
+                      : item.type === 'REVIEW_HELPFUL'
+                        ? ThumbsUp
+                        : item.type === 'ROLE_UPDATED'
+                          ? Feather
+                          : BookOpen;
+                  const targetPath =
+                    item.link || (item.bookId ? `/livros/${item.bookId}` : '/');
+
                   return (
                     <div
                       key={item.id}
@@ -201,7 +211,7 @@ export const NotificationsPopover: React.FC = () => {
                       }`}
                     >
                       <Link
-                        to={`/livros/${item.bookId}`}
+                        to={targetPath}
                         onClick={() => handleItemClick(item)}
                         className="flex items-start gap-3 flex-1 min-w-0"
                       >
@@ -215,9 +225,11 @@ export const NotificationsPopover: React.FC = () => {
                               {formatRelativeTime(item.createdAt)}
                             </span>
                           </div>
-                          <p className="text-[11px] font-semibold text-secondary truncate mt-0.5">
-                            {item.bookTitle}
-                          </p>
+                          {item.bookTitle && (
+                            <p className="text-[11px] font-semibold text-secondary truncate mt-0.5">
+                              {item.bookTitle}
+                            </p>
+                          )}
                           <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
                             {item.description}
                           </p>

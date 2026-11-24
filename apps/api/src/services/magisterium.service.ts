@@ -18,7 +18,7 @@ import {
   computeEditorialAiInputHash,
   parseMagisteriumResponse,
 } from './magisterium.utils.js';
-import { logProviderFailure } from './provider-logger.js';
+import { logProviderFailure, logProviderMetric } from './provider-logger.js';
 
 const MAGISTERIUM_API_URL = 'https://www.magisterium.com/api/v1/chat/completions';
 const MAGISTERIUM_MODEL = 'magisterium-1';
@@ -47,6 +47,13 @@ export async function generateEditorialAiDraft(
   }).lean<EditorialAiDraftAttrs | null>();
 
   if (cached) {
+    logProviderMetric({
+      provider: 'magisterium-ai',
+      operation: 'chat_completions',
+      durationMs: 0,
+      success: true,
+      cacheHit: true,
+    });
     return {
       draftText: cached.draftText,
       suggestedAdequacy: cached.suggestedAdequacy ?? null,
@@ -142,6 +149,14 @@ export async function generateEditorialAiDraft(
     targetId: bookId,
     targetLabel: book.title,
     details: 'consultou apoio doutrinário via Magisterium AI',
+  });
+
+  logProviderMetric({
+    provider: 'magisterium-ai',
+    operation: 'chat_completions',
+    durationMs: Date.now() - startedAt,
+    success: true,
+    cacheHit: false,
   });
 
   return {

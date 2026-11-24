@@ -87,11 +87,17 @@ const EnvSchema = z.object({
     path: ["REVIEW_REQUIRES_AUTH"],
     message: "Flags de autenticação não podem ser false em produção",
   },
+).refine(
+  (config) => !(config.NODE_ENV === "production" && (!config.CORS_ORIGIN || config.CORS_ORIGIN.length === 0)),
+  {
+    path: ["CORS_ORIGIN"],
+    message: "CORS_ORIGIN deve ser configurado em produção",
+  },
 );
 
 export type Env = z.infer<typeof EnvSchema>;
 
-function loadEnv(source: NodeJS.ProcessEnv): Env {
+export function loadEnv(source: NodeJS.ProcessEnv): Env {
   const result = EnvSchema.safeParse(source);
 
   if (!result.success) {

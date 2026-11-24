@@ -14,10 +14,7 @@ import { calculateConsensus } from './consensus.service.js';
 import { toBookDto, type BookLean } from './book.service.js';
 import { sanitizeAlternativeIds, sanitizeTags } from './curation.utils.js';
 import { notifyReadingListWatchers } from './notification.service.js';
-
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+import { escapeRegex } from '../utils/regex.js';
 
 export async function getCurationStats(): Promise<CurationStats> {
   const [total, pendingReview, locked, imprimatur] = await Promise.all([

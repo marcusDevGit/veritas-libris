@@ -18,6 +18,7 @@ let authInstance: Auth | null = null;
 if (isFirebaseConfigured) {
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   authInstance = getAuth(app);
+  authInstance.languageCode = 'pt-BR';
 }
 
 export const auth = authInstance;

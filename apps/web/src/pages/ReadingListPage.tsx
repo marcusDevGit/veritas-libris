@@ -11,7 +11,7 @@ type ListFilter = 'ALL' | AdequacyLevel | 'IMPRIMATUR';
 type ListSort = 'recent' | 'title' | 'year';
 
 export const ReadingListPage: React.FC = () => {
-  const { user, isLoading: authLoading, signInWithGoogle } = useAuth();
+  const { user, isLoading: authLoading, openAuthModal } = useAuth();
   const queryClient = useQueryClient();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -86,7 +86,7 @@ export const ReadingListPage: React.FC = () => {
           </p>
           <button
             type="button"
-            onClick={signInWithGoogle}
+            onClick={openAuthModal}
             className="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container transition-colors cursor-pointer"
           >
             Entrar com Google

@@ -13,12 +13,14 @@ describe('Services integration (MongoDB em memória)', () => {
   let ReviewModel: typeof import('../models/Review.model.js').ReviewModel;
   let AuditLogModel: typeof import('../models/AuditLog.model.js').AuditLogModel;
   let UserModel: typeof import('../models/User.model.js').UserModel;
+  let NotificationModel: typeof import('../models/Notification.model.js').NotificationModel;
   let env: typeof import('../config/env.js').env;
   let updateBookEditorial: typeof import('./curation.service.js').updateBookEditorial;
   let upsertReview: typeof import('./review.service.js').upsertReview;
   let voteReviewHelpful: typeof import('./review.service.js').voteReviewHelpful;
   let generateEditorialAiDraft: typeof import('./magisterium.service.js').generateEditorialAiDraft;
   let syncUserFromAuth: typeof import('./user.service.js').syncUserFromAuth;
+  let listUsers: typeof import('./user.service.js').listUsers;
   let updateUserRole: typeof import('./user.service.js').updateUserRole;
   const originalFetch = globalThis.fetch;
 
@@ -28,11 +30,12 @@ describe('Services integration (MongoDB em memória)', () => {
     ({ ReviewModel } = await import('../models/Review.model.js'));
     ({ AuditLogModel } = await import('../models/AuditLog.model.js'));
     ({ UserModel } = await import('../models/User.model.js'));
+    ({ NotificationModel } = await import('../models/Notification.model.js'));
     ({ env } = await import('../config/env.js'));
     ({ updateBookEditorial } = await import('./curation.service.js'));
     ({ upsertReview, voteReviewHelpful } = await import('./review.service.js'));
     ({ generateEditorialAiDraft } = await import('./magisterium.service.js'));
-    ({ syncUserFromAuth, updateUserRole } = await import('./user.service.js'));
+    ({ syncUserFromAuth, listUsers, updateUserRole } = await import('./user.service.js'));
   });
 
   beforeEach(async () => {
@@ -233,7 +236,7 @@ describe('Services integration (MongoDB em memória)', () => {
       assert.equal(afterLocked.recommendedAge, '18+');
     });
 
-    it('alterna voto útil sem permitir duplicidade pelo mesmo usuário', async () => {
+    it('alterna voto útil sem permitir duplicidade e notifica o autor apenas uma vez (anti-spam)', async () => {
       const book = await BookModel.create({
         isbn13: '9788535902778',
         title: 'Dom Casmurro',
@@ -254,13 +257,28 @@ describe('Services integration (MongoDB em memória)', () => {
         },
       });
 
+      await voteReviewHelpful(review._id, 'author-1');
+      assert.equal(
+        await NotificationModel.countDocuments({ userId: 'author-1', type: 'REVIEW_HELPFUL' }),
+        0,
+      );
+
       const firstVote = await voteReviewHelpful(review._id, 'voter-1');
       assert.equal(firstVote.voted, true);
-      assert.equal(firstVote.helpfulVotes, 1);
+      assert.equal(firstVote.helpfulVotes, 2);
 
       const secondVote = await voteReviewHelpful(review._id, 'voter-1');
       assert.equal(secondVote.voted, false);
-      assert.equal(secondVote.helpfulVotes, 0);
+      assert.equal(secondVote.helpfulVotes, 1);
+
+      await voteReviewHelpful(review._id, 'voter-1');
+
+      const helpfulNotifs = await NotificationModel.find({
+        userId: 'author-1',
+        type: 'REVIEW_HELPFUL',
+      }).lean();
+      assert.equal(helpfulNotifs.length, 1);
+      assert.equal(helpfulNotifs[0]?.link, `/livros/${book._id.toString()}`);
     });
   });
 
@@ -340,7 +358,7 @@ describe('Services integration (MongoDB em memória)', () => {
   });
 
   describe('user.service', () => {
-    it('vincula usuário convidado (pending:<email>) ao UID real no primeiro login', async () => {
+    it('vincula usuário convidado (pending:<email>) ao UID real apenas quando emailVerified é true', async () => {
       await UserModel.create({
         uid: 'pending:convidado@veritas.org',
         email: 'convidado@veritas.org',
@@ -348,9 +366,20 @@ describe('Services integration (MongoDB em memória)', () => {
         role: 'CURATOR',
       });
 
+      const unverified = await syncUserFromAuth({
+        uid: 'unverified-uid',
+        email: 'convidado@veritas.org',
+        emailVerified: false,
+        name: 'Tentativa Não Verificada',
+      });
+      assert.equal(unverified.role, 'READER');
+      const stillPending = await UserModel.findOne({ uid: 'pending:convidado@veritas.org' }).lean();
+      assert.ok(stillPending);
+
       const synced = await syncUserFromAuth({
         uid: 'firebase-uid-123',
         email: 'convidado@veritas.org',
+        emailVerified: true,
         name: 'Convidado Real',
       });
 
@@ -400,6 +429,50 @@ describe('Services integration (MongoDB em memória)', () => {
       assert.equal(demoted.role, 'CURATOR');
       const logs = await AuditLogModel.find({ action: 'ROLE_UPDATED' }).lean();
       assert.equal(logs.length, 1);
+
+      const roleNotifs = await NotificationModel.find({
+        userId: 'admin-1',
+        type: 'ROLE_UPDATED',
+      }).lean();
+      assert.equal(roleNotifs.length, 1);
+      assert.equal(roleNotifs[0]?.link, '/curadoria');
+    });
+
+    it('agrega pareceres e votos úteis recebidos em listUsers para apoiar gestão de curadores', async () => {
+      const book = await BookModel.create({
+        isbn13: '9788535902778',
+        title: 'Dom Casmurro',
+        authors: ['Machado de Assis'],
+      });
+
+      await UserModel.create({
+        uid: 'reader-metric',
+        email: 'metric@veritas.org',
+        name: 'Leitor Ativo',
+        role: 'READER',
+      });
+
+      const createdReview = await upsertReview({
+        bookId: book._id.toString(),
+        userId: 'reader-metric',
+        userName: 'Leitor Ativo',
+        isCurator: false,
+        data: {
+          adequacyVote: 'RECOMMENDED',
+          ageVote: '14+',
+          suggestedTags: [],
+          reservations: [],
+          comment: 'Leitura muito proveitosa e bem escrita.',
+        },
+      });
+      await voteReviewHelpful(createdReview._id, 'voter-a');
+      await voteReviewHelpful(createdReview._id, 'voter-b');
+
+      const result = await listUsers({ page: 1, limit: 20, sort: 'recent' });
+      const target = result.items.find((u) => u.uid === 'reader-metric');
+      assert.ok(target);
+      assert.equal(target.reviewsCount, 1);
+      assert.equal(target.helpfulVotesReceived, 2);
     });
   });
 });

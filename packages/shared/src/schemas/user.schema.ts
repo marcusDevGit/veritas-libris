@@ -14,6 +14,8 @@ export const UserDtoSchema = z.object({
   title: z.string().nullable().optional(),
   lastSeenAt: z.string().nullable().optional(),
   updatedByEmail: z.string().nullable().optional(),
+  reviewsCount: z.number().int().nonnegative().default(0),
+  helpfulVotesReceived: z.number().int().nonnegative().default(0),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

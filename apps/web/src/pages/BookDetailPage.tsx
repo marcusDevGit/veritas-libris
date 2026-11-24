@@ -24,7 +24,7 @@ import { ArrowLeft } from 'lucide-react';
  */
 export const BookDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { user, isCurator, signInWithGoogle } = useAuth();
+  const { user, isCurator, openAuthModal } = useAuth();
   const queryClient = useQueryClient();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
@@ -92,7 +92,7 @@ export const BookDetailPage: React.FC = () => {
 
   const handleToggleReadingList = () => {
     if (!user) {
-      void signInWithGoogle();
+      openAuthModal();
       return;
     }
     toggleReadingListMutation.mutate(Boolean(readingListStatusQuery.data?.saved));
