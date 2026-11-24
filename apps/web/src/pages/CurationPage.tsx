@@ -21,7 +21,7 @@ import { CurationSuggestionsPanel } from '../components/domain/curation/Curation
 type CurationTab = 'queue' | 'suggestions';
 
 export const CurationPage: React.FC = () => {
-  const { user, profile, isCurator, isLoading: authLoading, signInWithGoogle } = useAuth();
+  const { user, profile, isCurator, isLoading: authLoading, openAuthModal } = useAuth();
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<CurationTab>('queue');
@@ -113,7 +113,7 @@ export const CurationPage: React.FC = () => {
           </p>
           <button
             type="button"
-            onClick={signInWithGoogle}
+            onClick={openAuthModal}
             className="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container transition-colors cursor-pointer"
           >
             Entrar com Google

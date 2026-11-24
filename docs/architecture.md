@@ -1,6 +1,6 @@
 # Arquitetura do Sistema — Veritas Libris
 
-Este documento descreve a organização interna do monorepo, o fluxo de dados e as principais decisões arquiteturais adotadas até a versão **v1.5.1**.
+Este documento descreve a organização interna do monorepo, o fluxo de dados e as principais decisões arquiteturais adotadas até a versão **v1.6.0**.
 
 ---
 

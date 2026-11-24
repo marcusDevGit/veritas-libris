@@ -14,13 +14,14 @@ export function isAdminRole(role: UserRole): boolean {
  */
 export function resolveEffectiveRole(options: {
   email: string | null;
+  emailVerified?: boolean;
   adminEmails: string[];
   storedRole?: UserRole | null;
   claimCurator?: boolean;
   claimAdmin?: boolean;
 }): UserRole {
   const normalizedEmail = options.email?.trim().toLowerCase();
-  if (normalizedEmail && options.adminEmails.includes(normalizedEmail)) {
+  if (options.emailVerified === true && normalizedEmail && options.adminEmails.includes(normalizedEmail)) {
     return 'ADMIN';
   }
 

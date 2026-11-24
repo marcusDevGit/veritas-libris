@@ -20,7 +20,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenScanner,
 }) => {
   const location = useLocation();
-  const { user, isCurator, isAdmin, isLoading, signInWithGoogle } = useAuth();
+  const { user, isCurator, isAdmin, isLoading, openAuthModal } = useAuth();
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -216,7 +216,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <button
                 type="button"
-                onClick={signInWithGoogle}
+                onClick={openAuthModal}
                 className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors border border-outline/20 whitespace-nowrap cursor-pointer shrink-0"
               >
                 <LogIn className="w-3.5 h-3.5 text-secondary" />

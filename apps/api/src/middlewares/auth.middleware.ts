@@ -1,7 +1,7 @@
 import type { FastifyRequest } from 'fastify';
 import type { UserRole } from '@app/shared';
 import { getFirebaseAuth } from '../config/firebase.js';
-import { ForbiddenError, UnauthorizedError } from '../errors/app-error.js';
+import { AppError, ForbiddenError, UnauthorizedError } from '../errors/app-error.js';
 import { isAdminRole, isCuratorRole } from '../services/rbac.utils.js';
 import { syncUserFromAuth } from '../services/user.service.js';
 
@@ -38,34 +38,46 @@ export async function requireAuth(request: FastifyRequest): Promise<void> {
     throw new UnauthorizedError('Token de autenticação ausente');
   }
 
+  let decoded;
   try {
-    const decoded = await getFirebaseAuth().verifyIdToken(token);
-    const name = typeof decoded.name === 'string' && decoded.name.length > 0 ? decoded.name : 'Usuário';
-    const email = decoded.email ?? null;
-    const photoUrl = typeof decoded.picture === 'string' ? decoded.picture : null;
-
-    const synced = await syncUserFromAuth({
-      uid: decoded.uid,
-      email,
-      name,
-      photoUrl,
-      claimCurator: decoded['curator'] === true,
-      claimAdmin: decoded['admin'] === true,
-    });
-
-    request.authUser = {
-      uid: synced.uid,
-      name: synced.name,
-      email: synced.email,
-      photoUrl: synced.photoUrl ?? photoUrl,
-      role: synced.role,
-      isCurator: isCuratorRole(synced.role),
-      isAdmin: isAdminRole(synced.role),
-    };
+    decoded = await getFirebaseAuth().verifyIdToken(token);
   } catch (error) {
     request.log.warn({ err: error }, 'Falha ao verificar token do Firebase');
     throw new UnauthorizedError('Token inválido ou expirado');
   }
+
+  const emailVerified = decoded.email_verified === true;
+  if (!emailVerified) {
+    throw new AppError(
+      403,
+      'Confirme seu endereço de e-mail pelo link enviado antes de continuar.',
+      'EMAIL_NOT_VERIFIED',
+    );
+  }
+
+  const name = typeof decoded.name === 'string' && decoded.name.length > 0 ? decoded.name : 'Usuário';
+  const email = decoded.email ?? null;
+  const photoUrl = typeof decoded.picture === 'string' ? decoded.picture : null;
+
+  const synced = await syncUserFromAuth({
+    uid: decoded.uid,
+    email,
+    emailVerified,
+    name,
+    photoUrl,
+    claimCurator: decoded['curator'] === true,
+    claimAdmin: decoded['admin'] === true,
+  });
+
+  request.authUser = {
+    uid: synced.uid,
+    name: synced.name,
+    email: synced.email,
+    photoUrl: synced.photoUrl ?? photoUrl,
+    role: synced.role,
+    isCurator: isCuratorRole(synced.role),
+    isAdmin: isAdminRole(synced.role),
+  };
 }
 
 /** Exige papel CURATOR ou ADMIN (deve ser usado após requireAuth). */

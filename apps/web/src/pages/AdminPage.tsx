@@ -31,7 +31,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 export const AdminPage: React.FC = () => {
-  const { user, profile, isAdmin, isLoading: authLoading, signInWithGoogle, refreshProfile } = useAuth();
+  const { user, profile, isAdmin, isLoading: authLoading, openAuthModal, refreshProfile } = useAuth();
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<TabKey>('users');
@@ -122,7 +122,7 @@ export const AdminPage: React.FC = () => {
           </p>
           <button
             type="button"
-            onClick={signInWithGoogle}
+            onClick={openAuthModal}
             className="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-primary text-on-primary text-sm font-semibold hover:bg-primary-container transition-colors cursor-pointer"
           >
             Entrar com Google

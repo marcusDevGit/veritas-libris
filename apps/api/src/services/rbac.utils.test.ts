@@ -18,13 +18,22 @@ describe('rbac.utils', () => {
     assert.equal(isAdminRole('ADMIN'), true);
   });
 
-  it('resolveEffectiveRole promove e-mails listados em ADMIN_EMAILS para ADMIN', () => {
-    const role = resolveEffectiveRole({
+  it('resolveEffectiveRole promove e-mails listados em ADMIN_EMAILS apenas quando emailVerified é true', () => {
+    const unverifiedRole = resolveEffectiveRole({
       email: 'Admin@Veritas.org',
+      emailVerified: false,
       adminEmails: ['admin@veritas.org'],
       storedRole: 'READER',
     });
-    assert.equal(role, 'ADMIN');
+    assert.equal(unverifiedRole, 'READER');
+
+    const verifiedRole = resolveEffectiveRole({
+      email: 'Admin@Veritas.org',
+      emailVerified: true,
+      adminEmails: ['admin@veritas.org'],
+      storedRole: 'READER',
+    });
+    assert.equal(verifiedRole, 'ADMIN');
   });
 
   it('resolveEffectiveRole prioriza storedRole sobre custom claims quando não é bootstrap admin', () => {

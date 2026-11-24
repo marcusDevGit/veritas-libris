@@ -2,6 +2,15 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.6.0] - 2026-11-24
+### Added
+- **Autenticação com E-mail/Senha e Proteção RBAC (`@app/api` e `@app/web`):**
+  - `auth.middleware.ts` exige `email_verified === true` (retornando `403 EMAIL_NOT_VERIFIED` caso contrário) e repassa `emailVerified` para `syncUserFromAuth`.
+  - `rbac.utils.ts` e `user.service.ts` restringem promoção via `ADMIN_EMAILS`, `isFounder` e vinculação de convites `pending:<email>` exclusivamente a contas com e-mail verificado.
+  - `AuthModal.tsx`, `AuthContext.tsx` e `auth-errors.ts` unificam login com Google, cadastro com nome completo obrigatório + verificação de e-mail, login por e-mail/senha, recuperação de senha (`languageCode = 'pt-BR'`) e mensagens amigáveis em PT-BR.
+
+---
+
 ## [1.5.1] - 2026-11-24
 ### Security & Observability
 - **Hardening de Produção (`@app/api` e `@app/web`):**

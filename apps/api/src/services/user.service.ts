@@ -54,6 +54,7 @@ function toAuditLogDto(doc: AuditLogAttrs & { _id: unknown }): AuditLogDto {
 export interface SyncAuthInput {
   uid: string;
   email: string | null;
+  emailVerified?: boolean;
   name: string;
   photoUrl?: string | null;
   claimCurator?: boolean;
@@ -62,14 +63,15 @@ export interface SyncAuthInput {
 
 /**
  * Sincroniza o usuário autenticado no MongoDB e resolve seu papel efetivo.
- * Garante bootstrap de ADMIN para e-mails listados em ADMIN_EMAILS.
+ * Garante bootstrap de ADMIN para e-mails listados em ADMIN_EMAILS apenas quando o e-mail está verificado.
  */
 export async function syncUserFromAuth(input: SyncAuthInput): Promise<UserDto> {
   const normalizedEmail = input.email ? input.email.trim().toLowerCase() : null;
+  const isEmailVerified = input.emailVerified === true;
   let existing = await UserModel.findOne({ uid: input.uid }).lean<UserAttrs | null>();
 
-  // Se foi pré-cadastrado/convidado por e-mail antes do 1º login, vincula ao UID real
-  if (!existing && normalizedEmail) {
+  // Se foi pré-cadastrado/convidado por e-mail antes do 1º login, vincula apenas com e-mail verificado
+  if (!existing && normalizedEmail && isEmailVerified) {
     const invited = await UserModel.findOne({
       email: normalizedEmail,
       uid: `pending:${normalizedEmail}`,
@@ -79,15 +81,16 @@ export async function syncUserFromAuth(input: SyncAuthInput): Promise<UserDto> {
       existing = await UserModel.findOneAndUpdate(
         { uid: invited.uid },
         { $set: { uid: input.uid } },
-        { new: true },
+        { returnDocument: 'after' },
       ).lean<UserAttrs | null>();
     }
   }
 
-  const isFounder = Boolean(normalizedEmail && env.ADMIN_EMAILS.includes(normalizedEmail));
+  const isFounder = Boolean(isEmailVerified && normalizedEmail && env.ADMIN_EMAILS.includes(normalizedEmail));
 
   const effectiveRole = resolveEffectiveRole({
     email: normalizedEmail,
+    emailVerified: isEmailVerified,
     adminEmails: env.ADMIN_EMAILS,
     storedRole: existing?.role ?? null,
     claimCurator: input.claimCurator,

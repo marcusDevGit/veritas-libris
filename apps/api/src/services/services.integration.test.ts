@@ -358,7 +358,7 @@ describe('Services integration (MongoDB em memória)', () => {
   });
 
   describe('user.service', () => {
-    it('vincula usuário convidado (pending:<email>) ao UID real no primeiro login', async () => {
+    it('vincula usuário convidado (pending:<email>) ao UID real apenas quando emailVerified é true', async () => {
       await UserModel.create({
         uid: 'pending:convidado@veritas.org',
         email: 'convidado@veritas.org',
@@ -366,9 +366,20 @@ describe('Services integration (MongoDB em memória)', () => {
         role: 'CURATOR',
       });
 
+      const unverified = await syncUserFromAuth({
+        uid: 'unverified-uid',
+        email: 'convidado@veritas.org',
+        emailVerified: false,
+        name: 'Tentativa Não Verificada',
+      });
+      assert.equal(unverified.role, 'READER');
+      const stillPending = await UserModel.findOne({ uid: 'pending:convidado@veritas.org' }).lean();
+      assert.ok(stillPending);
+
       const synced = await syncUserFromAuth({
         uid: 'firebase-uid-123',
         email: 'convidado@veritas.org',
+        emailVerified: true,
         name: 'Convidado Real',
       });
 
