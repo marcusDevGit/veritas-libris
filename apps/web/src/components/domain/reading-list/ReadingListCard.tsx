@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { AdequacyLevel, BookDto } from '@app/shared';
+import { formatBookTitle, type AdequacyLevel, type BookDto } from '@app/shared';
 import { Award, BookOpen, Trash2, ArrowRight } from 'lucide-react';
 
 interface ReadingListCardProps {
@@ -35,7 +35,11 @@ export const ReadingListCard: React.FC<ReadingListCardProps> = ({
   isRemoving,
   onRemove,
 }) => {
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
   const verdict = VERDICT_BADGE[book.adequacyStatus];
+  const displayTitle = formatBookTitle(book.title);
+  const summaryText = book.editorialSummary?.trim() ?? '';
+  const hasLongSummary = summaryText.length > 160;
 
   return (
     <article className="bg-surface-container-lowest border border-outline/15 rounded-xl p-4 sm:p-5 shadow-2xs hover:shadow-sm transition-shadow flex flex-col justify-between gap-4">
@@ -74,7 +78,7 @@ export const ReadingListCard: React.FC<ReadingListCardProps> = ({
 
           <Link to={`/livros/${book._id}`}>
             <h2 className="font-editorial text-base font-bold text-primary hover:text-primary-container transition-colors line-clamp-2 leading-snug">
-              {book.title}
+              {displayTitle}
             </h2>
           </Link>
           <p className="text-xs text-on-surface-variant mt-1 truncate">
@@ -85,10 +89,25 @@ export const ReadingListCard: React.FC<ReadingListCardProps> = ({
         </div>
       </div>
 
-      {book.editorialSummary && (
-        <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed bg-surface-container-low rounded-lg p-2.5 border border-outline/10">
-          {book.editorialSummary}
-        </p>
+      {summaryText && (
+        <div className="bg-surface-container-low rounded-lg p-2.5 border border-outline/10 flex flex-col gap-1.5">
+          <p
+            className={`text-xs text-on-surface-variant leading-relaxed whitespace-pre-line ${
+              !isSummaryExpanded && hasLongSummary ? 'line-clamp-3' : ''
+            }`}
+          >
+            {summaryText}
+          </p>
+          {hasLongSummary && (
+            <button
+              type="button"
+              onClick={() => setIsSummaryExpanded((prev) => !prev)}
+              className="self-start text-[11px] font-semibold text-primary hover:text-secondary transition-colors cursor-pointer"
+            >
+              {isSummaryExpanded ? 'Mostrar menos' : 'Ler parecer completo'}
+            </button>
+          )}
+        </div>
       )}
 
       <div className="pt-3 border-t border-outline/10 flex items-center justify-between gap-2">

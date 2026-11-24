@@ -5,10 +5,10 @@ import { BookOpen, Feather, Home, MessageSquareQuote, Scale, ShieldCheck } from 
 export const CriteriaHeroSection: React.FC = () => {
   return (
     <section className="w-full bg-surface-container-lowest border-b border-outline/10">
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-10 lg:py-14">
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 pb-10 lg:pb-14">
         <nav
           aria-label="Navegação Estrutural"
-          className="flex items-center gap-2 text-xs text-on-surface-variant mb-6"
+          className="flex items-center gap-2 text-xs text-on-surface-variant mb-3"
         >
           <Link to="/" className="hover:text-primary transition-colors inline-flex items-center gap-1">
             <Home className="w-3.5 h-3.5" />

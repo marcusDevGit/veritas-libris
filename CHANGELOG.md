@@ -2,6 +2,16 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.4.1] - 2026-11-24
+### Fixed
+- **Adequação Mobile (`@app/web`):**
+  - Menu de navegação móvel na `Navbar` (`< xl`) e sincronização da busca global (desktop e mobile) com a URL `/?q=...`.
+  - Remoção de scroll horizontal em `CatalogFilters` (`grid-cols-2` no `SelectAdequacy` + filtros secundários recolhíveis), `GuidePage` (`grid-cols-2`), `CurationBookQueue`, `BookReviewsSection` e `ReadingListPage`.
+  - Ajuste de espaçamento superior (`pt-28`) em todas as páginas para evitar sobreposição pelo header fixo no mobile, incluindo alinhamento de `CriteriaPage` e `AboutCurationPage`.
+  - `NotificationsPopover` com posicionamento `fixed inset-x-3` no mobile; `FamilyModeWidget` em largura total; `CurationKpiGrid` compacto no mobile; fluxo mestre-detalhe em `CurationPage`; suporte ao modo `list` no `BookCard`; paginação com janela deslizante em `CatalogPage`; e leitura completa expansível do parecer em `ReadingListCard`.
+
+---
+
 ## [1.4.0] - 2026-11-22
 ### Added
 - **Manual Completo da Plataforma (`docs/guia-veritas.md`):** guia oficial cobrindo critérios de discernimento, motor de consenso, papéis (`READER`, `CURATOR`, `ADMIN`), Copiloto IA, sugestões e funcionalidades.

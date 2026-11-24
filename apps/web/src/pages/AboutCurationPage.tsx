@@ -13,7 +13,7 @@ export const AboutCurationPage: React.FC = () => {
   );
 
   return (
-    <div className="pt-[84px] sm:pt-[100px] pb-16 flex flex-col gap-10">
+    <div className="pt-28 sm:pt-[116px] pb-16 flex flex-col gap-10">
       <AboutHeroQuote />
       <AboutMissionTriad />
       <AboutOperationsAndFoundations />

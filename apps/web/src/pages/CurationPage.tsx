@@ -25,6 +25,7 @@ export const CurationPage: React.FC = () => {
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<CurationTab>('queue');
+  const [mobilePanel, setMobilePanel] = useState<'queue' | 'editor'>('queue');
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<CurationFilter>('all');
   const [selectedBook, setSelectedBook] = useState<BookDto | null>(null);
@@ -155,7 +156,7 @@ export const CurationPage: React.FC = () => {
   const pendingSuggestionsCount = suggestionsSummaryQuery.data?.stats.pending ?? 0;
 
   return (
-    <div className="pt-[96px] sm:pt-[116px] pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6">
+    <div className="pt-28 sm:pt-[116px] pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <nav aria-label="Navegação Estrutural" className="flex items-center gap-2 text-xs text-on-surface-variant">
           <Link to="/" className="hover:text-primary transition-colors inline-flex items-center gap-1">
@@ -263,7 +264,7 @@ export const CurationPage: React.FC = () => {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-5">
+            <div className={`lg:col-span-5 ${mobilePanel === 'editor' ? 'hidden lg:block' : 'block'}`}>
               <CurationBookQueue
                 books={books}
                 stats={stats}
@@ -276,20 +277,31 @@ export const CurationPage: React.FC = () => {
                 onSelectBook={(book) => {
                   setFeedback(null);
                   setSelectedBook(book);
+                  setMobilePanel('editor');
                 }}
               />
             </div>
 
-            <div className="lg:col-span-7">
+            <div className={`lg:col-span-7 ${mobilePanel === 'queue' ? 'hidden lg:block' : 'block'}`}>
               {selectedBook ? (
-                <CurationEditorialEditor
-                  book={selectedBook}
-                  isSaving={saveEditorialMutation.isPending}
-                  feedback={feedback}
-                  onSave={(body) =>
-                    saveEditorialMutation.mutate({ bookId: selectedBook._id, body })
-                  }
-                />
+                <div className="flex flex-col gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setMobilePanel('queue')}
+                    className="lg:hidden self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-primary text-xs font-semibold hover:bg-surface-container-high transition-colors cursor-pointer"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Voltar para a Fila</span>
+                  </button>
+                  <CurationEditorialEditor
+                    book={selectedBook}
+                    isSaving={saveEditorialMutation.isPending}
+                    feedback={feedback}
+                    onSave={(body) =>
+                      saveEditorialMutation.mutate({ bookId: selectedBook._id, body })
+                    }
+                  />
+                </div>
               ) : (
                 <div className="bg-surface-container-lowest border border-outline/15 rounded-xl p-10 text-center text-sm text-on-surface-variant">
                   Selecione uma obra na fila ao lado para editar o parecer oficial.

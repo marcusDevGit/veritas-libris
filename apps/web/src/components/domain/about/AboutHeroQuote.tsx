@@ -4,10 +4,10 @@ import { Home, Quote, Scale, ShieldCheck } from 'lucide-react';
 
 export const AboutHeroQuote: React.FC = () => {
   return (
-    <section className="w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 pt-8 pb-4">
+    <section className="w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 pb-4">
       <nav
         aria-label="Navegação Estrutural"
-        className="flex items-center gap-2 text-xs text-on-surface-variant mb-5"
+        className="flex items-center gap-2 text-xs text-on-surface-variant mb-3"
       >
         <Link to="/" className="hover:text-primary transition-colors inline-flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
