@@ -2,6 +2,12 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.4.2] - 2026-11-24
+### Added
+- **Testes de Regras de Negócio com MongoDB em Memória (`@app/api`):** adicionada dependência de desenvolvimento `mongodb-memory-server`, helper `apps/api/src/test/mongo-memory.ts` e suíte `apps/api/src/services/services.integration.test.ts` cobrindo `curation.service`, `review.service`, `magisterium.service` e `user.service` (`60/60` testes passando).
+
+---
+
 ## [1.4.1] - 2026-11-24
 ### Fixed
 - **Adequação Mobile (`@app/web`):**
