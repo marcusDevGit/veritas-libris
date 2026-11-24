@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookMarked, Search, ScanBarcode, Plus, LogIn } from 'lucide-react';
+import { BookMarked, Search, ScanBarcode, Plus, LogIn, Menu, X } from 'lucide-react';
 import { TopBanner } from './TopBanner.js';
 import { NotificationsPopover } from './NotificationsPopover.js';
 import { ProfileMenu } from './ProfileMenu.js';
@@ -22,8 +22,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   const location = useLocation();
   const { user, isCurator, isAdmin, isLoading, signInWithGoogle } = useAuth();
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const desktopSearchRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -164,12 +169,28 @@ export const Navbar: React.FC<NavbarProps> = ({
             </nav>
           )}
 
-          <div className="flex items-center gap-2 sm:gap-3 xl:border-l xl:border-outline/20 xl:pl-4">
+          <div className="flex items-center gap-1.5 sm:gap-3 xl:border-l xl:border-outline/20 xl:pl-4">
+            <button
+              type="button"
+              aria-label={isMobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={isMobileMenuOpen}
+              onClick={() => {
+                setIsMobileMenuOpen((prev) => !prev);
+                setIsMobileSearchOpen(false);
+              }}
+              className="xl:hidden p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all cursor-pointer"
+            >
+              {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+
             <button
               type="button"
               aria-label="Abrir busca"
-              onClick={() => setIsMobileSearchOpen((prev) => !prev)}
-              className="sm:hidden p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all"
+              onClick={() => {
+                setIsMobileSearchOpen((prev) => !prev);
+                setIsMobileMenuOpen(false);
+              }}
+              className="sm:hidden p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all cursor-pointer"
             >
               <Search className="w-4 h-4" />
             </button>
@@ -205,6 +226,43 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       </div>
+
+      {isMobileMenuOpen && (
+        <nav
+          aria-label="Menu de navegação móvel"
+          className="xl:hidden bg-surface border-t border-outline/15 px-4 py-3 shadow-md"
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-semibold">
+            {[
+              { to: '/', label: 'Catálogo', show: true },
+              { to: '/minha-lista', label: 'Minha Lista', show: Boolean(user) },
+              { to: '/criterios', label: 'Critérios', show: true },
+              { to: '/sobre', label: 'Sobre', show: true },
+              { to: '/guia', label: 'Guia', show: true },
+              { to: '/sugestoes', label: 'Sugestões', show: true },
+              { to: '/curadoria', label: 'Curadoria', show: isCurator },
+              { to: '/admin', label: 'Admin', show: isAdmin },
+            ]
+              .filter((item) => item.show)
+              .map((item) => {
+                const active = location.pathname === item.to;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`px-3 py-2.5 rounded-lg transition-colors ${
+                      active
+                        ? 'bg-primary text-on-primary font-bold'
+                        : 'bg-surface-container text-on-surface hover:bg-surface-container-high hover:text-primary'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+          </div>
+        </nav>
+      )}
 
       {isMobileSearchOpen && (
         <div className="sm:hidden px-4 pb-3 pt-1 bg-surface border-t border-outline/10">

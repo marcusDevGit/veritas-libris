@@ -14,7 +14,7 @@ export const GuidePage: React.FC = () => {
   );
 
   return (
-    <div className="pt-[96px] sm:pt-[116px] pb-16 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col gap-8">
+    <div className="pt-28 sm:pt-[120px] pb-16 max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col gap-8">
       <header className="flex flex-col gap-2">
         <nav aria-label="Navegação Estrutural" className="flex items-center gap-2 text-xs text-on-surface-variant">
           <Link to="/" className="hover:text-primary transition-colors inline-flex items-center gap-1">
@@ -42,10 +42,11 @@ export const GuidePage: React.FC = () => {
         <div
           role="tablist"
           aria-label="Seções do Guia da Plataforma"
-          className="flex items-center gap-2 overflow-x-auto pb-3 border-b border-outline/15"
+          className="grid grid-cols-2 sm:flex sm:flex-wrap items-stretch sm:items-center gap-2 pb-3 border-b border-outline/15"
         >
-          {GUIDE_TABS.map((tab) => {
+          {GUIDE_TABS.map((tab, index) => {
             const isActive = activeTab === tab.id;
+            const isLastOdd = index === GUIDE_TABS.length - 1 && GUIDE_TABS.length % 2 === 1;
             return (
               <button
                 key={tab.id}
@@ -53,7 +54,9 @@ export const GuidePage: React.FC = () => {
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold shrink-0 transition-colors cursor-pointer ${
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-center transition-colors cursor-pointer ${
+                  isLastOdd ? 'col-span-2 sm:col-span-1' : ''
+                } ${
                   isActive
                     ? 'bg-primary text-on-primary shadow-2xs'
                     : 'bg-surface-container text-on-surface-variant hover:text-primary hover:bg-surface-container-high'

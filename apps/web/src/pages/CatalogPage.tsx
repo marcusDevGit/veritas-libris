@@ -35,6 +35,14 @@ export const CatalogPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<SortOption>(initialSort);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
+  const urlQuery = searchParams.get('q') || '';
+  useEffect(() => {
+    if (urlQuery !== q) {
+      setQ(urlQuery);
+      setPage(1);
+    }
+  }, [urlQuery]);
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
@@ -91,7 +99,7 @@ export const CatalogPage: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen">
-      <div className="pt-[96px] sm:pt-[108px] w-full">
+      <div className="pt-28 sm:pt-[108px] w-full">
         <FamilyModeWidget
           isFamilyMode={isFamilyMode}
           onToggleFamilyMode={(val) => {
@@ -190,71 +198,90 @@ export const CatalogPage: React.FC = () => {
               }
             >
               {displayedBooks.map((book) => (
-                <BookCard key={book._id} book={book} />
+                <BookCard key={book._id} book={book} viewMode={viewMode} />
               ))}
             </div>
 
-            {data && data.totalPages > 1 && (
-              <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-outline/15">
-                <div className="text-xs text-on-surface-variant">
-                  Página <strong className="text-primary">{page}</strong> de {data.totalPages} páginas
+            {data && data.totalPages > 1 && (() => {
+              const totalPages = data.totalPages;
+              const start = Math.max(1, Math.min(page - 2, totalPages - 4));
+              const end = Math.min(totalPages, start + 4);
+              const visiblePages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
+              return (
+                <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-outline/15">
+                  <div className="text-xs text-on-surface-variant">
+                    Página <strong className="text-primary">{page}</strong> de {totalPages} páginas
+                  </div>
+
+                  <nav aria-label="Navegação de Páginas" className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      aria-label="Página anterior"
+                      disabled={page <= 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+
+                    {start > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setPage(1)}
+                          className="w-8 h-8 rounded-lg text-xs font-bold hover:bg-surface-container text-on-surface-variant transition-colors cursor-pointer"
+                        >
+                          1
+                        </button>
+                        {start > 2 && <span className="px-1 text-outline text-xs">...</span>}
+                      </>
+                    )}
+
+                    {visiblePages.map((pageNum) => {
+                      const isActive = pageNum === page;
+                      return (
+                        <button
+                          key={pageNum}
+                          type="button"
+                          onClick={() => setPage(pageNum)}
+                          className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            isActive
+                              ? 'bg-primary text-on-primary shadow-xs'
+                              : 'hover:bg-surface-container text-on-surface-variant'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+
+                    {end < totalPages && (
+                      <>
+                        {end < totalPages - 1 && <span className="px-1 text-outline text-xs">...</span>}
+                        <button
+                          type="button"
+                          onClick={() => setPage(totalPages)}
+                          className="w-8 h-8 rounded-lg text-xs font-bold hover:bg-surface-container text-on-surface-variant transition-colors cursor-pointer"
+                        >
+                          {totalPages}
+                        </button>
+                      </>
+                    )}
+
+                    <button
+                      type="button"
+                      aria-label="Próxima página"
+                      disabled={page >= totalPages}
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </nav>
                 </div>
-
-                <nav aria-label="Navegação de Páginas" className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    disabled={page <= 1}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-
-                  {Array.from({ length: Math.min(5, data.totalPages) }).map((_, idx) => {
-                    const pageNum = idx + 1;
-                    const isActive = pageNum === page;
-                    return (
-                      <button
-                        key={pageNum}
-                        type="button"
-                        onClick={() => setPage(pageNum)}
-                        className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
-                          isActive
-                            ? 'bg-primary text-on-primary shadow-xs'
-                            : 'hover:bg-surface-container text-on-surface-variant'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-
-                  {data.totalPages > 5 && (
-                    <>
-                      <span className="px-1 text-outline text-xs">...</span>
-                      <button
-                        type="button"
-                        onClick={() => setPage(data.totalPages)}
-                        className={`w-8 h-8 rounded-lg text-xs font-bold hover:bg-surface-container text-on-surface-variant transition-colors ${
-                          page === data.totalPages ? 'bg-primary text-on-primary' : ''
-                        }`}
-                      >
-                        {data.totalPages}
-                      </button>
-                    </>
-                  )}
-
-                  <button
-                    type="button"
-                    disabled={page >= data.totalPages}
-                    onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))}
-                    className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </nav>
-              </div>
-            )}
+              );
+            })()}
           </>
         )}
 

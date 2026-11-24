@@ -77,7 +77,7 @@ export const BookReviewsSection: React.FC<BookReviewsSectionProps> = ({
         </span>
       </div>
 
-      <div className="flex items-center gap-2 overflow-x-auto pb-3 border-b border-outline/10 text-xs">
+      <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-outline/10 text-xs">
         <button
           type="button"
           onClick={() => setActiveTab('ALL')}

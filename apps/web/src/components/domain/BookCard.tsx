@@ -17,6 +17,7 @@ import {
 export interface BookCardProps {
   book: BookDto;
   reviewCount?: number;
+  viewMode?: 'grid' | 'list';
 }
 
 /**
@@ -28,8 +29,13 @@ export interface BookCardProps {
  * - Caixa contextual de "Atenção Formativa" ou "Risco Doutrinário" para livros com ressalvas
  * - Tags temáticas e rodapé com número de pareceres e link direto
  */
-export const BookCard: React.FC<BookCardProps> = ({ book, reviewCount = 0 }) => {
+export const BookCard: React.FC<BookCardProps> = ({
+  book,
+  reviewCount = 0,
+  viewMode = 'grid',
+}) => {
   const displayTitle = formatBookTitle(book.title);
+  const isList = viewMode === 'list';
   const hasHighSeverity = book.reservations.some((r) => r.severity === 'HIGH');
   const mainReservation = book.reservations[0];
 
@@ -100,27 +106,39 @@ export const BookCard: React.FC<BookCardProps> = ({ book, reviewCount = 0 }) => 
   };
 
   return (
-    <article className="flex flex-col bg-surface-container-lowest rounded-xl shadow-xs hover:shadow-md transition-all duration-200 overflow-hidden group border border-outline/10">
+    <article
+      className={`flex bg-surface-container-lowest rounded-xl shadow-xs hover:shadow-md transition-all duration-200 overflow-hidden group border border-outline/10 ${
+        isList ? 'flex-row items-stretch' : 'flex-col'
+      }`}
+    >
       <Link
         to={`/livros/${book._id}`}
-        className="relative h-64 w-full bg-gradient-to-b from-surface-container to-surface-container-high flex items-center justify-center p-6 overflow-hidden"
+        className={`relative bg-gradient-to-b from-surface-container to-surface-container-high flex items-center justify-center overflow-hidden ${
+          isList ? 'w-28 sm:w-36 shrink-0 p-3' : 'h-64 w-full p-6'
+        }`}
       >
         {book.coverUrl ? (
           <img
             src={book.coverUrl}
             alt={`Capa de ${displayTitle}`}
-            className="w-36 h-52 object-cover rounded shadow-md group-hover:scale-105 transition-transform duration-300"
+            className={`object-cover rounded shadow-md group-hover:scale-105 transition-transform duration-300 ${
+              isList ? 'w-20 h-28 sm:w-24 sm:h-36' : 'w-36 h-52'
+            }`}
             loading="lazy"
           />
         ) : (
-          <div className="w-36 h-52 bg-primary rounded shadow-md flex flex-col justify-between p-3 relative group-hover:scale-105 transition-transform duration-300 text-center">
+          <div
+            className={`bg-primary rounded shadow-md flex flex-col justify-between relative group-hover:scale-105 transition-transform duration-300 text-center ${
+              isList ? 'w-20 h-28 sm:w-24 sm:h-36 p-2' : 'w-36 h-52 p-3'
+            }`}
+          >
             <div className="border border-secondary-container/40 h-full w-full p-2 flex flex-col justify-between">
               <span className="text-[9px] uppercase tracking-widest text-secondary-container font-medium line-clamp-1">
                 {book.authors[0] || 'Autor'}
               </span>
               <div className="flex flex-col items-center">
-                <BookOpen className="w-6 h-6 text-secondary-container mb-1 stroke-[1.5]" />
-                <span className="text-[11px] font-editorial text-surface font-bold leading-tight line-clamp-3">
+                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-secondary-container mb-1 stroke-[1.5]" />
+                <span className="text-[10px] sm:text-[11px] font-editorial text-surface font-bold leading-tight line-clamp-3">
                   {displayTitle}
                 </span>
               </div>
@@ -132,7 +150,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, reviewCount = 0 }) => 
         )}
 
         <span
-          className={`absolute top-3 right-3 px-2 py-0.5 text-xs font-bold rounded shadow-xs ${
+          className={`absolute top-2 right-2 sm:top-3 sm:right-3 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded shadow-xs ${
             book.recommendedAge === 'ALL'
               ? 'bg-secondary text-on-secondary'
               : 'bg-tertiary text-on-tertiary'
@@ -141,12 +159,14 @@ export const BookCard: React.FC<BookCardProps> = ({ book, reviewCount = 0 }) => 
           {book.recommendedAge}
         </span>
 
-        <div className="absolute top-3 left-3">
-          {getTopLeftBadge()}
-        </div>
+        {!isList && (
+          <div className="absolute top-3 left-3">
+            {getTopLeftBadge()}
+          </div>
+        )}
       </Link>
 
-      <div className="p-5 flex flex-col flex-1 justify-between gap-3">
+      <div className={`flex flex-col flex-1 justify-between gap-3 min-w-0 ${isList ? 'p-3.5 sm:p-5' : 'p-5'}`}>
         <div className="flex flex-col gap-1.5">
           <div className="w-fit">
             {getStatusBadge()}

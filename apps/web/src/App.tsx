@@ -1,5 +1,5 @@
-import React, { Suspense, lazy, useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext.js';
 import { Navbar } from './components/layout/Navbar.js';
@@ -57,74 +57,104 @@ const queryClient = new QueryClient({
   },
 });
 
-export const App: React.FC = () => {
+const AppShell: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isScannerModalOpen, setIsScannerModalOpen] = useState(false);
   const [scannedIsbn, setScannedIsbn] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('q') ?? '';
+  });
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlQ = params.get('q') ?? '';
+    setSearchTerm((prev) => (prev === urlQ ? prev : urlQ));
+  }, [location.search]);
+
+  const handleSearchChange = (nextTerm: string) => {
+    setSearchTerm(nextTerm);
+    const params = new URLSearchParams(location.pathname === '/' ? location.search : '');
+    if (nextTerm.trim()) {
+      params.set('q', nextTerm);
+    } else {
+      params.delete('q');
+    }
+    params.delete('page');
+    const searchStr = params.toString();
+    navigate(searchStr ? `/?${searchStr}` : '/', { replace: location.pathname === '/' });
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-surface text-on-surface">
+      <Navbar
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        onOpenImportModal={() => {
+          setScannedIsbn('');
+          setIsImportModalOpen(true);
+        }}
+        onOpenScanner={() => setIsScannerModalOpen(true)}
+      />
+
+      <main className="flex-1">
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<CatalogPage />} />
+            <Route path="/livros/:id" element={<BookDetailPage />} />
+            <Route path="/minha-lista" element={<ReadingListPage />} />
+            <Route path="/meus-pareceres" element={<MyReviewsPage />} />
+            <Route path="/criterios" element={<CriteriaPage />} />
+            <Route path="/sobre" element={<AboutCurationPage />} />
+            <Route path="/sugestoes" element={<SuggestionsPage />} />
+            <Route path="/guia" element={<GuidePage />} />
+            <Route path="/curadoria" element={<CurationPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+          </Routes>
+        </Suspense>
+      </main>
+
+      <Footer />
+
+      {isImportModalOpen && (
+        <Suspense fallback={null}>
+          <ImportBookModal
+            isOpen={isImportModalOpen}
+            initialQuery={scannedIsbn}
+            onClose={() => {
+              setIsImportModalOpen(false);
+              setScannedIsbn('');
+            }}
+          />
+        </Suspense>
+      )}
+
+      {isScannerModalOpen && (
+        <Suspense fallback={null}>
+          <IsbnScannerModal
+            isOpen={isScannerModalOpen}
+            onClose={() => setIsScannerModalOpen(false)}
+            onDetected={(isbn13) => {
+              setIsScannerModalOpen(false);
+              setScannedIsbn(isbn13);
+              setIsImportModalOpen(true);
+            }}
+          />
+        </Suspense>
+      )}
+    </div>
+  );
+};
+
+export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
           <ScrollToTop />
-          <div className="min-h-screen flex flex-col bg-surface text-on-surface">
-            <Navbar
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              onOpenImportModal={() => {
-                setScannedIsbn('');
-                setIsImportModalOpen(true);
-              }}
-              onOpenScanner={() => setIsScannerModalOpen(true)}
-            />
-
-            <main className="flex-1">
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<CatalogPage />} />
-                  <Route path="/livros/:id" element={<BookDetailPage />} />
-                  <Route path="/minha-lista" element={<ReadingListPage />} />
-                  <Route path="/meus-pareceres" element={<MyReviewsPage />} />
-                  <Route path="/criterios" element={<CriteriaPage />} />
-                  <Route path="/sobre" element={<AboutCurationPage />} />
-                  <Route path="/sugestoes" element={<SuggestionsPage />} />
-                  <Route path="/guia" element={<GuidePage />} />
-                  <Route path="/curadoria" element={<CurationPage />} />
-                  <Route path="/admin" element={<AdminPage />} />
-                </Routes>
-              </Suspense>
-            </main>
-
-            <Footer />
-
-            {isImportModalOpen && (
-              <Suspense fallback={null}>
-                <ImportBookModal
-                  isOpen={isImportModalOpen}
-                  initialQuery={scannedIsbn}
-                  onClose={() => {
-                    setIsImportModalOpen(false);
-                    setScannedIsbn('');
-                  }}
-                />
-              </Suspense>
-            )}
-
-            {isScannerModalOpen && (
-              <Suspense fallback={null}>
-                <IsbnScannerModal
-                  isOpen={isScannerModalOpen}
-                  onClose={() => setIsScannerModalOpen(false)}
-                  onDetected={(isbn13) => {
-                    setIsScannerModalOpen(false);
-                    setScannedIsbn(isbn13);
-                    setIsImportModalOpen(true);
-                  }}
-                />
-              </Suspense>
-            )}
-          </div>
+          <AppShell />
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>

@@ -52,13 +52,13 @@ export const CurationBookQueue: React.FC<CurationBookQueueProps> = ({
         />
       </div>
 
-      <div className="flex items-center gap-1.5 overflow-x-auto py-1 text-xs font-semibold">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 py-1 text-xs font-semibold">
         {pills.map((pill) => (
           <button
             key={pill.value}
             type="button"
             onClick={() => onFilterChange(pill.value)}
-            className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-full text-center whitespace-nowrap transition-colors cursor-pointer ${
               filter === pill.value
                 ? 'bg-primary text-on-primary'
                 : 'bg-surface-container text-on-surface-variant hover:text-primary'

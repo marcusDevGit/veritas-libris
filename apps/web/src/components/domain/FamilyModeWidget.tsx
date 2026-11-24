@@ -46,8 +46,8 @@ export const FamilyModeWidget: React.FC<FamilyModeWidgetProps> = ({
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-start sm:items-center gap-4 bg-surface-container-lowest p-4 rounded-xl shadow-xs border border-outline/10 shrink-0">
-            <div className="flex items-center gap-3 pr-4 sm:border-r border-outline/20">
+          <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-stretch sm:items-center gap-3 sm:gap-4 bg-surface-container-lowest p-4 rounded-xl shadow-xs border border-outline/10 w-full lg:w-auto lg:shrink-0">
+            <div className="flex items-center justify-between sm:justify-start gap-3 pb-3 sm:pb-0 sm:pr-4 border-b sm:border-b-0 sm:border-r border-outline/20">
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   <Users className="w-4 h-4 text-secondary" />
@@ -93,10 +93,10 @@ export const FamilyModeWidget: React.FC<FamilyModeWidgetProps> = ({
       </section>
 
       {isFamilyMode && (
-        <div className="w-full bg-surface-container-low px-6 lg:px-8 pb-4">
-          <div className="max-w-[1380px] mx-auto flex items-center justify-between p-3 bg-surface-container-high rounded-xl text-xs text-primary border border-secondary-container/40">
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-secondary shrink-0" />
+        <div className="w-full bg-surface-container-low px-4 sm:px-6 lg:px-8 pb-4">
+          <div className="max-w-[1380px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-surface-container-high rounded-xl text-xs text-primary border border-secondary-container/40">
+            <div className="flex items-start sm:items-center gap-2">
+              <Shield className="w-4 h-4 text-secondary shrink-0 mt-0.5 sm:mt-0" />
               <span>
                 <strong>Modo Família Ativo:</strong> Ocultando títulos classificados como 16+, 18+ ou com ressalvas graves de imodéstia e blasfêmia.
               </span>
@@ -104,7 +104,7 @@ export const FamilyModeWidget: React.FC<FamilyModeWidgetProps> = ({
             <button
               type="button"
               onClick={() => onToggleFamilyMode(false)}
-              className="text-xs font-bold text-secondary hover:underline flex items-center gap-1 shrink-0 ml-2"
+              className="text-xs font-bold text-secondary hover:underline flex items-center gap-1 shrink-0 self-end sm:self-auto sm:ml-2 cursor-pointer"
             >
               <span>Desativar</span>
               <X className="w-3.5 h-3.5" />

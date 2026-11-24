@@ -67,7 +67,7 @@ export const MyReviewsPage: React.FC = () => {
   const items = myReviewsQuery.data?.items ?? [];
 
   return (
-    <div className="pt-[96px] sm:pt-[116px] pb-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6">
+    <div className="pt-28 sm:pt-[116px] pb-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <nav aria-label="Navegação Estrutural" className="flex items-center gap-2 text-xs text-on-surface-variant">
           <Link to="/" className="hover:text-primary transition-colors inline-flex items-center gap-1">
