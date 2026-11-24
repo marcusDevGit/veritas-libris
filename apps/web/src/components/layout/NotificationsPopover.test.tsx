@@ -125,4 +125,28 @@ describe('NotificationsPopover', () => {
       expect(mockArchiveNotification).toHaveBeenCalledWith('notif-read');
     });
   });
+
+  it('renderiza notificação ROLE_UPDATED sem bookId com link para /curadoria', async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: 'u-1' } });
+    mockListNotifications.mockResolvedValue({
+      unreadCount: 1,
+      items: [
+        {
+          id: 'notif-role',
+          link: '/curadoria',
+          type: 'ROLE_UPDATED',
+          title: 'Você foi promovido a Curador Oficial',
+          description: 'O Painel de Curadoria já está disponível.',
+          read: false,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    });
+
+    renderPopover();
+    fireEvent.click(screen.getByRole('button', { name: 'Notificações' }));
+
+    const link = await screen.findByRole('link', { name: /Você foi promovido a Curador Oficial/i });
+    expect(link).toHaveAttribute('href', '/curadoria');
+  });
 });

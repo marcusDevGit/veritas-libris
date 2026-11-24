@@ -11,14 +11,19 @@ import { env } from '../config/env.js';
 import { getFirebaseAuth } from '../config/firebase.js';
 import { AppError, NotFoundError } from '../errors/app-error.js';
 import { AuditLogModel, type AuditLogAttrs } from '../models/AuditLog.model.js';
+import { ReviewModel } from '../models/Review.model.js';
 import { UserModel, type UserAttrs } from '../models/User.model.js';
+import { notifyRoleUpdated } from './notification.service.js';
 import { canDemoteAdmin, resolveEffectiveRole } from './rbac.utils.js';
 
 function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function toUserDto(doc: UserAttrs): UserDto {
+function toUserDto(
+  doc: UserAttrs,
+  metrics?: { reviewsCount: number; helpfulVotesReceived: number },
+): UserDto {
   return {
     uid: doc.uid,
     email: doc.email ?? null,
@@ -29,6 +34,8 @@ function toUserDto(doc: UserAttrs): UserDto {
     title: doc.title ?? null,
     lastSeenAt: doc.lastSeenAt ? doc.lastSeenAt.toISOString() : null,
     updatedByEmail: doc.updatedByEmail ?? null,
+    reviewsCount: metrics?.reviewsCount ?? 0,
+    helpfulVotesReceived: metrics?.helpfulVotesReceived ?? 0,
     createdAt: doc.createdAt.toISOString(),
     updatedAt: doc.updatedAt.toISOString(),
   };
@@ -165,8 +172,34 @@ export async function listUsers(query: AdminUsersQuery): Promise<PaginatedUsers>
     getRoleStats(),
   ]);
 
+  const uids = docs.map((d) => d.uid);
+  const aggregatedMetrics =
+    uids.length > 0
+      ? await ReviewModel.aggregate<{
+          _id: string;
+          reviewsCount: number;
+          helpfulVotesReceived: number;
+        }>([
+          { $match: { userId: { $in: uids } } },
+          {
+            $group: {
+              _id: '$userId',
+              reviewsCount: { $sum: 1 },
+              helpfulVotesReceived: { $sum: '$helpfulVotes' },
+            },
+          },
+        ])
+      : [];
+
+  const metricsByUid = new Map(
+    aggregatedMetrics.map((m) => [
+      m._id,
+      { reviewsCount: m.reviewsCount, helpfulVotesReceived: m.helpfulVotesReceived },
+    ]),
+  );
+
   return {
-    items: docs.map(toUserDto),
+    items: docs.map((doc) => toUserDto(doc, metricsByUid.get(doc.uid))),
     page: query.page,
     limit: query.limit,
     total,
@@ -247,6 +280,16 @@ export async function updateUserRole(options: {
       targetLabel: updated.email ? `${updated.name} (${updated.email})` : updated.name,
       details: `Alterou cargo de ${previousRole} para ${options.nextRole}`,
     });
+
+    try {
+      await notifyRoleUpdated({
+        targetUid: updated.uid,
+        nextRole: options.nextRole,
+        actorName: options.actor.name,
+      });
+    } catch {
+      // Melhor esforço
+    }
   }
 
   return toUserDto(updated);

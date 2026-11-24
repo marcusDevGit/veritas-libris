@@ -13,7 +13,7 @@ import { AuditLogModel } from "../models/AuditLog.model.js";
 import { BookModel, type BookAttrs } from "../models/Book.model.js";
 import { ReviewModel, type ReviewAttrs } from "../models/Review.model.js";
 import { calculateConsensus } from "./consensus.service.js";
-import { notifyReadingListWatchers } from "./notification.service.js";
+import { notifyReadingListWatchers, notifyReviewHelpful } from "./notification.service.js";
 import { evaluateReviewDeletion } from "./review-moderation.utils.js";
 
 export interface UpsertReviewInput {
@@ -211,6 +211,22 @@ export async function voteReviewHelpful(
 
   if (!updated) {
     throw new NotFoundError("Avaliação não encontrada");
+  }
+
+  try {
+    const book = await BookModel.findById(updated.bookId, { title: 1 }).lean<{
+      title?: string;
+    } | null>();
+    await notifyReviewHelpful({
+      reviewId,
+      bookId: updated.bookId,
+      bookTitle: book?.title ?? "Obra do catálogo",
+      authorUid: updated.userId,
+      voterUid: userId,
+      helpfulVotes: updated.helpfulVotes,
+    });
+  } catch {
+    // Melhor esforço para não falhar o voto útil
   }
 
   return {

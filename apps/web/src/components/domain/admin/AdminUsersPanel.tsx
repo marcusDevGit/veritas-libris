@@ -233,6 +233,12 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({
                             <p className="text-xs text-on-surface-variant truncate">
                               {item.email ?? item.uid}
                             </p>
+                            <p className="text-[11px] text-outline mt-0.5">
+                              {item.reviewsCount ?? 0}{' '}
+                              {(item.reviewsCount ?? 0) === 1 ? 'parecer' : 'pareceres'} •{' '}
+                              {item.helpfulVotesReceived ?? 0}{' '}
+                              {(item.helpfulVotesReceived ?? 0) === 1 ? 'voto útil' : 'votos úteis'}
+                            </p>
                           </div>
                         </div>
                       </td>
@@ -339,6 +345,12 @@ export const AdminUsersPanel: React.FC<AdminUsersPanelProps> = ({
                         </div>
                         <p className="text-xs text-on-surface-variant truncate">
                           {item.email ?? item.uid}
+                        </p>
+                        <p className="text-[11px] text-outline mt-0.5">
+                          {item.reviewsCount ?? 0}{' '}
+                          {(item.reviewsCount ?? 0) === 1 ? 'parecer' : 'pareceres'} •{' '}
+                          {item.helpfulVotesReceived ?? 0}{' '}
+                          {(item.helpfulVotesReceived ?? 0) === 1 ? 'voto útil' : 'votos úteis'}
                         </p>
                       </div>
                     </div>

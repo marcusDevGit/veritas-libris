@@ -2,6 +2,19 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.5.0] - 2026-11-24
+### Added
+- **Notificações de Voto Útil e Promoção (`@app/shared`, `@app/api`, `@app/web`):**
+  - Novos tipos `REVIEW_HELPFUL` e `ROLE_UPDATED` em `NotificationDtoSchema` e `NotificationModel`, com `bookId`/`bookTitle` opcionais, campo `link` opcional e `dedupKey` com índice esparso `{ userId: 1, dedupKey: 1 }`.
+  - Anti-spam em `voteReviewHelpful`: notifica o autor do parecer apenas uma vez por eleitor (`dedupKey`), ignorando auto-votos.
+  - `updateUserRole` notifica promoções para `CURATOR` ou `ADMIN` com link direto para `/curadoria`.
+  - `NotificationsPopover` exibe os ícones `ThumbsUp` e `Feather` e suporta navegação por `link` mesmo sem `bookId`.
+- **Métricas para Gestão de Curadores (`/admin`):**
+  - `UserDtoSchema` e `listUsers` agregam `reviewsCount` e `helpfulVotesReceived` por usuário a partir do `ReviewModel`.
+  - `AdminUsersPanel` exibe pareceres e votos úteis recebidos tanto na tabela desktop quanto nos cards mobile.
+
+---
+
 ## [1.4.2] - 2026-11-24
 ### Added
 - **Testes de Regras de Negócio com MongoDB em Memória (`@app/api`):** adicionada dependência de desenvolvimento `mongodb-memory-server`, helper `apps/api/src/test/mongo-memory.ts` e suíte `apps/api/src/services/services.integration.test.ts` cobrindo `curation.service`, `review.service`, `magisterium.service` e `user.service` (`60/60` testes passando).
