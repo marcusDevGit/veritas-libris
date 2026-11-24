@@ -29,6 +29,7 @@ describe('API HTTP integration (buildApp)', () => {
   it('GET /health retorna 503 degraded quando MongoDB não está conectado e envia headers de segurança', async () => {
     const res = await app.inject({ method: 'GET', url: '/health' });
     assert.equal(res.statusCode, 503);
+    assert.ok(typeof res.headers['x-request-id'] === 'string' && res.headers['x-request-id'].length > 0);
     assert.equal(res.headers['x-content-type-options'], 'nosniff');
     assert.equal(res.headers['x-frame-options'], 'DENY');
     assert.equal(res.headers['referrer-policy'], 'strict-origin-when-cross-origin');
@@ -126,5 +127,28 @@ describe('API HTTP integration (buildApp)', () => {
     assert.equal(throttled.statusCode, 429);
     const body = throttled.json() as { code: string };
     assert.equal(body.code, 'RATE_LIMIT_EXCEEDED');
+  });
+
+  it('devolve x-request-id no header e requestId no payload em erros 500 tratados pelo errorHandler', async () => {
+    const { buildApp } = await import('./app.js');
+    const customApp = buildApp();
+    customApp.get('/test-500', async () => {
+      throw new Error('Falha simulada com detalhe interno sensível');
+    });
+    await customApp.ready();
+
+    try {
+      const res = await customApp.inject({ method: 'GET', url: '/test-500' });
+      assert.equal(res.statusCode, 500);
+      const headerReqId = res.headers['x-request-id'];
+      assert.ok(typeof headerReqId === 'string' && headerReqId.length > 0);
+
+      const body = res.json() as { statusCode: number; code: string; message: string; requestId: string };
+      assert.equal(body.code, 'INTERNAL_ERROR');
+      assert.equal(body.message, 'Erro interno do servidor');
+      assert.equal(body.requestId, headerReqId);
+    } finally {
+      await customApp.close();
+    }
   });
 });

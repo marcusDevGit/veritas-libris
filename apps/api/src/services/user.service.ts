@@ -15,10 +15,7 @@ import { ReviewModel } from '../models/Review.model.js';
 import { UserModel, type UserAttrs } from '../models/User.model.js';
 import { notifyRoleUpdated } from './notification.service.js';
 import { canDemoteAdmin, resolveEffectiveRole } from './rbac.utils.js';
-
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+import { escapeRegex } from '../utils/regex.js';
 
 function toUserDto(
   doc: UserAttrs,

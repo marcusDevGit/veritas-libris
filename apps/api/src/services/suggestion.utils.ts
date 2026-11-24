@@ -1,8 +1,5 @@
 import type { SuggestionListQuery, SuggestionStats, SuggestionStatus } from '@app/shared';
-
-function escapeRegex(input: string): string {
-  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+import { escapeRegex } from '../utils/regex.js';
 
 /**
  * Monta o filtro Mongoose preservando compatibilidade com documentos antigos

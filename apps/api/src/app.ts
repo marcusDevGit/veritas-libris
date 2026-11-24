@@ -33,9 +33,17 @@ export function buildApp(): FastifyInstance {
   app.setErrorHandler(errorHandler);
 
   void app.register(cors, {
-    origin: env.CORS_ORIGIN ?? true,
+    origin: env.CORS_ORIGIN ?? (env.NODE_ENV === 'production' ? false : true),
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['x-request-id'],
+  });
+
+  app.addHook('onSend', async (request, reply, payload) => {
+    if (!reply.hasHeader('x-request-id')) {
+      reply.header('x-request-id', request.id);
+    }
+    return payload;
   });
 
   void registerRateLimit(app);

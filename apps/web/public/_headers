@@ -1,0 +1,10 @@
+# Cabeçalhos de segurança para o Cloudflare Pages (@app/web)
+# - HSTS força HTTPS no domínio em produção
+# - CSP compatível com Google Fonts, Firebase Auth (Popup/Iframe/REST) e capas externas
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://apis.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: http://books.google.com; connect-src 'self' https: wss:; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'

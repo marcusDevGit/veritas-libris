@@ -2,6 +2,18 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.5.1] - 2026-11-24
+### Security & Observability
+- **Hardening de Produção (`@app/api` e `@app/web`):**
+  - `EnvSchema` agora exige `CORS_ORIGIN` configurado quando `NODE_ENV=production` e `@fastify/cors` adota fallback fail-closed (`false`).
+  - Helper único `escapeRegex(value, maxLength = 120)` em `apps/api/src/utils/regex.ts` para prevenir consultas custosas (anti-ReDoS) nos filtros textuais.
+  - Cabeçalhos de segurança (`Strict-Transport-Security`, `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` e `Permissions-Policy`) configurados em `apps/web/public/_headers` para o Cloudflare Pages.
+- **Rastreabilidade & Métricas (`@app/api`):**
+  - Header `x-request-id` retornado em todas as respostas (exposto via CORS) e campo `requestId` incluído no JSON de erro do `errorHandler`.
+  - `logProviderMetric` adicionado em `provider-logger.ts` para registrar latência, sucesso e `cacheHit` da Magisterium AI.
+
+---
+
 ## [1.5.0] - 2026-11-24
 ### Added
 - **Notificações de Voto Útil e Promoção (`@app/shared`, `@app/api`, `@app/web`):**
