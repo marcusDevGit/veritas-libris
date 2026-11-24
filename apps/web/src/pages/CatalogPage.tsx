@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../services/api.js';
-import type { AdequacyLevel, AgeRating, BookStampFilter } from '@app/shared';
+import { formatBookTitle, type AdequacyLevel, type AgeRating, type BookStampFilter } from '@app/shared';
 import { FamilyModeWidget } from '../components/domain/FamilyModeWidget.js';
 import {
   CatalogFilters,
@@ -12,7 +12,19 @@ import {
 import { BookCard } from '../components/domain/BookCard.js';
 import { BookCardSkeleton } from '../components/ui/BookCardSkeleton.js';
 import { MethodologySection } from '../components/domain/MethodologySection.js';
-import { BookX, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookX, ChevronLeft, ChevronRight, Tag, X } from 'lucide-react';
+
+function parseTagsParam(raw: string | null): string[] {
+  if (!raw) return [];
+  return Array.from(
+    new Set(
+      raw
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
+    ),
+  );
+}
 
 export const CatalogPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,12 +36,14 @@ export const CatalogPage: React.FC = () => {
   const initialFamilyMode = searchParams.get('familyMode') === 'true';
   const initialStamp = (searchParams.get('stamp') as BookStampFilter) || undefined;
   const initialSort = (searchParams.get('sort') as SortOption) || 'most-reviewed';
+  const initialTags = parseTagsParam(searchParams.get('tags'));
 
   const [q, setQ] = useState(initialQ);
   const [adequacy, setAdequacy] = useState<AdequacyLevel | undefined>(initialAdequacy);
   const [age, setAge] = useState<AgeRating | undefined>(initialAge);
   const [category, setCategory] = useState<string | undefined>(undefined);
   const [stamp, setStamp] = useState<string | undefined>(initialStamp);
+  const [tags, setTags] = useState<string[]>(initialTags);
   const [page, setPage] = useState(initialPage);
   const [isFamilyMode, setIsFamilyMode] = useState(initialFamilyMode);
   const [sortBy, setSortBy] = useState<SortOption>(initialSort);
@@ -43,17 +57,27 @@ export const CatalogPage: React.FC = () => {
     }
   }, [urlQuery]);
 
+  const urlTagsRaw = searchParams.get('tags') || '';
+  useEffect(() => {
+    const parsed = parseTagsParam(urlTagsRaw);
+    if (parsed.join(',') !== tags.join(',')) {
+      setTags(parsed);
+      setPage(1);
+    }
+  }, [urlTagsRaw]);
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     if (adequacy) params.set('adequacy', adequacy);
     if (age) params.set('age', age);
+    if (tags.length > 0) params.set('tags', tags.join(','));
     if (isFamilyMode) params.set('familyMode', 'true');
     if (stamp) params.set('stamp', stamp);
     if (sortBy !== 'most-reviewed') params.set('sort', sortBy);
     if (page > 1) params.set('page', String(page));
     setSearchParams(params, { replace: true });
-  }, [q, adequacy, age, isFamilyMode, stamp, sortBy, page, setSearchParams]);
+  }, [q, adequacy, age, tags, isFamilyMode, stamp, sortBy, page, setSearchParams]);
 
   const effectiveQuery = useMemo(() => {
     if (category) {
@@ -68,13 +92,14 @@ export const CatalogPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [
       'books',
-      { q: effectiveQuery, adequacy, age, familyMode: isFamilyMode, stamp: stampFilter, sort: sortBy, page },
+      { q: effectiveQuery, adequacy, age, tags, familyMode: isFamilyMode, stamp: stampFilter, sort: sortBy, page },
     ],
     queryFn: () =>
       api.getBooks({
         q: effectiveQuery,
         adequacy,
         age,
+        tags: tags.length > 0 ? tags : undefined,
         familyMode: isFamilyMode || undefined,
         stamp: stampFilter,
         sort: sortBy,
@@ -93,6 +118,7 @@ export const CatalogPage: React.FC = () => {
     setAge(undefined);
     setCategory(undefined);
     setStamp(undefined);
+    setTags([]);
     setIsFamilyMode(false);
     setPage(1);
   };
@@ -166,6 +192,30 @@ export const CatalogPage: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {tags.length > 0 && (
+          <div className="mb-5 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-on-surface-variant">
+              <Tag className="w-3.5 h-3.5 text-secondary" />
+              Filtrando por tags:
+            </span>
+            {tags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => {
+                  setTags((prev) => prev.filter((item) => item !== tag));
+                  setPage(1);
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/40 text-on-secondary-container text-xs font-semibold hover:bg-secondary-container/70 transition-colors cursor-pointer"
+                aria-label={`Remover filtro da tag ${tag}`}
+              >
+                <span>{formatBookTitle(tag)}</span>
+                <X className="w-3 h-3" />
+              </button>
+            ))}
+          </div>
+        )}
 
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
