@@ -2,6 +2,15 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.7.0] - 2026-11-24
+### Added
+- **Filtro por Tags no Catálogo & Normalização de Acervo Legado (`@app/web` e `@app/api`):**
+  - `CatalogPage.tsx` lê e sincroniza `?tags=...` na URL, repassa o filtro para `api.getBooks` e exibe chips ativos removíveis.
+  - `BookCard.tsx` e `BookVerdictHeroCard.tsx` tornam as tags temáticas clicáveis (formatadas em Title Case via `formatBookTitle` na exibição) apontando para `/?tags=<tag>`.
+  - `book-normalization.service.ts` e CLI `npm run normalize:books --workspace=@app/api` (`--dry-run` e `--refresh-synopsis`) padronizam títulos e sinopses antigas de forma idempotente preservando integralmente os campos de curadoria.
+
+---
+
 ## [1.6.0] - 2026-11-24
 ### Added
 - **Autenticação com E-mail/Senha e Proteção RBAC (`@app/api` e `@app/web`):**

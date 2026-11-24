@@ -208,7 +208,17 @@ export const BookCard: React.FC<BookCardProps> = ({
 
         <div className="flex flex-col gap-2.5 pt-2 border-t border-outline/10">
           <div className="flex flex-wrap gap-1">
-            {book.reservations.length > 0 ? (
+            {book.tags.length > 0 ? (
+              book.tags.slice(0, 3).map((tag) => (
+                <Link
+                  key={tag}
+                  to={`/?tags=${encodeURIComponent(tag)}`}
+                  className="px-2 py-0.5 bg-surface-container hover:bg-secondary-container/40 text-on-surface-variant hover:text-primary rounded text-[10px] font-medium transition-colors"
+                >
+                  {formatBookTitle(tag)}
+                </Link>
+              ))
+            ) : book.reservations.length > 0 ? (
               book.reservations.slice(0, 2).map((r, i) => (
                 <span
                   key={i}

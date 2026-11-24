@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { formatBookTitle, type BookDto } from '@app/shared';
 import { AdequacyBadge } from '../AdequacyBadge.js';
 import { CommunityStatsBar } from '../CommunityStatsBar.js';
@@ -237,12 +238,13 @@ export const BookVerdictHeroCard: React.FC<BookVerdictHeroCardProps> = ({ book }
             <span>Temáticas:</span>
           </span>
           {book.tags.map((t) => (
-            <span
+            <Link
               key={t}
-              className="px-2.5 py-1 rounded-md bg-surface-container text-on-surface-variant text-xs font-medium"
+              to={`/?tags=${encodeURIComponent(t)}`}
+              className="px-2.5 py-1 rounded-md bg-surface-container hover:bg-secondary-container/40 text-on-surface-variant hover:text-primary text-xs font-medium transition-colors"
             >
-              {t}
-            </span>
+              {formatBookTitle(t)}
+            </Link>
           ))}
         </div>
       )}

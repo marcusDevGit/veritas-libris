@@ -22,6 +22,7 @@ describe('Services integration (MongoDB em memória)', () => {
   let syncUserFromAuth: typeof import('./user.service.js').syncUserFromAuth;
   let listUsers: typeof import('./user.service.js').listUsers;
   let updateUserRole: typeof import('./user.service.js').updateUserRole;
+  let normalizeLegacyBooks: typeof import('./book-normalization.service.js').normalizeLegacyBooks;
   const originalFetch = globalThis.fetch;
 
   before(async () => {
@@ -36,6 +37,7 @@ describe('Services integration (MongoDB em memória)', () => {
     ({ upsertReview, voteReviewHelpful } = await import('./review.service.js'));
     ({ generateEditorialAiDraft } = await import('./magisterium.service.js'));
     ({ syncUserFromAuth, listUsers, updateUserRole } = await import('./user.service.js'));
+    ({ normalizeLegacyBooks } = await import('./book-normalization.service.js'));
   });
 
   beforeEach(async () => {
@@ -473,6 +475,53 @@ describe('Services integration (MongoDB em memória)', () => {
       assert.ok(target);
       assert.equal(target.reviewsCount, 1);
       assert.equal(target.helpfulVotesReceived, 2);
+    });
+  });
+
+  describe('book-normalization.service', () => {
+    it('normaliza títulos legados e sinopses de forma idempotente sem sobrescrever campos de curadoria', async () => {
+      const book = await BookModel.create({
+        isbn13: '9788535902778',
+        title: 'O SENHOR DOS ANEIS',
+        authors: ['J. R. R. Tolkien'],
+        synopsis: 'Sinopse antiga sem quebras.',
+        editorialLock: true,
+        adequacyStatus: 'WITH_RESERVATIONS',
+        recommendedAge: '14+',
+        hasImprimatur: false,
+        tags: ['fantasia', 'classico'],
+        reservations: [
+          { topic: 'VIOLENCE_GORE', severity: 'LOW', description: 'Batalhas épicas.' },
+        ],
+      });
+
+      const firstRun = await normalizeLegacyBooks({
+        refreshSynopsis: true,
+        fetchExternalByIsbn: async () => ({
+          synopsis: 'Primeiro parágrafo.\n\nSegundo parágrafo.',
+        }),
+      });
+      assert.equal(firstRun.updated, 1);
+      assert.equal(firstRun.items[0]?.newTitle, 'O Senhor dos Aneis');
+      assert.equal(firstRun.items[0]?.synopsisUpdated, true);
+
+      const updatedDoc = await BookModel.findById(book._id).lean();
+      assert.ok(updatedDoc);
+      assert.equal(updatedDoc.title, 'O Senhor dos Aneis');
+      assert.equal(updatedDoc.synopsis, 'Primeiro parágrafo.\n\nSegundo parágrafo.');
+      assert.equal(updatedDoc.editorialLock, true);
+      assert.equal(updatedDoc.adequacyStatus, 'WITH_RESERVATIONS');
+      assert.deepEqual(updatedDoc.tags, ['fantasia', 'classico']);
+      assert.equal(updatedDoc.reservations.length, 1);
+
+      const secondRun = await normalizeLegacyBooks({
+        refreshSynopsis: true,
+        fetchExternalByIsbn: async () => ({
+          synopsis: 'Primeiro parágrafo.\n\nSegundo parágrafo.',
+        }),
+      });
+      assert.equal(secondRun.updated, 0);
+      assert.equal(secondRun.skipped, 1);
     });
   });
 });
