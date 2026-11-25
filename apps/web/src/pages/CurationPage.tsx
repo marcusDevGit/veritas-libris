@@ -295,6 +295,7 @@ export const CurationPage: React.FC = () => {
                   </button>
                   <CurationEditorialEditor
                     book={selectedBook}
+                    aiQuota={queueQuery.data?.stats.aiQuota}
                     isSaving={saveEditorialMutation.isPending}
                     feedback={feedback}
                     onSave={(body) =>

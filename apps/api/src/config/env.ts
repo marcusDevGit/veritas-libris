@@ -48,6 +48,13 @@ const EnvSchema = z.object({
       value === undefined || value.trim() === "" ? undefined : value.trim(),
     ),
 
+  REDIS_URL: z
+    .string()
+    .optional()
+    .transform((value) =>
+      value === undefined || value.trim() === "" ? undefined : value.trim(),
+    ),
+
   CORS_ORIGIN: z
     .string()
     .optional()

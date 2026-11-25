@@ -1,6 +1,6 @@
 # Arquitetura do Sistema — Veritas Libris
 
-Este documento descreve a organização interna do monorepo, o fluxo de dados e as principais decisões arquiteturais adotadas até a versão **v1.8.0**.
+Este documento descreve a organização interna do monorepo, o fluxo de dados e as principais decisões arquiteturais adotadas até a versão **v1.9.0**.
 
 ---
 
@@ -52,6 +52,11 @@ Funciona como **Single Source of Truth (SSOT)** para contratos entre frontend e 
 ### Sistema de Notificações (`notification.service.ts` e `notification.utils.ts`)
 - Sempre que um livro recebe um parecer (`review.service.ts`) ou uma atualização editorial (`curation.service.ts`), `notifyReadingListWatchers` consulta `ReadingListItemModel`, deduplica os destinatários excluindo o próprio autor da ação (`buildNotificationPayloads`) e persiste avisos em `NotificationModel` (indexado por `{ userId: 1, createdAt: -1 }`).
 - A operação roda protegida em `try/catch` para não bloquear a publicação do parecer ou da curadoria caso haja erro transitório de notificação.
+- Índices TTL no MongoDB expiram automaticamente rascunhos antigos de `EditorialAiDraftModel` (90 dias) e notificações já arquivadas (`NotificationModel`, 30 dias via `partialFilterExpression`).
+
+### Rate Limit, Cota IA e Redis Opcional
+- `plugins/rate-limit.ts` protege rotas sensíveis/externas em memória por padrão; a variável opcional `REDIS_URL` permite acoplar um store distribuído (`ioredis`) ao `@fastify/rate-limit` quando a API escalar para múltiplas instâncias.
+- `getCurationStats` contabiliza chamadas reais (não cacheadas) de `AI_DRAFT_GENERATED` no dia UTC atual para exibir a cota preventiva (`100/dia`) em `/curadoria`.
 
 ---
 

@@ -14,11 +14,20 @@ export const CurationQueueQuerySchema = z.object({
 });
 export type CurationQueueQuery = z.infer<typeof CurationQueueQuerySchema>;
 
+export const AiQuotaStatsSchema = z.object({
+  usedToday: z.number().int().nonnegative(),
+  dailyLimit: z.number().int().positive(),
+  remaining: z.number().int().nonnegative(),
+  nearLimit: z.boolean(),
+});
+export type AiQuotaStats = z.infer<typeof AiQuotaStatsSchema>;
+
 export const CurationStatsSchema = z.object({
   total: z.number().int().nonnegative(),
   pendingReview: z.number().int().nonnegative(),
   locked: z.number().int().nonnegative(),
   imprimatur: z.number().int().nonnegative(),
+  aiQuota: AiQuotaStatsSchema.optional(),
 });
 export type CurationStats = z.infer<typeof CurationStatsSchema>;
 

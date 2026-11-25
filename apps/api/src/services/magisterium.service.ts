@@ -85,6 +85,7 @@ export async function generateEditorialAiDraft(
       },
       body: JSON.stringify({
         model: MAGISTERIUM_MODEL,
+        max_tokens: 700,
         messages: buildMagisteriumMessages(promptInput),
       }),
     });
