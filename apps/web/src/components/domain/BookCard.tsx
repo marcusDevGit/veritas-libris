@@ -207,37 +207,32 @@ export const BookCard: React.FC<BookCardProps> = ({
         </div>
 
         <div className="flex flex-col gap-2.5 pt-2 border-t border-outline/10">
-          <div className="flex flex-wrap gap-1">
-            {book.tags.length > 0 ? (
-              book.tags.slice(0, 3).map((tag) => (
-                <Link
-                  key={tag}
-                  to={`/?tags=${encodeURIComponent(tag)}`}
-                  className="px-2 py-0.5 bg-surface-container hover:bg-secondary-container/40 text-on-surface-variant hover:text-primary rounded text-[10px] font-medium transition-colors"
-                >
-                  {formatBookTitle(tag)}
-                </Link>
-              ))
-            ) : book.reservations.length > 0 ? (
-              book.reservations.slice(0, 2).map((r, i) => (
-                <span
-                  key={i}
-                  className="px-2 py-0.5 bg-surface-container text-on-surface-variant rounded text-[10px] font-medium"
-                >
-                  {RESERVATION_TOPIC_LABELS[r.topic] || r.topic}
-                </span>
-              ))
-            ) : (
-              <>
-                <span className="px-2 py-0.5 bg-surface-container text-on-surface-variant rounded text-[10px] font-medium">
-                  Tradição Cristã
-                </span>
-                <span className="px-2 py-0.5 bg-surface-container text-on-surface-variant rounded text-[10px] font-medium">
-                  Virtudes Morais
-                </span>
-              </>
-            )}
-          </div>
+          {(book.tags.length > 0 || book.reservations.length > 0) && (
+            <div className="flex flex-wrap gap-1">
+              {book.tags.length > 0
+                ? book.tags.slice(0, 3).map((tag) => (
+                    <Link
+                      key={tag}
+                      to={`/?tags=${encodeURIComponent(tag)}`}
+                      className="px-2 py-0.5 bg-surface-container hover:bg-secondary-container/40 text-on-surface-variant hover:text-primary rounded text-[10px] font-medium transition-colors"
+                    >
+                      {formatBookTitle(tag)}
+                    </Link>
+                  ))
+                : book.reservations.slice(0, 2).map((r, i) => {
+                    const label = RESERVATION_TOPIC_LABELS[r.topic] || r.topic;
+                    return (
+                      <Link
+                        key={i}
+                        to={`/?q=${encodeURIComponent(label)}`}
+                        className="px-2 py-0.5 bg-surface-container hover:bg-secondary-container/40 text-on-surface-variant hover:text-primary rounded text-[10px] font-medium transition-colors"
+                      >
+                        {label}
+                      </Link>
+                    );
+                  })}
+            </div>
+          )}
 
           <div className="flex items-center justify-between text-xs text-outline">
             <span className="flex items-center gap-1">

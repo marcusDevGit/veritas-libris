@@ -2,6 +2,15 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.8.0] - 2026-11-24
+### Added
+- **Suíte E2E com Playwright (`@app/web` e CI):**
+  - `@playwright/test` configurado em `apps/web/playwright.config.ts` para Desktop (`1280x800`) e Mobile (`390x844`), com script `npm run test:e2e --workspace=@app/web`.
+  - Cenários determinísticos em `apps/web/e2e/catalog.spec.ts` cobrindo listagem, filtro por tag clicável, Modo Família, ausência de overflow horizontal no mobile, navegação para `/livros/:id` e abertura do `AuthModal`.
+  - Vitest isolado em `src/**/*.test.{ts,tsx}` (`vitest.config.ts`) e job `e2e` adicionado ao `.github/workflows/ci.yml`.
+
+---
+
 ## [1.7.0] - 2026-11-24
 ### Added
 - **Filtro por Tags no Catálogo & Normalização de Acervo Legado (`@app/web` e `@app/api`):**
