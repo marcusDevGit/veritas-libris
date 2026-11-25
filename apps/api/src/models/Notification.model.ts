@@ -34,8 +34,14 @@ const notificationSchema = new Schema<NotificationAttrs>(
   },
 );
 
+const THIRTY_DAYS_SECONDS = 60 * 60 * 24 * 30;
+
 notificationSchema.index({ userId: 1, createdAt: -1 });
 notificationSchema.index({ userId: 1, archived: 1, createdAt: -1 });
+notificationSchema.index(
+  { createdAt: 1 },
+  { expireAfterSeconds: THIRTY_DAYS_SECONDS, partialFilterExpression: { archived: true } },
+);
 notificationSchema.index({ userId: 1, dedupKey: 1 }, { sparse: true });
 
 export const NotificationModel = model<NotificationAttrs>('Notification', notificationSchema);

@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test \"src/**/*.test.ts\"",
-    "normalize:books": "tsx --env-file-if-exists=.env src/scripts/normalize-legacy-books.ts"
+    "normalize:books": "tsx --env-file-if-exists=.env src/scripts/normalize-legacy-books.ts",
+    "eval:magisterium": "tsx src/scripts/eval-magisterium.ts"
   },
   "dependencies": {
     "@app/shared": "*",

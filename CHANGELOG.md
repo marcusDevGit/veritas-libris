@@ -2,6 +2,19 @@
 
 Todas as mudanças notáveis do projeto **Veritas Libris** estão documentadas neste arquivo.
 
+## [1.9.0] - 2026-11-24
+### Added
+- **Ícone Oficial & Suporte a PWA (`@app/web`):**
+  - Ícone vetorial próprio do Veritas Libris (`apps/web/public/favicon.svg`) substituindo `/vite.svg`, acompanhado de `manifest.webmanifest`, meta tags iOS/Android no `index.html` e Service Worker leve (`sw.js`) cacheando apenas shell estático (ignorando `/api/**`).
+- **Observabilidade de Cota Magisterium AI, TTL & Redis (`@app/shared`, `@app/api`, `@app/web`):**
+  - `getCurationStats` contabiliza chamadas reais (não cacheadas) de `AI_DRAFT_GENERATED` no dia UTC atual (`100/dia`) e exibe o indicador preventivo em `CurationAiAssistantBox.tsx`.
+  - Controle de custos (`max_tokens: 700` e limite de `8` ressalvas de até `200` chars no prompt), índices TTL em `EditorialAiDraftModel` (`90` dias) e `NotificationModel` (`30` dias para arquivadas), além de `REDIS_URL` opcional documentado em `.env.example` e `docs/architecture.md`.
+- **Suíte de Avaliação da Magisterium AI & Feedback Loop (`@app/api`):**
+  - Golden Set offline em `magisterium-eval.ts`, teste `magisterium-eval.test.ts`, script `npm run eval:magisterium --workspace=@app/api` e documentação em `docs/magisterium-eval.md`.
+  - `updateBookEditorial` registra no `AuditLog` (`IA: concordou` / `IA: divergiu`) ao aplicar Trava Editorial com rascunho prévio.
+
+---
+
 ## [1.8.0] - 2026-11-24
 ### Added
 - **Suíte E2E com Playwright (`@app/web` e CI):**

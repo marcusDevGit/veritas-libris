@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type {
   AdequacyLevel,
   AgeRating,
+  AiQuotaStats,
   BookDto,
   ReservationItem,
   UpdateBookEditorialBody,
@@ -33,6 +34,7 @@ function areReservationsEqual(a: ReservationItem[], b: ReservationItem[]): boole
 
 interface CurationEditorialEditorProps {
   book: BookDto;
+  aiQuota?: AiQuotaStats;
   isSaving: boolean;
   feedback?: { type: 'success' | 'error'; text: string } | null;
   onSave: (payload: UpdateBookEditorialBody) => void;
@@ -40,6 +42,7 @@ interface CurationEditorialEditorProps {
 
 export const CurationEditorialEditor: React.FC<CurationEditorialEditorProps> = ({
   book,
+  aiQuota,
   isSaving,
   feedback = null,
   onSave,
@@ -219,6 +222,7 @@ export const CurationEditorialEditor: React.FC<CurationEditorialEditorProps> = (
 
       <CurationAiAssistantBox
         bookId={book._id}
+        aiQuota={aiQuota}
         onApplyDraft={(draftText) => {
           setLocalError(null);
           setEditorialSummary(draftText);

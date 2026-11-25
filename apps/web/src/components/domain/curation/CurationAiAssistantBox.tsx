@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AdequacyLevel, EditorialAiDraftResponse } from '@app/shared';
+import type { AdequacyLevel, AiQuotaStats, EditorialAiDraftResponse } from '@app/shared';
 import {
   AlertCircle,
   BookMarked,
@@ -14,6 +14,7 @@ import { api, ApiError } from '../../../services/api.js';
 
 interface CurationAiAssistantBoxProps {
   bookId: string;
+  aiQuota?: AiQuotaStats;
   onApplyDraft: (draftText: string) => void;
 }
 
@@ -38,6 +39,7 @@ const VERDICT_LABEL_MAP: Record<AdequacyLevel, { label: string; className: strin
 
 export const CurationAiAssistantBox: React.FC<CurationAiAssistantBoxProps> = ({
   bookId,
+  aiQuota,
   onApplyDraft,
 }) => {
   const queryClient = useQueryClient();
@@ -58,6 +60,7 @@ export const CurationAiAssistantBox: React.FC<CurationAiAssistantBoxProps> = ({
       setApplied(false);
       setShowCitationsOnly(false);
       queryClient.invalidateQueries({ queryKey: ['admin-audit-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['curation-queue'] });
     },
   });
 
@@ -79,6 +82,18 @@ export const CurationAiAssistantBox: React.FC<CurationAiAssistantBoxProps> = ({
             <p className="text-[11px] text-on-surface-variant leading-relaxed mt-0.5">
               Sugere fundamentos e citações oficiais do Magistério para apoiar sua análise.
             </p>
+            {aiQuota && (
+              <span
+                className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
+                  aiQuota.nearLimit
+                    ? 'bg-warning-container/60 text-warning border-warning/30'
+                    : 'bg-surface-container text-on-surface-variant border-outline/20'
+                }`}
+              >
+                Cota IA hoje (UTC): {aiQuota.usedToday}/{aiQuota.dailyLimit}
+                {aiQuota.nearLimit ? ` • restam ${aiQuota.remaining}` : ''}
+              </span>
+            )}
           </div>
         </div>
 

@@ -46,7 +46,10 @@ const editorialAiDraftSchema = new Schema<EditorialAiDraftAttrs>(
   },
 );
 
+const NINETY_DAYS_SECONDS = 60 * 60 * 24 * 90;
+
 editorialAiDraftSchema.index({ bookId: 1, inputHash: 1 }, { unique: true });
+editorialAiDraftSchema.index({ createdAt: 1 }, { expireAfterSeconds: NINETY_DAYS_SECONDS });
 
 export const EditorialAiDraftModel = model<EditorialAiDraftAttrs>(
   'EditorialAiDraft',

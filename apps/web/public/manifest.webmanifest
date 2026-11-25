@@ -1,0 +1,20 @@
+{
+  "name": "Veritas Libris — Curadoria & Discernimento Literário",
+  "short_name": "Veritas Libris",
+  "description": "Plataforma independente de curadoria e discernimento literário católico à luz da Tradição e do Magistério Eclesial.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1e3a5f",
+  "background_color": "#fdfbf7",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

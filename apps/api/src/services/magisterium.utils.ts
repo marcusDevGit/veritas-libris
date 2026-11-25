@@ -68,7 +68,8 @@ export function buildMagisteriumMessages(
   const reservationsText =
     book.reservations.length > 0
       ? book.reservations
-          .map((r) => `- ${r.topic} (${r.severity}): ${r.description}`)
+          .slice(0, 8)
+          .map((r) => `- ${r.topic} (${r.severity}): ${r.description.trim().slice(0, 200)}`)
           .join('\n')
       : 'Nenhuma ressalva comunitária consolidada até o momento.';
 

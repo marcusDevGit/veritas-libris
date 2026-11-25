@@ -9,6 +9,7 @@ import type {
 import { AppError, NotFoundError } from '../errors/app-error.js';
 import { AuditLogModel } from '../models/AuditLog.model.js';
 import { BookModel } from '../models/Book.model.js';
+import { EditorialAiDraftModel } from '../models/EditorialAiDraft.model.js';
 import { ReviewModel } from '../models/Review.model.js';
 import { calculateConsensus } from './consensus.service.js';
 import { toBookDto, type BookLean } from './book.service.js';
@@ -16,15 +17,35 @@ import { sanitizeAlternativeIds, sanitizeTags } from './curation.utils.js';
 import { notifyReadingListWatchers } from './notification.service.js';
 import { escapeRegex } from '../utils/regex.js';
 
+const MAGISTERIUM_DAILY_LIMIT = 100;
+
 export async function getCurationStats(): Promise<CurationStats> {
-  const [total, pendingReview, locked, imprimatur] = await Promise.all([
+  const startOfUtcDay = new Date();
+  startOfUtcDay.setUTCHours(0, 0, 0, 0);
+
+  const [total, pendingReview, locked, imprimatur, usedToday] = await Promise.all([
     BookModel.countDocuments({}),
     BookModel.countDocuments({ editorialLock: { $ne: true } }),
     BookModel.countDocuments({ editorialLock: true }),
     BookModel.countDocuments({ hasImprimatur: true }),
+    AuditLogModel.countDocuments({
+      action: 'AI_DRAFT_GENERATED',
+      createdAt: { $gte: startOfUtcDay },
+    }),
   ]);
 
-  return { total, pendingReview, locked, imprimatur };
+  return {
+    total,
+    pendingReview,
+    locked,
+    imprimatur,
+    aiQuota: {
+      usedToday,
+      dailyLimit: MAGISTERIUM_DAILY_LIMIT,
+      remaining: Math.max(0, MAGISTERIUM_DAILY_LIMIT - usedToday),
+      nearLimit: usedToday >= Math.floor(MAGISTERIUM_DAILY_LIMIT * 0.8),
+    },
+  };
 }
 
 export async function listCurationBooks(
@@ -144,6 +165,17 @@ export async function updateBookEditorial(
     throw new NotFoundError('Obra não encontrada após atualização');
   }
 
+  const latestAiDraft = body.editorialLock
+    ? await EditorialAiDraftModel.findOne({ bookId: updated._id })
+        .sort({ createdAt: -1 })
+        .select('suggestedAdequacy')
+        .lean<{ suggestedAdequacy?: string | null } | null>()
+    : null;
+  const aiFeedbackSuffix =
+    body.editorialLock && latestAiDraft?.suggestedAdequacy
+      ? ` • IA: ${latestAiDraft.suggestedAdequacy === updated.adequacyStatus ? 'concordou' : 'divergiu'}`
+      : '';
+
   await AuditLogModel.create({
     action: 'EDITORIAL_LOCK_UPDATED',
     actorUid: actor.uid,
@@ -153,7 +185,7 @@ export async function updateBookEditorial(
     details: body.editorialLock
       ? `Aplicou Trava Editorial: ${updated.adequacyStatus} (${updated.recommendedAge})${
           updated.hasImprimatur ? ' • Com Imprimatur' : ''
-        } • ${updated.tags.length} tag(s), ${updated.reservations.length} ressalva(s)`
+        } • ${updated.tags.length} tag(s), ${updated.reservations.length} ressalva(s)${aiFeedbackSuffix}`
       : 'Desativou Trava Editorial e restaurou consenso comunitário',
   });
 
